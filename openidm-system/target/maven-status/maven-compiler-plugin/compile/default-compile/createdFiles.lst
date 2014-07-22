@@ -1,0 +1,13 @@
+org/forgerock/openidm/core/FrameworkPropertyAccessor.class
+org/forgerock/openidm/core/ServicePropertyAccessor.class
+org/forgerock/openidm/core/PropertyUtil.class
+org/forgerock/openidm/core/PropertyAccessor.class
+org/forgerock/openidm/core/ServerConstants.class
+org/forgerock/openidm/logging/util/LogFilter.class
+org/forgerock/openidm/core/SystemPropertyAccessor.class
+org/forgerock/openidm/core/internal/Activator.class
+org/forgerock/openidm/core/IdentityServer.class
+org/forgerock/openidm/core/PropertyUtil$Delimiter.class
+org/forgerock/openidm/core/PropertyUtil$1.class
+org/forgerock/openidm/core/PropertyUtil$Delimiter$2.class
+org/forgerock/openidm/core/PropertyUtil$Delimiter$1.class

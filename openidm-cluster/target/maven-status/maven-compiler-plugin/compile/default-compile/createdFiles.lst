@@ -1,0 +1,10 @@
+org/forgerock/openidm/cluster/ClusterEventType.class
+org/forgerock/openidm/cluster/ClusterManager$ClusterManagerThread.class
+org/forgerock/openidm/cluster/InstanceState.class
+org/forgerock/openidm/cluster/ClusterEvent.class
+org/forgerock/openidm/cluster/ClusterManager$1.class
+org/forgerock/openidm/cluster/ClusterManager$ClusterManagerThread$1.class
+org/forgerock/openidm/cluster/ClusterManagementService.class
+org/forgerock/openidm/cluster/ClusterEventListener.class
+org/forgerock/openidm/cluster/ClusterManager.class
+org/forgerock/openidm/cluster/ClusterConfig.class

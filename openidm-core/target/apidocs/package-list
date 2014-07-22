@@ -1,0 +1,5 @@
+org.forgerock.openidm.core.filter
+org.forgerock.openidm.internal.metadata
+org.forgerock.openidm.managed
+org.forgerock.openidm.sync
+org.forgerock.openidm.sync.impl

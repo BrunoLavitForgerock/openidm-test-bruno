@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.managed" configuration-policy="require" activate="activate" deactivate="deactivate" modified="modified">
+        <implementation class="org.forgerock.openidm.managed.ManagedObjectService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.json.resource.RequestHandler"/>
+        </service>
+        <property name="service.description" value="OpenIDM managed objects service"/>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="openidm.router.prefix" value="/managed*"/>
+        <property name="service.pid" value="org.forgerock.openidm.managed"/>
+        <reference name="cryptoService" interface="org.forgerock.openidm.crypto.CryptoService" cardinality="1..1" policy="dynamic" bind="bindCryptoService" unbind="unbindCryptoService"/>
+        <reference name="scriptRegistry" interface="org.forgerock.script.ScriptRegistry" cardinality="1..1" policy="dynamic" bind="bindScriptRegistry" unbind="unbindScriptRegistry"/>
+        <reference name="syncRoute" interface="org.forgerock.openidm.router.RouteService" cardinality="0..1" policy="dynamic" target="(openidm.router.prefix=/sync*)" bind="bindSyncRoute" unbind="unbindSyncRoute"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+    </scr:component>
+</components>

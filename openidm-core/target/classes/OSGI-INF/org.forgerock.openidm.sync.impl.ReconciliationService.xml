@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.recon" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.sync.impl.ReconciliationService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.json.resource.RequestHandler"/>
+            <provide interface="org.forgerock.openidm.sync.impl.Reconcile"/>
+        </service>
+        <property name="service.description" value="Reconciliation Service"/>
+        <property name="service.vendor" value="ForgeRock AS"/>
+        <property name="openidm.router.prefix" value="/recon/*"/>
+        <property name="service.pid" value="org.forgerock.openidm.recon"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+        <reference name="mappings" interface="org.forgerock.openidm.sync.impl.Mappings" cardinality="0..1" policy="dynamic" bind="bindMappings" unbind="unbindMappings"/>
+    </scr:component>
+</components>

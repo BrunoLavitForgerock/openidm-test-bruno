@@ -1,0 +1,734 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.<a name="line.2"></a>
+<span class="sourceLineNo">003</span> *<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * The contents of this file are subject to the terms<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * of the Common Development and Distribution License<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * (the License). You may not use this file except in<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * compliance with the License.<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * You can obtain a copy of the License at<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * http://forgerock.org/license/CDDLv1.0.html<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * See the License for the specific language governing<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * permission and limitations under the License.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> *<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * When distributing Covered Code, include this CDDL<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * Header Notice in each file and include the License file<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * at http://forgerock.org/license/CDDLv1.0.html<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * If applicable, add the following below the CDDL Header,<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * with the fields enclosed by brackets [] replaced by<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * your own identifying information:<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * "Portions Copyrighted [year] [name of copyright owner]"<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>package org.forgerock.openidm.script.impl;<a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.io.File;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.net.URL;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.util.Collections;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import java.util.HashMap;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import java.util.HashSet;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import java.util.List;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import java.util.Map;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import java.util.Set;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import java.util.concurrent.ConcurrentHashMap;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import java.util.concurrent.ConcurrentMap;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import java.util.regex.Matcher;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import java.util.regex.Pattern;<a name="line.38"></a>
+<span class="sourceLineNo">039</span><a name="line.39"></a>
+<span class="sourceLineNo">040</span>import javax.script.ScriptException;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import javax.script.SimpleBindings;<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>import org.apache.commons.lang3.StringUtils;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import org.apache.felix.scr.annotations.Activate;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import org.apache.felix.scr.annotations.Component;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import org.apache.felix.scr.annotations.ConfigurationPolicy;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import org.apache.felix.scr.annotations.Deactivate;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import org.apache.felix.scr.annotations.Modified;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>import org.apache.felix.scr.annotations.Properties;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>import org.apache.felix.scr.annotations.Property;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>import org.apache.felix.scr.annotations.Reference;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>import org.apache.felix.scr.annotations.ReferenceCardinality;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>import org.apache.felix.scr.annotations.ReferencePolicy;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>import org.apache.felix.scr.annotations.References;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>import org.apache.felix.scr.annotations.Service;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>import org.forgerock.json.crypto.JsonCrypto;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>import org.forgerock.json.crypto.JsonCryptoException;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>import org.forgerock.json.fluent.JsonValue;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>import org.forgerock.json.fluent.JsonValueException;<a name="line.59"></a>
+<span class="sourceLineNo">060</span>import org.forgerock.json.resource.ActionRequest;<a name="line.60"></a>
+<span class="sourceLineNo">061</span>import org.forgerock.json.resource.BadRequestException;<a name="line.61"></a>
+<span class="sourceLineNo">062</span>import org.forgerock.json.resource.Context;<a name="line.62"></a>
+<span class="sourceLineNo">063</span>import org.forgerock.json.resource.CreateRequest;<a name="line.63"></a>
+<span class="sourceLineNo">064</span>import org.forgerock.json.resource.DeleteRequest;<a name="line.64"></a>
+<span class="sourceLineNo">065</span>import org.forgerock.json.resource.ForbiddenException;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>import org.forgerock.json.resource.InternalServerErrorException;<a name="line.66"></a>
+<span class="sourceLineNo">067</span>import org.forgerock.json.resource.NotFoundException;<a name="line.67"></a>
+<span class="sourceLineNo">068</span>import org.forgerock.json.resource.NotSupportedException;<a name="line.68"></a>
+<span class="sourceLineNo">069</span>import org.forgerock.json.resource.PatchRequest;<a name="line.69"></a>
+<span class="sourceLineNo">070</span>import org.forgerock.json.resource.PersistenceConfig;<a name="line.70"></a>
+<span class="sourceLineNo">071</span>import org.forgerock.json.resource.QueryRequest;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>import org.forgerock.json.resource.QueryResultHandler;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>import org.forgerock.json.resource.ReadRequest;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>import org.forgerock.json.resource.RequestHandler;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>import org.forgerock.json.resource.Resource;<a name="line.75"></a>
+<span class="sourceLineNo">076</span>import org.forgerock.json.resource.ResourceException;<a name="line.76"></a>
+<span class="sourceLineNo">077</span>import org.forgerock.json.resource.ResultHandler;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>import org.forgerock.json.resource.RootContext;<a name="line.78"></a>
+<span class="sourceLineNo">079</span>import org.forgerock.json.resource.ServerContext;<a name="line.79"></a>
+<span class="sourceLineNo">080</span>import org.forgerock.json.resource.ServiceUnavailableException;<a name="line.80"></a>
+<span class="sourceLineNo">081</span>import org.forgerock.json.resource.UpdateRequest;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;<a name="line.82"></a>
+<span class="sourceLineNo">083</span>import org.forgerock.openidm.core.IdentityServer;<a name="line.83"></a>
+<span class="sourceLineNo">084</span>import org.forgerock.openidm.core.ServerConstants;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>import org.forgerock.openidm.crypto.CryptoService;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>import org.forgerock.openidm.quartz.impl.ExecutionException;<a name="line.86"></a>
+<span class="sourceLineNo">087</span>import org.forgerock.openidm.quartz.impl.ScheduledService;<a name="line.87"></a>
+<span class="sourceLineNo">088</span>import org.forgerock.script.Script;<a name="line.88"></a>
+<span class="sourceLineNo">089</span>import org.forgerock.script.ScriptEntry;<a name="line.89"></a>
+<span class="sourceLineNo">090</span>import org.forgerock.script.ScriptName;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>import org.forgerock.script.engine.ScriptEngineFactory;<a name="line.91"></a>
+<span class="sourceLineNo">092</span>import org.forgerock.script.exception.ScriptThrownException;<a name="line.92"></a>
+<span class="sourceLineNo">093</span>import org.forgerock.script.registry.ScriptRegistryImpl;<a name="line.93"></a>
+<span class="sourceLineNo">094</span>import org.forgerock.script.scope.Function;<a name="line.94"></a>
+<span class="sourceLineNo">095</span>import org.forgerock.script.scope.FunctionFactory;<a name="line.95"></a>
+<span class="sourceLineNo">096</span>import org.forgerock.script.scope.Parameter;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>import org.forgerock.script.scope.ResourceFunctions;<a name="line.97"></a>
+<span class="sourceLineNo">098</span>import org.forgerock.script.source.DirectoryContainer;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>import org.forgerock.script.source.SourceUnit;<a name="line.99"></a>
+<span class="sourceLineNo">100</span>import org.ops4j.pax.swissbox.extender.BundleWatcher;<a name="line.100"></a>
+<span class="sourceLineNo">101</span>import org.ops4j.pax.swissbox.extender.ManifestEntry;<a name="line.101"></a>
+<span class="sourceLineNo">102</span>import org.osgi.framework.Constants;<a name="line.102"></a>
+<span class="sourceLineNo">103</span>import org.osgi.service.component.ComponentContext;<a name="line.103"></a>
+<span class="sourceLineNo">104</span>import org.slf4j.Logger;<a name="line.104"></a>
+<span class="sourceLineNo">105</span>import org.slf4j.LoggerFactory;<a name="line.105"></a>
+<span class="sourceLineNo">106</span><a name="line.106"></a>
+<span class="sourceLineNo">107</span><a name="line.107"></a>
+<span class="sourceLineNo">108</span>/**<a name="line.108"></a>
+<span class="sourceLineNo">109</span> *<a name="line.109"></a>
+<span class="sourceLineNo">110</span> * @author Laszlo Hordos<a name="line.110"></a>
+<span class="sourceLineNo">111</span> */<a name="line.111"></a>
+<span class="sourceLineNo">112</span>@Component(name = ScriptRegistryService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        description = "OpenIDM Script Registry Service", immediate = true)<a name="line.113"></a>
+<span class="sourceLineNo">114</span>@Service<a name="line.114"></a>
+<span class="sourceLineNo">115</span>@Properties({<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),<a name="line.116"></a>
+<span class="sourceLineNo">117</span>    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Script Registry Service"),<a name="line.117"></a>
+<span class="sourceLineNo">118</span>    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/script*") })<a name="line.118"></a>
+<span class="sourceLineNo">119</span>@References({<a name="line.119"></a>
+<span class="sourceLineNo">120</span>    @Reference(name = "CryptoServiceReference", referenceInterface = CryptoService.class,<a name="line.120"></a>
+<span class="sourceLineNo">121</span>            bind = "bindCryptoService", unbind = "unbindCryptoService",<a name="line.121"></a>
+<span class="sourceLineNo">122</span>            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),<a name="line.122"></a>
+<span class="sourceLineNo">123</span>    @Reference(name = "PersistenceConfigReference", referenceInterface = PersistenceConfig.class,<a name="line.123"></a>
+<span class="sourceLineNo">124</span>            bind = "setPersistenceConfig", unbind = "unsetPersistenceConfig",<a name="line.124"></a>
+<span class="sourceLineNo">125</span>            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),<a name="line.125"></a>
+<span class="sourceLineNo">126</span>    @Reference(name = "ScriptEngineFactoryReference",<a name="line.126"></a>
+<span class="sourceLineNo">127</span>            referenceInterface = ScriptEngineFactory.class, bind = "addingEntries",<a name="line.127"></a>
+<span class="sourceLineNo">128</span>            unbind = "removingEntries", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,<a name="line.128"></a>
+<span class="sourceLineNo">129</span>            policy = ReferencePolicy.DYNAMIC),<a name="line.129"></a>
+<span class="sourceLineNo">130</span>    @Reference(name = "FunctionReference", referenceInterface = Function.class,<a name="line.130"></a>
+<span class="sourceLineNo">131</span>            bind = "bindFunction", unbind = "unbindFunction",<a name="line.131"></a>
+<span class="sourceLineNo">132</span>            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,<a name="line.132"></a>
+<span class="sourceLineNo">133</span>            target = "(" + ScriptRegistryService.SCRIPT_NAME + "=*)") })<a name="line.133"></a>
+<span class="sourceLineNo">134</span>public class ScriptRegistryService extends ScriptRegistryImpl implements RequestHandler, ScheduledService {<a name="line.134"></a>
+<span class="sourceLineNo">135</span><a name="line.135"></a>
+<span class="sourceLineNo">136</span>    public static final Set&lt;String&gt; reservedNames;<a name="line.136"></a>
+<span class="sourceLineNo">137</span><a name="line.137"></a>
+<span class="sourceLineNo">138</span>    static {<a name="line.138"></a>
+<span class="sourceLineNo">139</span>        Set&lt;String&gt; _reservedNames = new HashSet&lt;String&gt;(15);<a name="line.139"></a>
+<span class="sourceLineNo">140</span>        _reservedNames.add("create");<a name="line.140"></a>
+<span class="sourceLineNo">141</span>        _reservedNames.add("read");<a name="line.141"></a>
+<span class="sourceLineNo">142</span>        _reservedNames.add("update");<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        _reservedNames.add("patch");<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        _reservedNames.add("query");<a name="line.144"></a>
+<span class="sourceLineNo">145</span>        _reservedNames.add("delete");<a name="line.145"></a>
+<span class="sourceLineNo">146</span>        _reservedNames.add("action");<a name="line.146"></a>
+<span class="sourceLineNo">147</span>        _reservedNames.add("encrypt");<a name="line.147"></a>
+<span class="sourceLineNo">148</span>        _reservedNames.add("decrypt");<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        _reservedNames.add("isEncrypted");<a name="line.149"></a>
+<span class="sourceLineNo">150</span><a name="line.150"></a>
+<span class="sourceLineNo">151</span>        for (IdentityServerFunctions f : IdentityServerFunctions.values()) {<a name="line.151"></a>
+<span class="sourceLineNo">152</span>            _reservedNames.add(f.name());<a name="line.152"></a>
+<span class="sourceLineNo">153</span>        }<a name="line.153"></a>
+<span class="sourceLineNo">154</span>        reservedNames = Collections.unmodifiableSet(_reservedNames);<a name="line.154"></a>
+<span class="sourceLineNo">155</span>    }<a name="line.155"></a>
+<span class="sourceLineNo">156</span><a name="line.156"></a>
+<span class="sourceLineNo">157</span>    // TODO Move to public package<a name="line.157"></a>
+<span class="sourceLineNo">158</span>    public static final String SCRIPT_NAME = "org.forgerock.openidm.script.name";<a name="line.158"></a>
+<span class="sourceLineNo">159</span><a name="line.159"></a>
+<span class="sourceLineNo">160</span>    // Public Constants<a name="line.160"></a>
+<span class="sourceLineNo">161</span>    public static final String PID = "org.forgerock.openidm.script";<a name="line.161"></a>
+<span class="sourceLineNo">162</span><a name="line.162"></a>
+<span class="sourceLineNo">163</span>    /**<a name="line.163"></a>
+<span class="sourceLineNo">164</span>     * Setup logging for the {@link ScriptRegistryService}.<a name="line.164"></a>
+<span class="sourceLineNo">165</span>     */<a name="line.165"></a>
+<span class="sourceLineNo">166</span>    // private static final LocalizedLogger logger =<a name="line.166"></a>
+<span class="sourceLineNo">167</span>    // LocalizedLogger.getLocalizedLogger(ScriptRegistryService.class);<a name="line.167"></a>
+<span class="sourceLineNo">168</span>    private static final Logger logger = LoggerFactory.getLogger(ScriptRegistryService.class);<a name="line.168"></a>
+<span class="sourceLineNo">169</span>    private static final String PROP_IDENTITY_SERVER = "identityServer";<a name="line.169"></a>
+<span class="sourceLineNo">170</span>    private static final String PROP_OPENIDM = "openidm";<a name="line.170"></a>
+<span class="sourceLineNo">171</span>    private static final String PROP_CONSOLE = "console";<a name="line.171"></a>
+<span class="sourceLineNo">172</span>    <a name="line.172"></a>
+<span class="sourceLineNo">173</span>    private static final String SOURCE_DIRECTORY = "directory";<a name="line.173"></a>
+<span class="sourceLineNo">174</span>    private static final String SOURCE_FILE = "file";<a name="line.174"></a>
+<span class="sourceLineNo">175</span>    private static final String SOURCE_SUBDIRECTORIES = "subdirectories";<a name="line.175"></a>
+<span class="sourceLineNo">176</span>    private static final String SOURCE_VISIBILITY = "visibility";<a name="line.176"></a>
+<span class="sourceLineNo">177</span>    private static final String SOURCE_TYPE = "type";<a name="line.177"></a>
+<span class="sourceLineNo">178</span>    <a name="line.178"></a>
+<span class="sourceLineNo">179</span><a name="line.179"></a>
+<span class="sourceLineNo">180</span>    private final ConcurrentMap&lt;String, Object&gt; openidm = new ConcurrentHashMap&lt;String, Object&gt;();<a name="line.180"></a>
+<span class="sourceLineNo">181</span>    private static final ConcurrentMap&lt;String, Object&gt; propertiesCache = new ConcurrentHashMap&lt;String, Object&gt;();<a name="line.181"></a>
+<span class="sourceLineNo">182</span><a name="line.182"></a>
+<span class="sourceLineNo">183</span>    private enum Action {<a name="line.183"></a>
+<span class="sourceLineNo">184</span>        eval<a name="line.184"></a>
+<span class="sourceLineNo">185</span>    }<a name="line.185"></a>
+<span class="sourceLineNo">186</span>    <a name="line.186"></a>
+<span class="sourceLineNo">187</span>    private BundleWatcher&lt;ManifestEntry&gt; manifestWatcher;<a name="line.187"></a>
+<span class="sourceLineNo">188</span><a name="line.188"></a>
+<span class="sourceLineNo">189</span>    @Activate<a name="line.189"></a>
+<span class="sourceLineNo">190</span>    protected void activate(ComponentContext context) throws Exception {<a name="line.190"></a>
+<span class="sourceLineNo">191</span>        JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);<a name="line.191"></a>
+<span class="sourceLineNo">192</span><a name="line.192"></a>
+<span class="sourceLineNo">193</span>        setConfiguration(configuration.required().asMap());<a name="line.193"></a>
+<span class="sourceLineNo">194</span><a name="line.194"></a>
+<span class="sourceLineNo">195</span>        HashMap&lt;String, Object&gt; identityServer = new HashMap&lt;String, Object&gt;();<a name="line.195"></a>
+<span class="sourceLineNo">196</span>        for (IdentityServerFunctions f : IdentityServerFunctions.values()) {<a name="line.196"></a>
+<span class="sourceLineNo">197</span>            identityServer.put(f.name(), f);<a name="line.197"></a>
+<span class="sourceLineNo">198</span>        }<a name="line.198"></a>
+<span class="sourceLineNo">199</span>        Map&lt;String, Object&gt; console = new HashMap&lt;String, Object&gt;();<a name="line.199"></a>
+<span class="sourceLineNo">200</span>        console.put("log", new Function&lt;Void&gt;() {<a name="line.200"></a>
+<span class="sourceLineNo">201</span>            @Override<a name="line.201"></a>
+<span class="sourceLineNo">202</span>            public Void call(Parameter scope, Function&lt;?&gt; callback, Object... arguments) throws ResourceException, NoSuchMethodException {<a name="line.202"></a>
+<span class="sourceLineNo">203</span>                if (arguments.length &gt; 0) {<a name="line.203"></a>
+<span class="sourceLineNo">204</span>                    if (arguments[0] instanceof String) {<a name="line.204"></a>
+<span class="sourceLineNo">205</span>                        System.out.println((String) arguments[0]);<a name="line.205"></a>
+<span class="sourceLineNo">206</span>                    }<a name="line.206"></a>
+<span class="sourceLineNo">207</span>                }<a name="line.207"></a>
+<span class="sourceLineNo">208</span>                return null;<a name="line.208"></a>
+<span class="sourceLineNo">209</span>            }<a name="line.209"></a>
+<span class="sourceLineNo">210</span>        });<a name="line.210"></a>
+<span class="sourceLineNo">211</span>        put(PROP_IDENTITY_SERVER, identityServer);<a name="line.211"></a>
+<span class="sourceLineNo">212</span>        put(PROP_CONSOLE, console);<a name="line.212"></a>
+<span class="sourceLineNo">213</span>        put(PROP_OPENIDM, openidm);<a name="line.213"></a>
+<span class="sourceLineNo">214</span>        JsonValue properties = configuration.get("properties");<a name="line.214"></a>
+<span class="sourceLineNo">215</span>        if (properties.isMap()) {<a name="line.215"></a>
+<span class="sourceLineNo">216</span>            for (Map.Entry&lt;String, Object&gt; entry : properties.asMap().entrySet()) {<a name="line.216"></a>
+<span class="sourceLineNo">217</span>                if (PROP_IDENTITY_SERVER.equals(entry.getKey())<a name="line.217"></a>
+<span class="sourceLineNo">218</span>                        || PROP_OPENIDM.equals(entry.getKey())<a name="line.218"></a>
+<span class="sourceLineNo">219</span>                        || PROP_CONSOLE.equals(entry.getKey())) {<a name="line.219"></a>
+<span class="sourceLineNo">220</span>                    continue;<a name="line.220"></a>
+<span class="sourceLineNo">221</span>                }<a name="line.221"></a>
+<span class="sourceLineNo">222</span>                put(entry.getKey(), entry.getValue());<a name="line.222"></a>
+<span class="sourceLineNo">223</span>            }<a name="line.223"></a>
+<span class="sourceLineNo">224</span>        }<a name="line.224"></a>
+<span class="sourceLineNo">225</span><a name="line.225"></a>
+<span class="sourceLineNo">226</span>        try {<a name="line.226"></a>
+<span class="sourceLineNo">227</span>            JsonValue sources = configuration.get("sources");<a name="line.227"></a>
+<span class="sourceLineNo">228</span>            if (!sources.isNull()) {<a name="line.228"></a>
+<span class="sourceLineNo">229</span>                for (String key : sources.keys()) {<a name="line.229"></a>
+<span class="sourceLineNo">230</span>                    JsonValue source = sources.get(key);<a name="line.230"></a>
+<span class="sourceLineNo">231</span>                    String directory = source.get(SOURCE_DIRECTORY).asString();<a name="line.231"></a>
+<span class="sourceLineNo">232</span>                    URL directoryURL = (new File(directory)).toURI().toURL();<a name="line.232"></a>
+<span class="sourceLineNo">233</span>                    /* TODO: Support addition config properties (currently set to defaults in commons)<a name="line.233"></a>
+<span class="sourceLineNo">234</span>                    JsonValue subDirValue = source.get(SOURCE_SUBDIRECTORIES).defaultTo("auto-true");<a name="line.234"></a>
+<span class="sourceLineNo">235</span>                    boolean subdirectories = true;<a name="line.235"></a>
+<span class="sourceLineNo">236</span>                    if (subDirValue.isBoolean()) {<a name="line.236"></a>
+<span class="sourceLineNo">237</span>                        subdirectories = subDirValue.asBoolean();<a name="line.237"></a>
+<span class="sourceLineNo">238</span>                    } else {<a name="line.238"></a>
+<span class="sourceLineNo">239</span>                        subdirectories = Boolean.parseBoolean(subDirValue.asString());<a name="line.239"></a>
+<span class="sourceLineNo">240</span>                    }<a name="line.240"></a>
+<span class="sourceLineNo">241</span>                    String type = source.get(SOURCE_TYPE).defaultTo("auto-detect").asString();<a name="line.241"></a>
+<span class="sourceLineNo">242</span>                    String visibility = source.get(SOURCE_VISIBILITY).defaultTo("public").asString();<a name="line.242"></a>
+<span class="sourceLineNo">243</span>                    */<a name="line.243"></a>
+<span class="sourceLineNo">244</span>                    DirectoryContainer dc = new DirectoryContainer(key, directoryURL);<a name="line.244"></a>
+<span class="sourceLineNo">245</span>                    addSourceUnit(dc);<a name="line.245"></a>
+<span class="sourceLineNo">246</span>                }<a name="line.246"></a>
+<span class="sourceLineNo">247</span>            }<a name="line.247"></a>
+<span class="sourceLineNo">248</span>        } catch (Exception e) {<a name="line.248"></a>
+<span class="sourceLineNo">249</span>            logger.error("Error loading sources", e);<a name="line.249"></a>
+<span class="sourceLineNo">250</span>            throw e;<a name="line.250"></a>
+<span class="sourceLineNo">251</span>        }<a name="line.251"></a>
+<span class="sourceLineNo">252</span><a name="line.252"></a>
+<span class="sourceLineNo">253</span>        // OPENIDM-1746 Set the script registry class loader to this class, so that any libraries<a name="line.253"></a>
+<span class="sourceLineNo">254</span>        // bundled as an OSGI-Fragment attached to this bundle will be "seen" by scripts.<a name="line.254"></a>
+<span class="sourceLineNo">255</span>        setRegistryLevelScriptClassLoader(this.getClass().getClassLoader());<a name="line.255"></a>
+<span class="sourceLineNo">256</span><a name="line.256"></a>
+<span class="sourceLineNo">257</span>        /*<a name="line.257"></a>
+<span class="sourceLineNo">258</span>         * manifestWatcher = new BundleWatcher&lt;ManifestEntry&gt;(context, new<a name="line.258"></a>
+<span class="sourceLineNo">259</span>         * ScriptEngineManifestScanner(), null); manifestWatcher.start();<a name="line.259"></a>
+<span class="sourceLineNo">260</span>         */<a name="line.260"></a>
+<span class="sourceLineNo">261</span><a name="line.261"></a>
+<span class="sourceLineNo">262</span>        logger.info("OpenIDM Script Service component is activated.");<a name="line.262"></a>
+<span class="sourceLineNo">263</span>    }<a name="line.263"></a>
+<span class="sourceLineNo">264</span><a name="line.264"></a>
+<span class="sourceLineNo">265</span>    @Modified<a name="line.265"></a>
+<span class="sourceLineNo">266</span>    protected void modified(ComponentContext context) {<a name="line.266"></a>
+<span class="sourceLineNo">267</span>        JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);<a name="line.267"></a>
+<span class="sourceLineNo">268</span>        setConfiguration(configuration.required().asMap());<a name="line.268"></a>
+<span class="sourceLineNo">269</span>        propertiesCache.clear();<a name="line.269"></a>
+<span class="sourceLineNo">270</span>        Set&lt;String&gt; keys =<a name="line.270"></a>
+<span class="sourceLineNo">271</span>                null != getBindings() ? new HashSet&lt;String&gt;(getBindings().keySet()) : Collections<a name="line.271"></a>
+<span class="sourceLineNo">272</span>                        .&lt;String&gt; emptySet();<a name="line.272"></a>
+<span class="sourceLineNo">273</span>        keys.remove(PROP_OPENIDM);<a name="line.273"></a>
+<span class="sourceLineNo">274</span>        keys.remove(PROP_IDENTITY_SERVER);<a name="line.274"></a>
+<span class="sourceLineNo">275</span>        keys.remove(PROP_CONSOLE);<a name="line.275"></a>
+<span class="sourceLineNo">276</span>        JsonValue properties = configuration.get("properties");<a name="line.276"></a>
+<span class="sourceLineNo">277</span>        if (properties.isMap()) {<a name="line.277"></a>
+<span class="sourceLineNo">278</span>            for (Map.Entry&lt;String, Object&gt; entry : properties.asMap().entrySet()) {<a name="line.278"></a>
+<span class="sourceLineNo">279</span>                if (PROP_IDENTITY_SERVER.equals(entry.getKey())<a name="line.279"></a>
+<span class="sourceLineNo">280</span>                        || PROP_OPENIDM.equals(entry.getKey())<a name="line.280"></a>
+<span class="sourceLineNo">281</span>                        || PROP_CONSOLE.equals(entry.getKey())) {<a name="line.281"></a>
+<span class="sourceLineNo">282</span>                    continue;<a name="line.282"></a>
+<span class="sourceLineNo">283</span>                }<a name="line.283"></a>
+<span class="sourceLineNo">284</span>                put(entry.getKey(), entry.getValue());<a name="line.284"></a>
+<span class="sourceLineNo">285</span>                keys.remove(entry.getKey());<a name="line.285"></a>
+<span class="sourceLineNo">286</span>            }<a name="line.286"></a>
+<span class="sourceLineNo">287</span>        }<a name="line.287"></a>
+<span class="sourceLineNo">288</span>        if (!keys.isEmpty()) {<a name="line.288"></a>
+<span class="sourceLineNo">289</span>            for (String name : keys) {<a name="line.289"></a>
+<span class="sourceLineNo">290</span>                getBindings().remove(name);<a name="line.290"></a>
+<span class="sourceLineNo">291</span>            }<a name="line.291"></a>
+<span class="sourceLineNo">292</span>        }<a name="line.292"></a>
+<span class="sourceLineNo">293</span>        logger.info("OpenIDM Script Service component is modified.");<a name="line.293"></a>
+<span class="sourceLineNo">294</span>    }<a name="line.294"></a>
+<span class="sourceLineNo">295</span><a name="line.295"></a>
+<span class="sourceLineNo">296</span>    @Deactivate<a name="line.296"></a>
+<span class="sourceLineNo">297</span>    protected void deactivate(ComponentContext context) {<a name="line.297"></a>
+<span class="sourceLineNo">298</span>        if (null != manifestWatcher) {<a name="line.298"></a>
+<span class="sourceLineNo">299</span>            manifestWatcher.stop();<a name="line.299"></a>
+<span class="sourceLineNo">300</span>        }<a name="line.300"></a>
+<span class="sourceLineNo">301</span>        propertiesCache.clear();<a name="line.301"></a>
+<span class="sourceLineNo">302</span>        openidm.clear();<a name="line.302"></a>
+<span class="sourceLineNo">303</span>        setBindings(null);<a name="line.303"></a>
+<span class="sourceLineNo">304</span>        logger.info("OpenIDM Script Service component is deactivated.");<a name="line.304"></a>
+<span class="sourceLineNo">305</span>    }<a name="line.305"></a>
+<span class="sourceLineNo">306</span><a name="line.306"></a>
+<span class="sourceLineNo">307</span>    @Override<a name="line.307"></a>
+<span class="sourceLineNo">308</span>    public void setPersistenceConfig(PersistenceConfig persistenceConfig) {<a name="line.308"></a>
+<span class="sourceLineNo">309</span>        super.setPersistenceConfig(persistenceConfig);<a name="line.309"></a>
+<span class="sourceLineNo">310</span>        openidm.put("create", ResourceFunctions.CREATE);<a name="line.310"></a>
+<span class="sourceLineNo">311</span>        openidm.put("read", ResourceFunctions.READ);<a name="line.311"></a>
+<span class="sourceLineNo">312</span>        openidm.put("update", ResourceFunctions.UPDATE);<a name="line.312"></a>
+<span class="sourceLineNo">313</span>        openidm.put("patch", ResourceFunctions.PATCH);<a name="line.313"></a>
+<span class="sourceLineNo">314</span>        openidm.put("query", ResourceFunctions.QUERY);<a name="line.314"></a>
+<span class="sourceLineNo">315</span>        openidm.put("delete", ResourceFunctions.DELETE);<a name="line.315"></a>
+<span class="sourceLineNo">316</span>        openidm.put("action", ResourceFunctions.ACTION);<a name="line.316"></a>
+<span class="sourceLineNo">317</span>        logger.info("Resource functions are enabled");<a name="line.317"></a>
+<span class="sourceLineNo">318</span>    }<a name="line.318"></a>
+<span class="sourceLineNo">319</span><a name="line.319"></a>
+<span class="sourceLineNo">320</span>    public void unsetPersistenceConfig(PersistenceConfig persistenceConfig) {<a name="line.320"></a>
+<span class="sourceLineNo">321</span>        openidm.remove("create", ResourceFunctions.CREATE);<a name="line.321"></a>
+<span class="sourceLineNo">322</span>        openidm.remove("read", ResourceFunctions.READ);<a name="line.322"></a>
+<span class="sourceLineNo">323</span>        openidm.remove("update", ResourceFunctions.UPDATE);<a name="line.323"></a>
+<span class="sourceLineNo">324</span>        openidm.remove("patch", ResourceFunctions.PATCH);<a name="line.324"></a>
+<span class="sourceLineNo">325</span>        openidm.remove("query", ResourceFunctions.QUERY);<a name="line.325"></a>
+<span class="sourceLineNo">326</span>        openidm.remove("delete", ResourceFunctions.DELETE);<a name="line.326"></a>
+<span class="sourceLineNo">327</span>        openidm.remove("action", ResourceFunctions.ACTION);<a name="line.327"></a>
+<span class="sourceLineNo">328</span>        super.setPersistenceConfig(null);<a name="line.328"></a>
+<span class="sourceLineNo">329</span>        logger.info("Resource functions are disabled");<a name="line.329"></a>
+<span class="sourceLineNo">330</span>    }<a name="line.330"></a>
+<span class="sourceLineNo">331</span><a name="line.331"></a>
+<span class="sourceLineNo">332</span>    protected void bindCryptoService(final CryptoService cryptoService) {<a name="line.332"></a>
+<span class="sourceLineNo">333</span>        // encrypt(any value, string cipher, string alias)<a name="line.333"></a>
+<span class="sourceLineNo">334</span>        openidm.put("encrypt", new Function&lt;JsonValue&gt;() {<a name="line.334"></a>
+<span class="sourceLineNo">335</span><a name="line.335"></a>
+<span class="sourceLineNo">336</span>            static final long serialVersionUID = 1L;<a name="line.336"></a>
+<span class="sourceLineNo">337</span><a name="line.337"></a>
+<span class="sourceLineNo">338</span>            public JsonValue call(Parameter scope, Function&lt;?&gt; callback, Object... arguments)<a name="line.338"></a>
+<span class="sourceLineNo">339</span>                    throws ResourceException, NoSuchMethodException {<a name="line.339"></a>
+<span class="sourceLineNo">340</span>                if (arguments.length == 3) {<a name="line.340"></a>
+<span class="sourceLineNo">341</span>                    JsonValue value = null;<a name="line.341"></a>
+<span class="sourceLineNo">342</span>                    String cipher = null;<a name="line.342"></a>
+<span class="sourceLineNo">343</span>                    String alias = null;<a name="line.343"></a>
+<span class="sourceLineNo">344</span>                    if (arguments[0] instanceof Map<a name="line.344"></a>
+<span class="sourceLineNo">345</span>                            || arguments[0] instanceof List<a name="line.345"></a>
+<span class="sourceLineNo">346</span>                            || arguments[0] instanceof String<a name="line.346"></a>
+<span class="sourceLineNo">347</span>                            || arguments[0] instanceof Number<a name="line.347"></a>
+<span class="sourceLineNo">348</span>                            || arguments[0] instanceof Boolean) {<a name="line.348"></a>
+<span class="sourceLineNo">349</span>                        value = new JsonValue(arguments[0]);<a name="line.349"></a>
+<span class="sourceLineNo">350</span>                    } else if (arguments[0] instanceof JsonValue) {<a name="line.350"></a>
+<span class="sourceLineNo">351</span>                        value = (JsonValue) arguments[0];<a name="line.351"></a>
+<span class="sourceLineNo">352</span>                    } else {<a name="line.352"></a>
+<span class="sourceLineNo">353</span>                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(<a name="line.353"></a>
+<span class="sourceLineNo">354</span>                                "encrypt", arguments));<a name="line.354"></a>
+<span class="sourceLineNo">355</span>                    }<a name="line.355"></a>
+<span class="sourceLineNo">356</span>                    if (arguments[1] instanceof String) {<a name="line.356"></a>
+<span class="sourceLineNo">357</span>                        cipher = (String) arguments[1];<a name="line.357"></a>
+<span class="sourceLineNo">358</span>                    } else if (arguments[0] == null) {<a name="line.358"></a>
+<span class="sourceLineNo">359</span>                        cipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;<a name="line.359"></a>
+<span class="sourceLineNo">360</span>                    } else {<a name="line.360"></a>
+<span class="sourceLineNo">361</span>                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(<a name="line.361"></a>
+<span class="sourceLineNo">362</span>                                "encrypt", arguments));<a name="line.362"></a>
+<span class="sourceLineNo">363</span>                    }<a name="line.363"></a>
+<span class="sourceLineNo">364</span><a name="line.364"></a>
+<span class="sourceLineNo">365</span>                    if (arguments[2] instanceof String) {<a name="line.365"></a>
+<span class="sourceLineNo">366</span>                        alias = (String) arguments[2];<a name="line.366"></a>
+<span class="sourceLineNo">367</span>                    } else {<a name="line.367"></a>
+<span class="sourceLineNo">368</span>                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(<a name="line.368"></a>
+<span class="sourceLineNo">369</span>                                "encrypt", arguments));<a name="line.369"></a>
+<span class="sourceLineNo">370</span>                    }<a name="line.370"></a>
+<span class="sourceLineNo">371</span>                    try {<a name="line.371"></a>
+<span class="sourceLineNo">372</span>                        return cryptoService.encrypt(value, cipher, alias);<a name="line.372"></a>
+<span class="sourceLineNo">373</span>                    } catch (JsonCryptoException e) {<a name="line.373"></a>
+<span class="sourceLineNo">374</span>                        throw new InternalServerErrorException(e.getMessage(), e);<a name="line.374"></a>
+<span class="sourceLineNo">375</span>                    }<a name="line.375"></a>
+<span class="sourceLineNo">376</span>                } else {<a name="line.376"></a>
+<span class="sourceLineNo">377</span>                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(<a name="line.377"></a>
+<span class="sourceLineNo">378</span>                            "encrypt", arguments));<a name="line.378"></a>
+<span class="sourceLineNo">379</span>                }<a name="line.379"></a>
+<span class="sourceLineNo">380</span>            }<a name="line.380"></a>
+<span class="sourceLineNo">381</span>        });<a name="line.381"></a>
+<span class="sourceLineNo">382</span>        // decrypt(any value)<a name="line.382"></a>
+<span class="sourceLineNo">383</span>        openidm.put("decrypt", new Function&lt;JsonValue&gt;() {<a name="line.383"></a>
+<span class="sourceLineNo">384</span><a name="line.384"></a>
+<span class="sourceLineNo">385</span>            static final long serialVersionUID = 1L;<a name="line.385"></a>
+<span class="sourceLineNo">386</span><a name="line.386"></a>
+<span class="sourceLineNo">387</span>            public JsonValue call(Parameter scope, Function&lt;?&gt; callback, Object... arguments)<a name="line.387"></a>
+<span class="sourceLineNo">388</span>                    throws ResourceException, NoSuchMethodException {<a name="line.388"></a>
+<span class="sourceLineNo">389</span>                if (arguments.length == 1<a name="line.389"></a>
+<span class="sourceLineNo">390</span>                        &amp;&amp; (arguments[0] instanceof Map || arguments[0] instanceof JsonValue)) {<a name="line.390"></a>
+<span class="sourceLineNo">391</span>                    return cryptoService<a name="line.391"></a>
+<span class="sourceLineNo">392</span>                            .decrypt(arguments[0] instanceof JsonValue ? (JsonValue) arguments[0]<a name="line.392"></a>
+<span class="sourceLineNo">393</span>                                    : new JsonValue(arguments[0]));<a name="line.393"></a>
+<span class="sourceLineNo">394</span>                } else {<a name="line.394"></a>
+<span class="sourceLineNo">395</span>                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(<a name="line.395"></a>
+<span class="sourceLineNo">396</span>                            "decrypt", arguments));<a name="line.396"></a>
+<span class="sourceLineNo">397</span>                }<a name="line.397"></a>
+<span class="sourceLineNo">398</span>            }<a name="line.398"></a>
+<span class="sourceLineNo">399</span>        });<a name="line.399"></a>
+<span class="sourceLineNo">400</span>        // isEncrypted(any value)<a name="line.400"></a>
+<span class="sourceLineNo">401</span>        openidm.put("isEncrypted", new Function&lt;Boolean&gt;() {<a name="line.401"></a>
+<span class="sourceLineNo">402</span><a name="line.402"></a>
+<span class="sourceLineNo">403</span>            static final long serialVersionUID = 1L;<a name="line.403"></a>
+<span class="sourceLineNo">404</span><a name="line.404"></a>
+<span class="sourceLineNo">405</span>            public Boolean call(Parameter scope, Function&lt;?&gt; callback, Object... arguments)<a name="line.405"></a>
+<span class="sourceLineNo">406</span>                    throws ResourceException, NoSuchMethodException {<a name="line.406"></a>
+<span class="sourceLineNo">407</span>                if (arguments == null || arguments.length == 0) {<a name="line.407"></a>
+<span class="sourceLineNo">408</span>                    return false;<a name="line.408"></a>
+<span class="sourceLineNo">409</span>                } else if (arguments.length == 1) {<a name="line.409"></a>
+<span class="sourceLineNo">410</span>                    return JsonCrypto.isJsonCrypto(arguments[0] instanceof JsonValue<a name="line.410"></a>
+<span class="sourceLineNo">411</span>                        ? (JsonValue) arguments[0] <a name="line.411"></a>
+<span class="sourceLineNo">412</span>                        : new JsonValue(arguments[0]));<a name="line.412"></a>
+<span class="sourceLineNo">413</span>                } else {<a name="line.413"></a>
+<span class="sourceLineNo">414</span>                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(<a name="line.414"></a>
+<span class="sourceLineNo">415</span>                            "isEncrypted", arguments));<a name="line.415"></a>
+<span class="sourceLineNo">416</span>                }<a name="line.416"></a>
+<span class="sourceLineNo">417</span>            }<a name="line.417"></a>
+<span class="sourceLineNo">418</span>        });<a name="line.418"></a>
+<span class="sourceLineNo">419</span>        logger.info("Crypto functions are enabled");<a name="line.419"></a>
+<span class="sourceLineNo">420</span>    }<a name="line.420"></a>
+<span class="sourceLineNo">421</span><a name="line.421"></a>
+<span class="sourceLineNo">422</span>    protected void unbindCryptoService(final CryptoService function) {<a name="line.422"></a>
+<span class="sourceLineNo">423</span>        openidm.remove("encrypt");<a name="line.423"></a>
+<span class="sourceLineNo">424</span>        openidm.remove("decrypt");<a name="line.424"></a>
+<span class="sourceLineNo">425</span>        openidm.remove("isEncrypted");<a name="line.425"></a>
+<span class="sourceLineNo">426</span>        logger.info("Crypto functions are disabled");<a name="line.426"></a>
+<span class="sourceLineNo">427</span>    }<a name="line.427"></a>
+<span class="sourceLineNo">428</span><a name="line.428"></a>
+<span class="sourceLineNo">429</span>    protected void bindFunction(final Function function, Map properties) {<a name="line.429"></a>
+<span class="sourceLineNo">430</span>        Object name = properties.get(SCRIPT_NAME);<a name="line.430"></a>
+<span class="sourceLineNo">431</span>        if (name instanceof String &amp;&amp; StringUtils.isNotBlank((String) name)<a name="line.431"></a>
+<span class="sourceLineNo">432</span>                &amp;&amp; !reservedNames.contains((String) name)) {<a name="line.432"></a>
+<span class="sourceLineNo">433</span>            openidm.put((String) name, function);<a name="line.433"></a>
+<span class="sourceLineNo">434</span>            logger.info("openidm.{} function is enabled", name);<a name="line.434"></a>
+<span class="sourceLineNo">435</span>        }<a name="line.435"></a>
+<span class="sourceLineNo">436</span>    }<a name="line.436"></a>
+<span class="sourceLineNo">437</span><a name="line.437"></a>
+<span class="sourceLineNo">438</span>    protected void unbindFunction(final Function function, Map properties) {<a name="line.438"></a>
+<span class="sourceLineNo">439</span>        Object name = properties.get(SCRIPT_NAME);<a name="line.439"></a>
+<span class="sourceLineNo">440</span>        if (name instanceof String &amp;&amp; StringUtils.isNotBlank((String) name)<a name="line.440"></a>
+<span class="sourceLineNo">441</span>                &amp;&amp; !reservedNames.contains((String) name)) {<a name="line.441"></a>
+<span class="sourceLineNo">442</span>            openidm.remove(name, function);<a name="line.442"></a>
+<span class="sourceLineNo">443</span>            logger.info("openidm.{} function is disabled", name);<a name="line.443"></a>
+<span class="sourceLineNo">444</span>        }<a name="line.444"></a>
+<span class="sourceLineNo">445</span>    }<a name="line.445"></a>
+<span class="sourceLineNo">446</span><a name="line.446"></a>
+<span class="sourceLineNo">447</span>    @Override<a name="line.447"></a>
+<span class="sourceLineNo">448</span>    public ScriptEntry takeScript(JsonValue script) throws ScriptException {<a name="line.448"></a>
+<span class="sourceLineNo">449</span>        // Check if "name" is missing and "file" is used instead<a name="line.449"></a>
+<span class="sourceLineNo">450</span>        JsonValue scriptConfig = script.clone();<a name="line.450"></a>
+<span class="sourceLineNo">451</span>        if (scriptConfig.get(SourceUnit.ATTR_NAME).isNull()) {<a name="line.451"></a>
+<span class="sourceLineNo">452</span>            JsonValue file = scriptConfig.get(SOURCE_FILE);<a name="line.452"></a>
+<span class="sourceLineNo">453</span>            if (!file.isNull()) {<a name="line.453"></a>
+<span class="sourceLineNo">454</span>                scriptConfig.put(SourceUnit.ATTR_NAME, file.asString());<a name="line.454"></a>
+<span class="sourceLineNo">455</span>            }<a name="line.455"></a>
+<span class="sourceLineNo">456</span>        }<a name="line.456"></a>
+<span class="sourceLineNo">457</span>        <a name="line.457"></a>
+<span class="sourceLineNo">458</span>        return super.takeScript(scriptConfig);<a name="line.458"></a>
+<span class="sourceLineNo">459</span>    }<a name="line.459"></a>
+<span class="sourceLineNo">460</span>    <a name="line.460"></a>
+<span class="sourceLineNo">461</span>    private static enum IdentityServerFunctions implements Function&lt;Object&gt; {<a name="line.461"></a>
+<span class="sourceLineNo">462</span>        getProperty {<a name="line.462"></a>
+<span class="sourceLineNo">463</span>            public Object call(Parameter scope, Function&lt;?&gt; callback, Object... arguments)<a name="line.463"></a>
+<span class="sourceLineNo">464</span>                    throws ResourceException, NoSuchMethodException {<a name="line.464"></a>
+<span class="sourceLineNo">465</span>                boolean useCache = false;<a name="line.465"></a>
+<span class="sourceLineNo">466</span>                if (arguments.length &lt; 1 || arguments.length &gt; 3) {<a name="line.466"></a>
+<span class="sourceLineNo">467</span>                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));<a name="line.467"></a>
+<span class="sourceLineNo">468</span>                }<a name="line.468"></a>
+<span class="sourceLineNo">469</span>                if (arguments.length == 3) {<a name="line.469"></a>
+<span class="sourceLineNo">470</span>                    useCache = (Boolean) arguments[2];<a name="line.470"></a>
+<span class="sourceLineNo">471</span>                }<a name="line.471"></a>
+<span class="sourceLineNo">472</span>                if (arguments[0] instanceof String) {<a name="line.472"></a>
+<span class="sourceLineNo">473</span>                    String name = (String) arguments[0];<a name="line.473"></a>
+<span class="sourceLineNo">474</span>                    Object result = null;<a name="line.474"></a>
+<span class="sourceLineNo">475</span>                    if (useCache) {<a name="line.475"></a>
+<span class="sourceLineNo">476</span>                        result = propertiesCache.get(name);<a name="line.476"></a>
+<span class="sourceLineNo">477</span>                    }<a name="line.477"></a>
+<span class="sourceLineNo">478</span>                    if (null == result) {<a name="line.478"></a>
+<span class="sourceLineNo">479</span>                        Object defaultValue = arguments.length == 2 ? arguments[1] : null;<a name="line.479"></a>
+<span class="sourceLineNo">480</span>                        result = IdentityServer.getInstance().getProperty(name, defaultValue, Object.class);<a name="line.480"></a>
+<span class="sourceLineNo">481</span>                        propertiesCache.putIfAbsent(name, result);<a name="line.481"></a>
+<span class="sourceLineNo">482</span>                    }<a name="line.482"></a>
+<span class="sourceLineNo">483</span>                    return result;<a name="line.483"></a>
+<span class="sourceLineNo">484</span>                } else {<a name="line.484"></a>
+<span class="sourceLineNo">485</span>                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));<a name="line.485"></a>
+<span class="sourceLineNo">486</span>                }<a name="line.486"></a>
+<span class="sourceLineNo">487</span>            }<a name="line.487"></a>
+<span class="sourceLineNo">488</span>        },<a name="line.488"></a>
+<span class="sourceLineNo">489</span><a name="line.489"></a>
+<span class="sourceLineNo">490</span>        getWorkingLocation {<a name="line.490"></a>
+<span class="sourceLineNo">491</span>            public Object call(Parameter scope, Function callback, Object... arguments)<a name="line.491"></a>
+<span class="sourceLineNo">492</span>                    throws ResourceException, NoSuchMethodException {<a name="line.492"></a>
+<span class="sourceLineNo">493</span>                if (arguments.length != 0) {<a name="line.493"></a>
+<span class="sourceLineNo">494</span>                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));<a name="line.494"></a>
+<span class="sourceLineNo">495</span>                }<a name="line.495"></a>
+<span class="sourceLineNo">496</span>                return IdentityServer.getInstance().getWorkingLocation().getAbsolutePath();<a name="line.496"></a>
+<span class="sourceLineNo">497</span>            }<a name="line.497"></a>
+<span class="sourceLineNo">498</span>        },<a name="line.498"></a>
+<span class="sourceLineNo">499</span><a name="line.499"></a>
+<span class="sourceLineNo">500</span>        getProjectLocation {<a name="line.500"></a>
+<span class="sourceLineNo">501</span>            public Object call(Parameter scope, Function callback, Object... arguments)<a name="line.501"></a>
+<span class="sourceLineNo">502</span>                    throws ResourceException, NoSuchMethodException {<a name="line.502"></a>
+<span class="sourceLineNo">503</span>                if (arguments.length != 0) {<a name="line.503"></a>
+<span class="sourceLineNo">504</span>                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this<a name="line.504"></a>
+<span class="sourceLineNo">505</span>                            .name(), arguments));<a name="line.505"></a>
+<span class="sourceLineNo">506</span>                }<a name="line.506"></a>
+<span class="sourceLineNo">507</span>                return IdentityServer.getInstance().getProjectLocation().getAbsolutePath();<a name="line.507"></a>
+<span class="sourceLineNo">508</span>            }<a name="line.508"></a>
+<span class="sourceLineNo">509</span>        },<a name="line.509"></a>
+<span class="sourceLineNo">510</span>        getInstallLocation {<a name="line.510"></a>
+<span class="sourceLineNo">511</span>            public Object call(Parameter scope, Function callback, Object... arguments)<a name="line.511"></a>
+<span class="sourceLineNo">512</span>                    throws ResourceException, NoSuchMethodException {<a name="line.512"></a>
+<span class="sourceLineNo">513</span>                if (arguments.length != 0) {<a name="line.513"></a>
+<span class="sourceLineNo">514</span>                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this<a name="line.514"></a>
+<span class="sourceLineNo">515</span>                            .name(), arguments));<a name="line.515"></a>
+<span class="sourceLineNo">516</span>                }<a name="line.516"></a>
+<span class="sourceLineNo">517</span>                return IdentityServer.getInstance().getInstallLocation().getAbsolutePath();<a name="line.517"></a>
+<span class="sourceLineNo">518</span>            }<a name="line.518"></a>
+<span class="sourceLineNo">519</span>        };<a name="line.519"></a>
+<span class="sourceLineNo">520</span>        static final long serialVersionUID = 1L;<a name="line.520"></a>
+<span class="sourceLineNo">521</span>    }<a name="line.521"></a>
+<span class="sourceLineNo">522</span>    <a name="line.522"></a>
+<span class="sourceLineNo">523</span>    private boolean isSourceUnit(String name) {<a name="line.523"></a>
+<span class="sourceLineNo">524</span>        if (SourceUnit.ATTR_NAME.equals(name) ||<a name="line.524"></a>
+<span class="sourceLineNo">525</span>                SourceUnit.ATTR_REQUEST_BINDING.equals(name) ||<a name="line.525"></a>
+<span class="sourceLineNo">526</span>                SourceUnit.ATTR_REVISION.equals(name) ||<a name="line.526"></a>
+<span class="sourceLineNo">527</span>                SourceUnit.ATTR_SOURCE.equals(name) ||<a name="line.527"></a>
+<span class="sourceLineNo">528</span>                SourceUnit.ATTR_TYPE.equals(name) ||<a name="line.528"></a>
+<span class="sourceLineNo">529</span>                SourceUnit.ATTR_VISIBILITY.equals(name) ||<a name="line.529"></a>
+<span class="sourceLineNo">530</span>                SourceUnit.AUTO_DETECT.equals(name) ||<a name="line.530"></a>
+<span class="sourceLineNo">531</span>                SOURCE_FILE.equals(name)) {<a name="line.531"></a>
+<span class="sourceLineNo">532</span>            return true;<a name="line.532"></a>
+<span class="sourceLineNo">533</span>        }<a name="line.533"></a>
+<span class="sourceLineNo">534</span>        return false;<a name="line.534"></a>
+<span class="sourceLineNo">535</span>    }<a name="line.535"></a>
+<span class="sourceLineNo">536</span><a name="line.536"></a>
+<span class="sourceLineNo">537</span>    // ----- Implementation of RequestHandler interface<a name="line.537"></a>
+<span class="sourceLineNo">538</span><a name="line.538"></a>
+<span class="sourceLineNo">539</span>    public void handleAction(final ServerContext context, final ActionRequest request,<a name="line.539"></a>
+<span class="sourceLineNo">540</span>            final ResultHandler&lt;JsonValue&gt; handler) {<a name="line.540"></a>
+<span class="sourceLineNo">541</span>        String resourceName = request.getResourceName();<a name="line.541"></a>
+<span class="sourceLineNo">542</span>        JsonValue content = request.getContent();<a name="line.542"></a>
+<span class="sourceLineNo">543</span>        Map&lt;String, Object&gt; bindings = new HashMap&lt;String, Object&gt;();<a name="line.543"></a>
+<span class="sourceLineNo">544</span>        JsonValue config = new JsonValue(new HashMap&lt;String, Object&gt;());<a name="line.544"></a>
+<span class="sourceLineNo">545</span>        ScriptEntry scriptEntry = null;<a name="line.545"></a>
+<span class="sourceLineNo">546</span>        try {<a name="line.546"></a>
+<span class="sourceLineNo">547</span>            if (resourceName == null || "".equals(resourceName)) {<a name="line.547"></a>
+<span class="sourceLineNo">548</span>                for (String key : content.keys()) {<a name="line.548"></a>
+<span class="sourceLineNo">549</span>                    if (isSourceUnit(key)) {<a name="line.549"></a>
+<span class="sourceLineNo">550</span>                        config.put(key, content.get(key).getObject());<a name="line.550"></a>
+<span class="sourceLineNo">551</span>                    } else {<a name="line.551"></a>
+<span class="sourceLineNo">552</span>                        bindings.put(key, content.get(key).getObject());<a name="line.552"></a>
+<span class="sourceLineNo">553</span>                    }<a name="line.553"></a>
+<span class="sourceLineNo">554</span>                }<a name="line.554"></a>
+<span class="sourceLineNo">555</span>                // The script will be in the request content<a name="line.555"></a>
+<span class="sourceLineNo">556</span>                scriptEntry = takeScript(config);<a name="line.556"></a>
+<span class="sourceLineNo">557</span>                // Add any additional parameters to the map of bindings<a name="line.557"></a>
+<span class="sourceLineNo">558</span>                bindings.putAll(request.getAdditionalParameters());<a name="line.558"></a>
+<span class="sourceLineNo">559</span>            } else {<a name="line.559"></a>
+<span class="sourceLineNo">560</span>                throw new NotSupportedException("Actions are not supported for resource instances");<a name="line.560"></a>
+<span class="sourceLineNo">561</span>            }<a name="line.561"></a>
+<span class="sourceLineNo">562</span>            switch (request.getActionAsEnum(Action.class)) {<a name="line.562"></a>
+<span class="sourceLineNo">563</span>                case eval:<a name="line.563"></a>
+<span class="sourceLineNo">564</span>                    if (scriptEntry.isActive()) {<a name="line.564"></a>
+<span class="sourceLineNo">565</span>                        Script script = scriptEntry.getScript(context);<a name="line.565"></a>
+<span class="sourceLineNo">566</span>                        handler.handleResult(new JsonValue(script.eval(new SimpleBindings(bindings))));<a name="line.566"></a>
+<span class="sourceLineNo">567</span>                    } else {<a name="line.567"></a>
+<span class="sourceLineNo">568</span>                        throw new ServiceUnavailableException();<a name="line.568"></a>
+<span class="sourceLineNo">569</span>                    }<a name="line.569"></a>
+<span class="sourceLineNo">570</span>                    break;<a name="line.570"></a>
+<span class="sourceLineNo">571</span>                default:<a name="line.571"></a>
+<span class="sourceLineNo">572</span>                    throw new BadRequestException("Unrecognized action ID " + request.getAction());<a name="line.572"></a>
+<span class="sourceLineNo">573</span>            }<a name="line.573"></a>
+<span class="sourceLineNo">574</span>        } catch (ResourceException e) {<a name="line.574"></a>
+<span class="sourceLineNo">575</span>            handler.handleError(e);<a name="line.575"></a>
+<span class="sourceLineNo">576</span>        } catch (IllegalArgumentException e) { // from getActionAsEnum<a name="line.576"></a>
+<span class="sourceLineNo">577</span>            handler.handleError(new BadRequestException(e.getMessage(), e));<a name="line.577"></a>
+<span class="sourceLineNo">578</span>        } catch (Exception e) {<a name="line.578"></a>
+<span class="sourceLineNo">579</span>            handler.handleError(new InternalServerErrorException(e.getMessage(), e));<a name="line.579"></a>
+<span class="sourceLineNo">580</span>        }<a name="line.580"></a>
+<span class="sourceLineNo">581</span>    }<a name="line.581"></a>
+<span class="sourceLineNo">582</span><a name="line.582"></a>
+<span class="sourceLineNo">583</span>    public void handleQuery(final ServerContext context, final QueryRequest request,<a name="line.583"></a>
+<span class="sourceLineNo">584</span>            final QueryResultHandler handler) {<a name="line.584"></a>
+<span class="sourceLineNo">585</span>        final ResourceException e = new NotSupportedException("Query operations are not supported");<a name="line.585"></a>
+<span class="sourceLineNo">586</span>        handler.handleError(e);<a name="line.586"></a>
+<span class="sourceLineNo">587</span>    }<a name="line.587"></a>
+<span class="sourceLineNo">588</span><a name="line.588"></a>
+<span class="sourceLineNo">589</span>    public void handleRead(final ServerContext context, final ReadRequest request,<a name="line.589"></a>
+<span class="sourceLineNo">590</span>            final ResultHandler&lt;Resource&gt; handler) {<a name="line.590"></a>
+<span class="sourceLineNo">591</span>        final ResourceException e = new NotSupportedException("Read operations are not supported");<a name="line.591"></a>
+<span class="sourceLineNo">592</span>        handler.handleError(e);<a name="line.592"></a>
+<span class="sourceLineNo">593</span>    }<a name="line.593"></a>
+<span class="sourceLineNo">594</span><a name="line.594"></a>
+<span class="sourceLineNo">595</span>    public void handleCreate(final ServerContext context, final CreateRequest request,<a name="line.595"></a>
+<span class="sourceLineNo">596</span>            final ResultHandler&lt;Resource&gt; handler) {<a name="line.596"></a>
+<span class="sourceLineNo">597</span>        final ResourceException e = new NotSupportedException("Create operations are not supported");<a name="line.597"></a>
+<span class="sourceLineNo">598</span>        handler.handleError(e);<a name="line.598"></a>
+<span class="sourceLineNo">599</span>    }<a name="line.599"></a>
+<span class="sourceLineNo">600</span><a name="line.600"></a>
+<span class="sourceLineNo">601</span>    public void handleDelete(final ServerContext context, final DeleteRequest request,<a name="line.601"></a>
+<span class="sourceLineNo">602</span>            final ResultHandler&lt;Resource&gt; handler) {<a name="line.602"></a>
+<span class="sourceLineNo">603</span>        final ResourceException e = new NotSupportedException("Delete operations are not supported");<a name="line.603"></a>
+<span class="sourceLineNo">604</span>        handler.handleError(e);<a name="line.604"></a>
+<span class="sourceLineNo">605</span>    }<a name="line.605"></a>
+<span class="sourceLineNo">606</span><a name="line.606"></a>
+<span class="sourceLineNo">607</span>    public void handlePatch(final ServerContext context, final PatchRequest request,<a name="line.607"></a>
+<span class="sourceLineNo">608</span>            final ResultHandler&lt;Resource&gt; handler) {<a name="line.608"></a>
+<span class="sourceLineNo">609</span>        final ResourceException e = new NotSupportedException("Patch operations are not supported");<a name="line.609"></a>
+<span class="sourceLineNo">610</span>        handler.handleError(e);<a name="line.610"></a>
+<span class="sourceLineNo">611</span>    }<a name="line.611"></a>
+<span class="sourceLineNo">612</span><a name="line.612"></a>
+<span class="sourceLineNo">613</span>    public void handleUpdate(final ServerContext context, final UpdateRequest request,<a name="line.613"></a>
+<span class="sourceLineNo">614</span>            final ResultHandler&lt;Resource&gt; handler) {<a name="line.614"></a>
+<span class="sourceLineNo">615</span>        final ResourceException e = new NotSupportedException("Update operations are not supported");<a name="line.615"></a>
+<span class="sourceLineNo">616</span>        handler.handleError(e);<a name="line.616"></a>
+<span class="sourceLineNo">617</span>    }<a name="line.617"></a>
+<span class="sourceLineNo">618</span>    <a name="line.618"></a>
+<span class="sourceLineNo">619</span>    @Override<a name="line.619"></a>
+<span class="sourceLineNo">620</span>    public void execute(ServerContext context, Map&lt;String, Object&gt; scheduledContext) throws ExecutionException {<a name="line.620"></a>
+<span class="sourceLineNo">621</span>        <a name="line.621"></a>
+<span class="sourceLineNo">622</span>        try {<a name="line.622"></a>
+<span class="sourceLineNo">623</span>            String scriptName = (String) scheduledContext.get(CONFIG_NAME);<a name="line.623"></a>
+<span class="sourceLineNo">624</span>            JsonValue params = new JsonValue(scheduledContext).get(CONFIGURED_INVOKE_CONTEXT);<a name="line.624"></a>
+<span class="sourceLineNo">625</span>            JsonValue scriptValue = params.get("script").expect(Map.class).clone();<a name="line.625"></a>
+<span class="sourceLineNo">626</span>            <a name="line.626"></a>
+<span class="sourceLineNo">627</span>            if (scriptValue.get(SourceUnit.ATTR_NAME).isNull()) {<a name="line.627"></a>
+<span class="sourceLineNo">628</span>                if (!scriptValue.get(SOURCE_FILE).isNull()) {<a name="line.628"></a>
+<span class="sourceLineNo">629</span>                    scriptValue.put(SourceUnit.ATTR_NAME, scriptValue.get(SOURCE_FILE).getObject());<a name="line.629"></a>
+<span class="sourceLineNo">630</span>                }<a name="line.630"></a>
+<span class="sourceLineNo">631</span>            }<a name="line.631"></a>
+<span class="sourceLineNo">632</span>            <a name="line.632"></a>
+<span class="sourceLineNo">633</span>            if (!scriptValue.isNull()) {<a name="line.633"></a>
+<span class="sourceLineNo">634</span>                ScriptEntry entry = takeScript(scriptValue);<a name="line.634"></a>
+<span class="sourceLineNo">635</span>                JsonValue input = params.get("input");<a name="line.635"></a>
+<span class="sourceLineNo">636</span>                execScript(context, entry, input);<a name="line.636"></a>
+<span class="sourceLineNo">637</span>            } else {<a name="line.637"></a>
+<span class="sourceLineNo">638</span>                throw new ExecutionException("No valid script '" + scriptName + "' configured in schedule.");<a name="line.638"></a>
+<span class="sourceLineNo">639</span>            }<a name="line.639"></a>
+<span class="sourceLineNo">640</span>        } catch (JsonValueException jve) {<a name="line.640"></a>
+<span class="sourceLineNo">641</span>            throw new ExecutionException(jve);<a name="line.641"></a>
+<span class="sourceLineNo">642</span>        } catch (ScriptException e) {<a name="line.642"></a>
+<span class="sourceLineNo">643</span>            throw new ExecutionException(e);<a name="line.643"></a>
+<span class="sourceLineNo">644</span>        } catch (ResourceException e) {<a name="line.644"></a>
+<span class="sourceLineNo">645</span>            throw new ExecutionException(e);<a name="line.645"></a>
+<span class="sourceLineNo">646</span>        }<a name="line.646"></a>
+<span class="sourceLineNo">647</span>    }<a name="line.647"></a>
+<span class="sourceLineNo">648</span><a name="line.648"></a>
+<span class="sourceLineNo">649</span>    private void execScript(Context context, ScriptEntry script, JsonValue value) throws ForbiddenException, InternalServerErrorException {<a name="line.649"></a>
+<span class="sourceLineNo">650</span>        if (null != script &amp;&amp; script.isActive()) {<a name="line.650"></a>
+<span class="sourceLineNo">651</span>            Script executable = script.getScript(context);<a name="line.651"></a>
+<span class="sourceLineNo">652</span>            executable.put("object", value.getObject());<a name="line.652"></a>
+<span class="sourceLineNo">653</span>            try {<a name="line.653"></a>
+<span class="sourceLineNo">654</span>                executable.eval(); // allows direct modification to the object<a name="line.654"></a>
+<span class="sourceLineNo">655</span>            } catch (ScriptThrownException ste) {<a name="line.655"></a>
+<span class="sourceLineNo">656</span>                throw new ForbiddenException(ste.getValue().toString());<a name="line.656"></a>
+<span class="sourceLineNo">657</span>            } catch (ScriptException se) {<a name="line.657"></a>
+<span class="sourceLineNo">658</span>                throw new InternalServerErrorException("script encountered exception", se);<a name="line.658"></a>
+<span class="sourceLineNo">659</span>            }<a name="line.659"></a>
+<span class="sourceLineNo">660</span>        }<a name="line.660"></a>
+<span class="sourceLineNo">661</span>    }<a name="line.661"></a>
+<span class="sourceLineNo">662</span>}<a name="line.662"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

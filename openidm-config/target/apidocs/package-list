@@ -1,0 +1,6 @@
+org.forgerock.openidm.config.crypto
+org.forgerock.openidm.config.installer
+org.forgerock.openidm.config.manage
+org.forgerock.openidm.config.persistence
+org.forgerock.openidm.logging
+org.forgerock.openidm.metadata.impl

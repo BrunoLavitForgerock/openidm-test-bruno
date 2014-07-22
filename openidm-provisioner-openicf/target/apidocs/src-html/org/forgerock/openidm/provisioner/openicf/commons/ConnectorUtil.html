@@ -1,0 +1,1303 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.<a name="line.2"></a>
+<span class="sourceLineNo">003</span> *<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * The contents of this file are subject to the terms<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * of the Common Development and Distribution License<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * (the License). You may not use this file except in<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * compliance with the License.<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * You can obtain a copy of the License at<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * http://forgerock.org/license/CDDLv1.0.html<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * See the License for the specific language governing<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * permission and limitations under the License.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> *<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * When distributing Covered Code, include this CDDL<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * Header Notice in each file and include the License file<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * at http://forgerock.org/license/CDDLv1.0.html<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * If applicable, add the following below the CDDL Header,<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * with the fields enclosed by brackets [] replaced by<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * your own identifying information:<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * "Portions Copyrighted [year] [name of copyright owner]"<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>package org.forgerock.openidm.provisioner.openicf.commons;<a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26"></a>
+<span class="sourceLineNo">027</span>import org.forgerock.json.fluent.JsonValue;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import org.forgerock.json.fluent.JsonValueException;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import org.forgerock.json.schema.validator.Constants;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import org.forgerock.json.schema.validator.exceptions.SchemaException;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import org.forgerock.openidm.provisioner.openicf.ConnectorReference;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import org.identityconnectors.common.Base64;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import org.identityconnectors.common.pooling.ObjectPoolConfiguration;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import org.identityconnectors.common.script.Script;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import org.identityconnectors.common.script.ScriptBuilder;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import org.identityconnectors.common.security.GuardedByteArray;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import org.identityconnectors.common.security.GuardedString;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import org.identityconnectors.framework.api.*;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import org.identityconnectors.framework.api.operations.APIOperation;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import org.identityconnectors.framework.common.objects.*;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import org.slf4j.Logger;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import org.slf4j.LoggerFactory;<a name="line.42"></a>
+<span class="sourceLineNo">043</span><a name="line.43"></a>
+<span class="sourceLineNo">044</span>import java.io.ByteArrayOutputStream;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import java.io.File;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import java.io.IOException;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import java.lang.reflect.Array;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import java.math.BigDecimal;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>import java.math.BigInteger;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>import java.net.URI;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>import java.net.URISyntaxException;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>import java.util.*;<a name="line.52"></a>
+<span class="sourceLineNo">053</span><a name="line.53"></a>
+<span class="sourceLineNo">054</span>import static org.forgerock.json.schema.validator.Constants.*;<a name="line.54"></a>
+<span class="sourceLineNo">055</span><a name="line.55"></a>
+<span class="sourceLineNo">056</span>/**<a name="line.56"></a>
+<span class="sourceLineNo">057</span> * Sample Class Doc<a name="line.57"></a>
+<span class="sourceLineNo">058</span> *<a name="line.58"></a>
+<span class="sourceLineNo">059</span> * @author $author$<a name="line.59"></a>
+<span class="sourceLineNo">060</span> * @version $Revision$ $Date$<a name="line.60"></a>
+<span class="sourceLineNo">061</span> */<a name="line.61"></a>
+<span class="sourceLineNo">062</span>public class ConnectorUtil {<a name="line.62"></a>
+<span class="sourceLineNo">063</span><a name="line.63"></a>
+<span class="sourceLineNo">064</span>    /**<a name="line.64"></a>
+<span class="sourceLineNo">065</span>     * Setup logging for the {@link ConnectorUtil}.<a name="line.65"></a>
+<span class="sourceLineNo">066</span>     */<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    private final static Logger logger = LoggerFactory.getLogger(ConnectorUtil.class);<a name="line.67"></a>
+<span class="sourceLineNo">068</span><a name="line.68"></a>
+<span class="sourceLineNo">069</span>    private static final String OPENICF_BUNDLENAME = "bundleName";<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    private static final String OPENICF_BUNDLEVERSION = "bundleVersion";<a name="line.70"></a>
+<span class="sourceLineNo">071</span>    private static final String OPENICF_CONNECTOR_NAME = "connectorName";<a name="line.71"></a>
+<span class="sourceLineNo">072</span>    public static final String OPENICF_CONNECTOR_HOST_REF = "connectorHostRef";<a name="line.72"></a>
+<span class="sourceLineNo">073</span>    private static final String OPENICF_HOST = "host";<a name="line.73"></a>
+<span class="sourceLineNo">074</span>    private static final String OPENICF_PORT = "port";<a name="line.74"></a>
+<span class="sourceLineNo">075</span>    public static final String OPENICF_KEY = "key";<a name="line.75"></a>
+<span class="sourceLineNo">076</span>    private static final String OPENICF_USE_SSL = "useSSL";<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    private static final String OPENICF_TRUST_MANAGERS = "trustManagers";<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    private static final String OPENICF_TIMEOUT = "timeout";<a name="line.78"></a>
+<span class="sourceLineNo">079</span>    private static final String OPENICF_MAX_OBJECTS = "maxObjects";<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    private static final String OPENICF_MAX_IDLE = "maxIdle";<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    private static final String OPENICF_MAX_WAIT = "maxWait";<a name="line.81"></a>
+<span class="sourceLineNo">082</span>    private static final String OPENICF_MIN_EVICTABLE_IDLE_TIME_MILLIS = "minEvictableIdleTimeMillis";<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    private static final String OPENICF_MIN_IDLE = "minIdle";<a name="line.83"></a>
+<span class="sourceLineNo">084</span>    private static final String OPENICF_POOL_CONFIG_OPTION = "poolConfigOption";<a name="line.84"></a>
+<span class="sourceLineNo">085</span>    private static final String OPENICF_RESULTSHANDLER_CONFIG_OPTION = "resultsHandlerConfig";<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    private static final String OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER = "enableNormalizingResultsHandler";<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    private static final String OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER = "enableFilteredResultsHandler";<a name="line.87"></a>
+<span class="sourceLineNo">088</span>    private static final String OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER = "enableCaseInsensitiveFilter";<a name="line.88"></a>
+<span class="sourceLineNo">089</span>    private static final String OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER = "enableAttributesToGetSearchResultsHandler";<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    private static final String OPENICF_OPERATION_TIMEOUT = "operationTimeout";<a name="line.90"></a>
+<span class="sourceLineNo">091</span>    public static final String OPENICF_CONFIGURATION_PROPERTIES = "configurationProperties";<a name="line.91"></a>
+<span class="sourceLineNo">092</span>    public static final String OPENICF_FLAGS = "flags";<a name="line.92"></a>
+<span class="sourceLineNo">093</span>    public static final String OPENICF_OBJECT_CLASS = "nativeType";<a name="line.93"></a>
+<span class="sourceLineNo">094</span>    //public static final String PROPERTY_IS_CONTAINER = "isContainer";<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    public static final String OPENICF_NATIVE_NAME = "nativeName";<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    public static final String OPENICF_NATIVE_TYPE = "nativeType";<a name="line.96"></a>
+<span class="sourceLineNo">097</span><a name="line.97"></a>
+<span class="sourceLineNo">098</span>    public static final String OPENICF_REMOTE_CONNECTOR_SERVERS = "remoteConnectorServers";<a name="line.98"></a>
+<span class="sourceLineNo">099</span><a name="line.99"></a>
+<span class="sourceLineNo">100</span>    public static final String JAVA_TYPE_BIGDECIMAL = "JAVA_TYPE_BIGDECIMAL";<a name="line.100"></a>
+<span class="sourceLineNo">101</span>    public static final String JAVA_TYPE_BIGINTEGER = "JAVA_TYPE_BIGINTEGER";<a name="line.101"></a>
+<span class="sourceLineNo">102</span>    public static final String JAVA_TYPE_PRIMITIVE_BOOLEAN = "JAVA_TYPE_PRIMITIVE_BOOLEAN";<a name="line.102"></a>
+<span class="sourceLineNo">103</span>    public static final String JAVA_TYPE_BYTE_ARRAY = "JAVA_TYPE_BYTE_ARRAY";<a name="line.103"></a>
+<span class="sourceLineNo">104</span>    public static final String JAVA_TYPE_CHAR = "JAVA_TYPE_CHAR";<a name="line.104"></a>
+<span class="sourceLineNo">105</span>    public static final String JAVA_TYPE_CHARACTER = "JAVA_TYPE_CHARACTER";<a name="line.105"></a>
+<span class="sourceLineNo">106</span>    public static final String JAVA_TYPE_DATE = "JAVA_TYPE_DATE";<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    public static final String JAVA_TYPE_PRIMITIVE_DOUBLE = "JAVA_TYPE_PRIMITIVE_DOUBLE";<a name="line.107"></a>
+<span class="sourceLineNo">108</span>    public static final String JAVA_TYPE_DOUBLE = "JAVA_TYPE_DOUBLE";<a name="line.108"></a>
+<span class="sourceLineNo">109</span>    public static final String JAVA_TYPE_FILE = "JAVA_TYPE_FILE";<a name="line.109"></a>
+<span class="sourceLineNo">110</span>    public static final String JAVA_TYPE_PRIMITIVE_FLOAT = "JAVA_TYPE_PRIMITIVE_FLOAT";<a name="line.110"></a>
+<span class="sourceLineNo">111</span>    public static final String JAVA_TYPE_FLOAT = "JAVA_TYPE_FLOAT";<a name="line.111"></a>
+<span class="sourceLineNo">112</span>    public static final String JAVA_TYPE_GUARDEDBYTEARRAY = "JAVA_TYPE_GUARDEDBYTEARRAY";<a name="line.112"></a>
+<span class="sourceLineNo">113</span>    public static final String JAVA_TYPE_GUARDEDSTRING = "JAVA_TYPE_GUARDEDSTRING";<a name="line.113"></a>
+<span class="sourceLineNo">114</span>    public static final String JAVA_TYPE_INT = "JAVA_TYPE_INT";<a name="line.114"></a>
+<span class="sourceLineNo">115</span>    public static final String JAVA_TYPE_PRIMITIVE_LONG = "JAVA_TYPE_PRIMITIVE_LONG";<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    public static final String JAVA_TYPE_LONG = "JAVA_TYPE_LONG";<a name="line.116"></a>
+<span class="sourceLineNo">117</span>    public static final String JAVA_TYPE_NAME = "JAVA_TYPE_NAME";<a name="line.117"></a>
+<span class="sourceLineNo">118</span>    public static final String JAVA_TYPE_OBJECTCLASS = "JAVA_TYPE_OBJECTCLASS";<a name="line.118"></a>
+<span class="sourceLineNo">119</span>    public static final String JAVA_TYPE_QUALIFIEDUID = "JAVA_TYPE_QUALIFIEDUID";<a name="line.119"></a>
+<span class="sourceLineNo">120</span>    public static final String JAVA_TYPE_SCRIPT = "JAVA_TYPE_SCRIPT";<a name="line.120"></a>
+<span class="sourceLineNo">121</span>    public static final String JAVA_TYPE_UID = "JAVA_TYPE_UID";<a name="line.121"></a>
+<span class="sourceLineNo">122</span>    public static final String JAVA_TYPE_URI = "JAVA_TYPE_URI";<a name="line.122"></a>
+<span class="sourceLineNo">123</span>    public static final String JAVA_TYPE_BYTE = "JAVA_TYPE_BYTE";<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    public static final String JAVA_TYPE_PRIMITIVE_BYTE = "JAVA_TYPE_PRIMITIVE_BYTE";<a name="line.124"></a>
+<span class="sourceLineNo">125</span><a name="line.125"></a>
+<span class="sourceLineNo">126</span><a name="line.126"></a>
+<span class="sourceLineNo">127</span>    private static final Map&lt;String, Class&gt; typeMap = new HashMap&lt;String, Class&gt;(43);<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    public static final String OPENICF_CONNECTOR_REF = "connectorRef";<a name="line.128"></a>
+<span class="sourceLineNo">129</span>    public static final String OPENICF_OBJECT_TYPES = "objectTypes";<a name="line.129"></a>
+<span class="sourceLineNo">130</span>    public static final String OPENICF_OPERATION_OPTIONS = "operationOptions";<a name="line.130"></a>
+<span class="sourceLineNo">131</span>    public static final String OPENICF_SYNC_TOKEN = "syncToken";<a name="line.131"></a>
+<span class="sourceLineNo">132</span>    public static final String OPENICF_OBJECT_FEATURES = "objectFeatures";<a name="line.132"></a>
+<span class="sourceLineNo">133</span><a name="line.133"></a>
+<span class="sourceLineNo">134</span>    static {<a name="line.134"></a>
+<span class="sourceLineNo">135</span><a name="line.135"></a>
+<span class="sourceLineNo">136</span>        typeMap.put(Constants.TYPE_ANY, Object.class);<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        //typeMap.put(Constants.TYPE_NULL, null);<a name="line.137"></a>
+<span class="sourceLineNo">138</span>        typeMap.put(Constants.TYPE_ARRAY, List.class);<a name="line.138"></a>
+<span class="sourceLineNo">139</span>        typeMap.put(Constants.TYPE_BOOLEAN, Boolean.class);<a name="line.139"></a>
+<span class="sourceLineNo">140</span>        typeMap.put(Constants.TYPE_INTEGER, Integer.class);<a name="line.140"></a>
+<span class="sourceLineNo">141</span>        typeMap.put(Constants.TYPE_NUMBER, Number.class);<a name="line.141"></a>
+<span class="sourceLineNo">142</span>        typeMap.put(Constants.TYPE_OBJECT, Map.class);<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        typeMap.put(Constants.TYPE_STRING, String.class);<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        typeMap.put(JAVA_TYPE_BIGDECIMAL, BigDecimal.class);<a name="line.144"></a>
+<span class="sourceLineNo">145</span>        typeMap.put(JAVA_TYPE_BIGINTEGER, BigInteger.class);<a name="line.145"></a>
+<span class="sourceLineNo">146</span>        typeMap.put(JAVA_TYPE_PRIMITIVE_BOOLEAN, boolean.class);<a name="line.146"></a>
+<span class="sourceLineNo">147</span>        typeMap.put(JAVA_TYPE_BYTE_ARRAY, byte[].class);<a name="line.147"></a>
+<span class="sourceLineNo">148</span>        typeMap.put(JAVA_TYPE_CHAR, char.class);<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        typeMap.put(JAVA_TYPE_CHARACTER, Character.class);<a name="line.149"></a>
+<span class="sourceLineNo">150</span>        typeMap.put(JAVA_TYPE_DATE, Date.class);<a name="line.150"></a>
+<span class="sourceLineNo">151</span>        typeMap.put(JAVA_TYPE_PRIMITIVE_DOUBLE, double.class);<a name="line.151"></a>
+<span class="sourceLineNo">152</span>        typeMap.put(JAVA_TYPE_DOUBLE, Double.class);<a name="line.152"></a>
+<span class="sourceLineNo">153</span>        typeMap.put(JAVA_TYPE_FILE, File.class);<a name="line.153"></a>
+<span class="sourceLineNo">154</span>        typeMap.put(JAVA_TYPE_PRIMITIVE_FLOAT, float.class);<a name="line.154"></a>
+<span class="sourceLineNo">155</span>        typeMap.put(JAVA_TYPE_FLOAT, Float.class);<a name="line.155"></a>
+<span class="sourceLineNo">156</span>        typeMap.put(JAVA_TYPE_GUARDEDBYTEARRAY, GuardedByteArray.class);<a name="line.156"></a>
+<span class="sourceLineNo">157</span>        typeMap.put(JAVA_TYPE_GUARDEDSTRING, GuardedString.class);<a name="line.157"></a>
+<span class="sourceLineNo">158</span>        typeMap.put(JAVA_TYPE_INT, int.class);<a name="line.158"></a>
+<span class="sourceLineNo">159</span>        typeMap.put(JAVA_TYPE_PRIMITIVE_LONG, long.class);<a name="line.159"></a>
+<span class="sourceLineNo">160</span>        typeMap.put(JAVA_TYPE_LONG, Long.class);<a name="line.160"></a>
+<span class="sourceLineNo">161</span>        typeMap.put(JAVA_TYPE_NAME, Name.class);<a name="line.161"></a>
+<span class="sourceLineNo">162</span>        typeMap.put(JAVA_TYPE_OBJECTCLASS, ObjectClass.class);<a name="line.162"></a>
+<span class="sourceLineNo">163</span>        typeMap.put(JAVA_TYPE_QUALIFIEDUID, QualifiedUid.class);<a name="line.163"></a>
+<span class="sourceLineNo">164</span>        typeMap.put(JAVA_TYPE_SCRIPT, Script.class);<a name="line.164"></a>
+<span class="sourceLineNo">165</span>        typeMap.put(JAVA_TYPE_UID, Uid.class);<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        typeMap.put(JAVA_TYPE_URI, URI.class);<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        typeMap.put(JAVA_TYPE_BYTE, Byte.class);<a name="line.167"></a>
+<span class="sourceLineNo">168</span>        typeMap.put(JAVA_TYPE_PRIMITIVE_BYTE, Byte.TYPE);<a name="line.168"></a>
+<span class="sourceLineNo">169</span>    }<a name="line.169"></a>
+<span class="sourceLineNo">170</span><a name="line.170"></a>
+<span class="sourceLineNo">171</span>    private static final String BUFFER_SIZE = "bufferSize";<a name="line.171"></a>
+<span class="sourceLineNo">172</span><a name="line.172"></a>
+<span class="sourceLineNo">173</span><a name="line.173"></a>
+<span class="sourceLineNo">174</span>    //Util Methods<a name="line.174"></a>
+<span class="sourceLineNo">175</span><a name="line.175"></a>
+<span class="sourceLineNo">176</span>    /**<a name="line.176"></a>
+<span class="sourceLineNo">177</span>     * Get the Java Class for the {@code type} value in the schema.<a name="line.177"></a>
+<span class="sourceLineNo">178</span>     * &lt;p/&gt;<a name="line.178"></a>
+<span class="sourceLineNo">179</span>     * The Default mapping:<a name="line.179"></a>
+<span class="sourceLineNo">180</span>     * &lt;table&gt;<a name="line.180"></a>
+<span class="sourceLineNo">181</span>     * &lt;tr&gt;&lt;td&gt;any&lt;/td&gt;&lt;td&gt;{@link Object}&lt;/td&gt;&lt;/tr&gt;<a name="line.181"></a>
+<span class="sourceLineNo">182</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_BIGDECIMAL&lt;/td&gt;&lt;td&gt;{@link BigDecimal}&lt;/td&gt;&lt;/tr&gt;<a name="line.182"></a>
+<span class="sourceLineNo">183</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_BIGINTEGER&lt;/td&gt;&lt;td&gt;{@link BigInteger}&lt;/td&gt;&lt;/tr&gt;<a name="line.183"></a>
+<span class="sourceLineNo">184</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_PRIMITIVE_BOOLEAN&lt;/td&gt;&lt;td&gt;{@link boolean}&lt;/td&gt;&lt;/tr&gt;<a name="line.184"></a>
+<span class="sourceLineNo">185</span>     * &lt;tr&gt;&lt;td&gt;boolean&lt;/td&gt;&lt;td&gt;{@link Boolean}&lt;/td&gt;&lt;/tr&gt;<a name="line.185"></a>
+<span class="sourceLineNo">186</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_BYTE_ARRAY&lt;/td&gt;&lt;td&gt;{@link byte[]}&lt;/td&gt;&lt;/tr&gt;<a name="line.186"></a>
+<span class="sourceLineNo">187</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_CHAR&lt;/td&gt;&lt;td&gt;{@link char}&lt;/td&gt;&lt;/tr&gt;<a name="line.187"></a>
+<span class="sourceLineNo">188</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_CHARACTER&lt;/td&gt;&lt;td&gt;{@link Character}&lt;/td&gt;&lt;/tr&gt;<a name="line.188"></a>
+<span class="sourceLineNo">189</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_DATE&lt;/td&gt;&lt;td&gt;{@link Date}&lt;/td&gt;&lt;/tr&gt;<a name="line.189"></a>
+<span class="sourceLineNo">190</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_PRIMITIVE_DOUBLE&lt;/td&gt;&lt;td&gt;{@link double}&lt;/td&gt;&lt;/tr&gt;<a name="line.190"></a>
+<span class="sourceLineNo">191</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_DOUBLE&lt;/td&gt;&lt;td&gt;{@link Double}&lt;/td&gt;&lt;/tr&gt;<a name="line.191"></a>
+<span class="sourceLineNo">192</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_FILE&lt;/td&gt;&lt;td&gt;{@link File}&lt;/td&gt;&lt;/tr&gt;<a name="line.192"></a>
+<span class="sourceLineNo">193</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_PRIMITIVE_FLOAT&lt;/td&gt;&lt;td&gt;{@link float}&lt;/td&gt;&lt;/tr&gt;<a name="line.193"></a>
+<span class="sourceLineNo">194</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_FLOAT&lt;/td&gt;&lt;td&gt;{@link Float}&lt;/td&gt;&lt;/tr&gt;<a name="line.194"></a>
+<span class="sourceLineNo">195</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_GUARDEDBYTEARRAY&lt;/td&gt;&lt;td&gt;{@link GuardedByteArray}&lt;/td&gt;&lt;/tr&gt;<a name="line.195"></a>
+<span class="sourceLineNo">196</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_GUARDEDSTRING&lt;/td&gt;&lt;td&gt;{@link GuardedString}&lt;/td&gt;&lt;/tr&gt;<a name="line.196"></a>
+<span class="sourceLineNo">197</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_INT&lt;/td&gt;&lt;td&gt;{@link int}&lt;/td&gt;&lt;/tr&gt;<a name="line.197"></a>
+<span class="sourceLineNo">198</span>     * &lt;tr&gt;&lt;td&gt;integer&lt;/td&gt;&lt;td&gt;{@link Integer}&lt;/td&gt;&lt;/tr&gt;<a name="line.198"></a>
+<span class="sourceLineNo">199</span>     * &lt;tr&gt;&lt;td&gt;array&lt;/td&gt;&lt;td&gt;{@link List}&lt;/td&gt;&lt;/tr&gt;<a name="line.199"></a>
+<span class="sourceLineNo">200</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_PRIMITIVE_LONG&lt;/td&gt;&lt;td&gt;{@link long}&lt;/td&gt;&lt;/tr&gt;<a name="line.200"></a>
+<span class="sourceLineNo">201</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_LONG&lt;/td&gt;&lt;td&gt;{@link Long}&lt;/td&gt;&lt;/tr&gt;<a name="line.201"></a>
+<span class="sourceLineNo">202</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_NAME&lt;/td&gt;&lt;td&gt;{@link Name}&lt;/td&gt;&lt;/tr&gt;<a name="line.202"></a>
+<span class="sourceLineNo">203</span>     * &lt;tr&gt;&lt;td&gt;null&lt;/td&gt;&lt;td&gt;{@code null}&lt;/td&gt;&lt;/tr&gt;<a name="line.203"></a>
+<span class="sourceLineNo">204</span>     * &lt;tr&gt;&lt;td&gt;number&lt;/td&gt;&lt;td&gt;{@link Number}&lt;/td&gt;&lt;/tr&gt;<a name="line.204"></a>
+<span class="sourceLineNo">205</span>     * &lt;tr&gt;&lt;td&gt;object&lt;/td&gt;&lt;td&gt;{@link Map}&lt;/td&gt;&lt;/tr&gt;<a name="line.205"></a>
+<span class="sourceLineNo">206</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_OBJECTCLASS&lt;/td&gt;&lt;td&gt;{@link ObjectClass}&lt;/td&gt;&lt;/tr&gt;<a name="line.206"></a>
+<span class="sourceLineNo">207</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_QUALIFIEDUID&lt;/td&gt;&lt;td&gt;{@link QualifiedUid}&lt;/td&gt;&lt;/tr&gt;<a name="line.207"></a>
+<span class="sourceLineNo">208</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_SCRIPT&lt;/td&gt;&lt;td&gt;{@link Script}&lt;/td&gt;&lt;/tr&gt;<a name="line.208"></a>
+<span class="sourceLineNo">209</span>     * &lt;tr&gt;&lt;td&gt;string&lt;/td&gt;&lt;td&gt;{@link String}&lt;/td&gt;&lt;/tr&gt;<a name="line.209"></a>
+<span class="sourceLineNo">210</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_UID&lt;/td&gt;&lt;td&gt;{@link Uid }&lt;/td&gt;&lt;/tr&gt;<a name="line.210"></a>
+<span class="sourceLineNo">211</span>     * &lt;tr&gt;&lt;td&gt;JAVA_TYPE_URI&lt;/td&gt;&lt;td&gt;{@link URI}&lt;/td&gt;&lt;/tr&gt;<a name="line.211"></a>
+<span class="sourceLineNo">212</span>     * &lt;/table&gt;<a name="line.212"></a>
+<span class="sourceLineNo">213</span>     *<a name="line.213"></a>
+<span class="sourceLineNo">214</span>     * @param name<a name="line.214"></a>
+<span class="sourceLineNo">215</span>     * @return class if it has mapped to a type or null if not.<a name="line.215"></a>
+<span class="sourceLineNo">216</span>     */<a name="line.216"></a>
+<span class="sourceLineNo">217</span>    public static Class findClassForName(String name) {<a name="line.217"></a>
+<span class="sourceLineNo">218</span>        return typeMap.get(name);<a name="line.218"></a>
+<span class="sourceLineNo">219</span>    }<a name="line.219"></a>
+<span class="sourceLineNo">220</span><a name="line.220"></a>
+<span class="sourceLineNo">221</span>    /**<a name="line.221"></a>
+<span class="sourceLineNo">222</span>     * Find the string code of the given {@code clazz}.<a name="line.222"></a>
+<span class="sourceLineNo">223</span>     * &lt;p/&gt;<a name="line.223"></a>
+<span class="sourceLineNo">224</span>     * Encodes the {@link Class} to String code<a name="line.224"></a>
+<span class="sourceLineNo">225</span>     *<a name="line.225"></a>
+<span class="sourceLineNo">226</span>     * @param clazz<a name="line.226"></a>
+<span class="sourceLineNo">227</span>     * @return<a name="line.227"></a>
+<span class="sourceLineNo">228</span>     * @see #findClassForName(String)<a name="line.228"></a>
+<span class="sourceLineNo">229</span>     */<a name="line.229"></a>
+<span class="sourceLineNo">230</span>    public static String findNameForClass(Class clazz) {<a name="line.230"></a>
+<span class="sourceLineNo">231</span>        for (Map.Entry&lt;String, Class&gt; entry : typeMap.entrySet()) {<a name="line.231"></a>
+<span class="sourceLineNo">232</span>            if (entry.getValue().equals(clazz)) {<a name="line.232"></a>
+<span class="sourceLineNo">233</span>                return entry.getKey();<a name="line.233"></a>
+<span class="sourceLineNo">234</span>            }<a name="line.234"></a>
+<span class="sourceLineNo">235</span>        }<a name="line.235"></a>
+<span class="sourceLineNo">236</span>        return null;<a name="line.236"></a>
+<span class="sourceLineNo">237</span>    }<a name="line.237"></a>
+<span class="sourceLineNo">238</span><a name="line.238"></a>
+<span class="sourceLineNo">239</span>    /**<a name="line.239"></a>
+<span class="sourceLineNo">240</span>     * Find the proper target simple class type for the source type.<a name="line.240"></a>
+<span class="sourceLineNo">241</span>     * &lt;p/&gt;<a name="line.241"></a>
+<span class="sourceLineNo">242</span>     * JSON schema has predefined types abd this method maps the {@code clazz} Class to proper representation<a name="line.242"></a>
+<span class="sourceLineNo">243</span>     *<a name="line.243"></a>
+<span class="sourceLineNo">244</span>     * @param clazz<a name="line.244"></a>
+<span class="sourceLineNo">245</span>     * @return<a name="line.245"></a>
+<span class="sourceLineNo">246</span>     */<a name="line.246"></a>
+<span class="sourceLineNo">247</span>    public static String findJSONTypeForClass(Class clazz) {<a name="line.247"></a>
+<span class="sourceLineNo">248</span>        if ((Integer.class.isAssignableFrom(clazz)) || (int.class == clazz)) {<a name="line.248"></a>
+<span class="sourceLineNo">249</span>            return Constants.TYPE_INTEGER;<a name="line.249"></a>
+<span class="sourceLineNo">250</span>        } else if ((Number.class.isAssignableFrom(clazz)) || (double.class == clazz) || (float.class == clazz) || (long.class == clazz)) {<a name="line.250"></a>
+<span class="sourceLineNo">251</span>            return Constants.TYPE_NUMBER;<a name="line.251"></a>
+<span class="sourceLineNo">252</span>        } else if ((Boolean.class.isAssignableFrom(clazz)) || (boolean.class == clazz)) {<a name="line.252"></a>
+<span class="sourceLineNo">253</span>            return Constants.TYPE_BOOLEAN;<a name="line.253"></a>
+<span class="sourceLineNo">254</span>        } else if (List.class.isAssignableFrom(clazz)) {<a name="line.254"></a>
+<span class="sourceLineNo">255</span>            return Constants.TYPE_ARRAY;<a name="line.255"></a>
+<span class="sourceLineNo">256</span>        } else if (Map.class.isAssignableFrom(clazz)) {<a name="line.256"></a>
+<span class="sourceLineNo">257</span>            return Constants.TYPE_OBJECT;<a name="line.257"></a>
+<span class="sourceLineNo">258</span>        } else {<a name="line.258"></a>
+<span class="sourceLineNo">259</span>            return Constants.TYPE_STRING;<a name="line.259"></a>
+<span class="sourceLineNo">260</span>        }<a name="line.260"></a>
+<span class="sourceLineNo">261</span>    }<a name="line.261"></a>
+<span class="sourceLineNo">262</span><a name="line.262"></a>
+<span class="sourceLineNo">263</span><a name="line.263"></a>
+<span class="sourceLineNo">264</span>    /**<a name="line.264"></a>
+<span class="sourceLineNo">265</span>     * Convert the {@link ObjectPoolConfiguration} to simple Map.<a name="line.265"></a>
+<span class="sourceLineNo">266</span>     * &lt;p/&gt;<a name="line.266"></a>
+<span class="sourceLineNo">267</span>     *<a name="line.267"></a>
+<span class="sourceLineNo">268</span>     * @param info<a name="line.268"></a>
+<span class="sourceLineNo">269</span>     * @return<a name="line.269"></a>
+<span class="sourceLineNo">270</span>     */<a name="line.270"></a>
+<span class="sourceLineNo">271</span>    public static Map&lt;String, Object&gt; getObjectPoolConfiguration(ObjectPoolConfiguration info) {<a name="line.271"></a>
+<span class="sourceLineNo">272</span>        Map&lt;String, Object&gt; poolConfigOption = new LinkedHashMap&lt;String, Object&gt;(5);<a name="line.272"></a>
+<span class="sourceLineNo">273</span>        poolConfigOption.put(OPENICF_MAX_OBJECTS, info.getMaxObjects());<a name="line.273"></a>
+<span class="sourceLineNo">274</span>        poolConfigOption.put(OPENICF_MAX_IDLE, info.getMaxIdle());<a name="line.274"></a>
+<span class="sourceLineNo">275</span>        poolConfigOption.put(OPENICF_MAX_WAIT, info.getMaxWait());<a name="line.275"></a>
+<span class="sourceLineNo">276</span>        poolConfigOption.put(OPENICF_MIN_EVICTABLE_IDLE_TIME_MILLIS, info.getMinEvictableIdleTimeMillis());<a name="line.276"></a>
+<span class="sourceLineNo">277</span>        poolConfigOption.put(OPENICF_MIN_IDLE, info.getMinIdle());<a name="line.277"></a>
+<span class="sourceLineNo">278</span>        return poolConfigOption;<a name="line.278"></a>
+<span class="sourceLineNo">279</span>    }<a name="line.279"></a>
+<span class="sourceLineNo">280</span><a name="line.280"></a>
+<span class="sourceLineNo">281</span>    /**<a name="line.281"></a>
+<span class="sourceLineNo">282</span>     * @param source<a name="line.282"></a>
+<span class="sourceLineNo">283</span>     * @param target<a name="line.283"></a>
+<span class="sourceLineNo">284</span>     * @throws UnsupportedOperationException when the property value can not be converted to String.<a name="line.284"></a>
+<span class="sourceLineNo">285</span>     */<a name="line.285"></a>
+<span class="sourceLineNo">286</span>    public static void configureResultsHandlerConfiguration(JsonValue source, ResultsHandlerConfiguration target) throws JsonValueException {<a name="line.286"></a>
+<span class="sourceLineNo">287</span>        if (!source.get(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER).isNull()) {<a name="line.287"></a>
+<span class="sourceLineNo">288</span>            target.setEnableNormalizingResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER).asBoolean());<a name="line.288"></a>
+<span class="sourceLineNo">289</span>        }<a name="line.289"></a>
+<span class="sourceLineNo">290</span>        if (!source.get(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER).isNull()) {<a name="line.290"></a>
+<span class="sourceLineNo">291</span>            target.setEnableFilteredResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER).asBoolean());<a name="line.291"></a>
+<span class="sourceLineNo">292</span>        }<a name="line.292"></a>
+<span class="sourceLineNo">293</span>        if (!source.get(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER).isNull()) {<a name="line.293"></a>
+<span class="sourceLineNo">294</span>            target.setEnableCaseInsensitiveFilter(source.get(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER).asBoolean());<a name="line.294"></a>
+<span class="sourceLineNo">295</span>        }<a name="line.295"></a>
+<span class="sourceLineNo">296</span>        if (!source.get(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER).isNull()) {<a name="line.296"></a>
+<span class="sourceLineNo">297</span>            target.setEnableAttributesToGetSearchResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER).asBoolean());<a name="line.297"></a>
+<span class="sourceLineNo">298</span>        }<a name="line.298"></a>
+<span class="sourceLineNo">299</span>    }<a name="line.299"></a>
+<span class="sourceLineNo">300</span><a name="line.300"></a>
+<span class="sourceLineNo">301</span>    /**<a name="line.301"></a>
+<span class="sourceLineNo">302</span>     * Convert the {@link ObjectPoolConfiguration} to simple Map.<a name="line.302"></a>
+<span class="sourceLineNo">303</span>     * &lt;p/&gt;<a name="line.303"></a>
+<span class="sourceLineNo">304</span>     *<a name="line.304"></a>
+<span class="sourceLineNo">305</span>     * @param info<a name="line.305"></a>
+<span class="sourceLineNo">306</span>     * @return<a name="line.306"></a>
+<span class="sourceLineNo">307</span>     */<a name="line.307"></a>
+<span class="sourceLineNo">308</span>    public static Map&lt;String, Object&gt; getResultsHandlerConfiguration(ResultsHandlerConfiguration info) {<a name="line.308"></a>
+<span class="sourceLineNo">309</span>        Map&lt;String, Object&gt; config = new LinkedHashMap&lt;String, Object&gt;(5);<a name="line.309"></a>
+<span class="sourceLineNo">310</span>        config.put(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER, info.isEnableNormalizingResultsHandler());<a name="line.310"></a>
+<span class="sourceLineNo">311</span>        config.put(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER, info.isEnableFilteredResultsHandler());<a name="line.311"></a>
+<span class="sourceLineNo">312</span>        config.put(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER, info.isEnableCaseInsensitiveFilter());<a name="line.312"></a>
+<span class="sourceLineNo">313</span>        config.put(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER, info.isEnableAttributesToGetSearchResultsHandler());<a name="line.313"></a>
+<span class="sourceLineNo">314</span>        return config;<a name="line.314"></a>
+<span class="sourceLineNo">315</span>    }<a name="line.315"></a>
+<span class="sourceLineNo">316</span><a name="line.316"></a>
+<span class="sourceLineNo">317</span>    /**<a name="line.317"></a>
+<span class="sourceLineNo">318</span>     * @param source<a name="line.318"></a>
+<span class="sourceLineNo">319</span>     * @param target<a name="line.319"></a>
+<span class="sourceLineNo">320</span>     * @throws UnsupportedOperationException when the property value can not be converted to String.<a name="line.320"></a>
+<span class="sourceLineNo">321</span>     */<a name="line.321"></a>
+<span class="sourceLineNo">322</span>    public static void configureObjectPoolConfiguration(JsonValue source, ObjectPoolConfiguration target) throws JsonValueException {<a name="line.322"></a>
+<span class="sourceLineNo">323</span>        Map&lt;String, Object&gt; poolConfiguration = source.asMap();<a name="line.323"></a>
+<span class="sourceLineNo">324</span>        if (null != poolConfiguration.get(OPENICF_MAX_OBJECTS)) {<a name="line.324"></a>
+<span class="sourceLineNo">325</span>            target.setMaxObjects(coercedTypeCasting(poolConfiguration.get(OPENICF_MAX_OBJECTS), int.class));<a name="line.325"></a>
+<span class="sourceLineNo">326</span>        }<a name="line.326"></a>
+<span class="sourceLineNo">327</span>        if (null != poolConfiguration.get(OPENICF_MAX_IDLE)) {<a name="line.327"></a>
+<span class="sourceLineNo">328</span>            target.setMaxIdle(coercedTypeCasting(poolConfiguration.get(OPENICF_MAX_IDLE), int.class));<a name="line.328"></a>
+<span class="sourceLineNo">329</span>        }<a name="line.329"></a>
+<span class="sourceLineNo">330</span>        if (null != poolConfiguration.get(OPENICF_MAX_WAIT)) {<a name="line.330"></a>
+<span class="sourceLineNo">331</span>            target.setMaxWait(coercedTypeCasting(poolConfiguration.get(OPENICF_MAX_WAIT), long.class));<a name="line.331"></a>
+<span class="sourceLineNo">332</span>        }<a name="line.332"></a>
+<span class="sourceLineNo">333</span>        if (null != poolConfiguration.get(OPENICF_MIN_EVICTABLE_IDLE_TIME_MILLIS)) {<a name="line.333"></a>
+<span class="sourceLineNo">334</span>            target.setMinEvictableIdleTimeMillis(coercedTypeCasting(poolConfiguration.get(OPENICF_MIN_EVICTABLE_IDLE_TIME_MILLIS), long.class));<a name="line.334"></a>
+<span class="sourceLineNo">335</span>        }<a name="line.335"></a>
+<span class="sourceLineNo">336</span>        if (null != poolConfiguration.get(OPENICF_MIN_IDLE)) {<a name="line.336"></a>
+<span class="sourceLineNo">337</span>            target.setMinIdle(coercedTypeCasting(poolConfiguration.get(OPENICF_MIN_IDLE), int.class));<a name="line.337"></a>
+<span class="sourceLineNo">338</span>        }<a name="line.338"></a>
+<span class="sourceLineNo">339</span>    }<a name="line.339"></a>
+<span class="sourceLineNo">340</span><a name="line.340"></a>
+<span class="sourceLineNo">341</span><a name="line.341"></a>
+<span class="sourceLineNo">342</span>    public static Map&lt;String, Object&gt; getTimeout(APIConfiguration configuration) {<a name="line.342"></a>
+<span class="sourceLineNo">343</span>        Map&lt;String, Object&gt; result = new LinkedHashMap&lt;String, Object&gt;(12);<a name="line.343"></a>
+<span class="sourceLineNo">344</span>        for (OperationType e : OperationType.values()) {<a name="line.344"></a>
+<span class="sourceLineNo">345</span>            result.put(e.name(), configuration.getTimeout(e.getValue()));<a name="line.345"></a>
+<span class="sourceLineNo">346</span>        }<a name="line.346"></a>
+<span class="sourceLineNo">347</span>        return result;<a name="line.347"></a>
+<span class="sourceLineNo">348</span>    }<a name="line.348"></a>
+<span class="sourceLineNo">349</span><a name="line.349"></a>
+<span class="sourceLineNo">350</span>    public static void configureTimeout(JsonValue source, APIConfiguration target) throws JsonValueException {<a name="line.350"></a>
+<span class="sourceLineNo">351</span>        for (OperationType e : OperationType.values()) {<a name="line.351"></a>
+<span class="sourceLineNo">352</span>            JsonValue value = source.get(e.name());<a name="line.352"></a>
+<span class="sourceLineNo">353</span>            try {<a name="line.353"></a>
+<span class="sourceLineNo">354</span>                if (!value.isNull()) {<a name="line.354"></a>
+<span class="sourceLineNo">355</span>                    target.setTimeout(e.getValue(), coercedTypeCasting(value.asNumber(), int.class));<a name="line.355"></a>
+<span class="sourceLineNo">356</span>                }<a name="line.356"></a>
+<span class="sourceLineNo">357</span>            } catch (IllegalArgumentException e1) {<a name="line.357"></a>
+<span class="sourceLineNo">358</span>                logger.error("Type casting exception of {} from {} to int", new Object[]{value.getObject(), value.getObject().getClass().getCanonicalName()}, e);<a name="line.358"></a>
+<span class="sourceLineNo">359</span>            }<a name="line.359"></a>
+<span class="sourceLineNo">360</span>        }<a name="line.360"></a>
+<span class="sourceLineNo">361</span>    }<a name="line.361"></a>
+<span class="sourceLineNo">362</span><a name="line.362"></a>
+<span class="sourceLineNo">363</span><a name="line.363"></a>
+<span class="sourceLineNo">364</span>    /**<a name="line.364"></a>
+<span class="sourceLineNo">365</span>     * @param source<a name="line.365"></a>
+<span class="sourceLineNo">366</span>     * @param target<a name="line.366"></a>
+<span class="sourceLineNo">367</span>     * @throws IllegalArgumentException<a name="line.367"></a>
+<span class="sourceLineNo">368</span>     */<a name="line.368"></a>
+<span class="sourceLineNo">369</span>    public static void setConfigurationProperties(ConfigurationProperties source, Map&lt;String, Object&gt; target) {<a name="line.369"></a>
+<span class="sourceLineNo">370</span>        for (String propertyName : source.getPropertyNames()) {<a name="line.370"></a>
+<span class="sourceLineNo">371</span>            ConfigurationProperty configurationProperty = source.getProperty(propertyName);<a name="line.371"></a>
+<span class="sourceLineNo">372</span>            target.put(propertyName, convertFromConfigurationProperty(configurationProperty));<a name="line.372"></a>
+<span class="sourceLineNo">373</span>        }<a name="line.373"></a>
+<span class="sourceLineNo">374</span>    }<a name="line.374"></a>
+<span class="sourceLineNo">375</span><a name="line.375"></a>
+<span class="sourceLineNo">376</span><a name="line.376"></a>
+<span class="sourceLineNo">377</span>    private static Object convertFromConfigurationProperty(ConfigurationProperty configurationProperty) {<a name="line.377"></a>
+<span class="sourceLineNo">378</span>        Object sourceValue = configurationProperty.getValue();<a name="line.378"></a>
+<span class="sourceLineNo">379</span>        if (sourceValue == null) {<a name="line.379"></a>
+<span class="sourceLineNo">380</span>            return null;<a name="line.380"></a>
+<span class="sourceLineNo">381</span>        }<a name="line.381"></a>
+<span class="sourceLineNo">382</span>        boolean isArray = sourceValue.getClass().isArray();<a name="line.382"></a>
+<span class="sourceLineNo">383</span>        Class sourceType = isArray ? sourceValue.getClass().getComponentType() : sourceValue.getClass();<a name="line.383"></a>
+<span class="sourceLineNo">384</span>        Object result = null;<a name="line.384"></a>
+<span class="sourceLineNo">385</span>        if (isArray) {<a name="line.385"></a>
+<span class="sourceLineNo">386</span>            if (sourceType == byte.class) {<a name="line.386"></a>
+<span class="sourceLineNo">387</span>                result = new String((byte[]) sourceValue);<a name="line.387"></a>
+<span class="sourceLineNo">388</span>            } else if (sourceType == char.class) {<a name="line.388"></a>
+<span class="sourceLineNo">389</span>                result = new String((char[]) sourceValue);<a name="line.389"></a>
+<span class="sourceLineNo">390</span>            } else if (sourceType == Character.class) {<a name="line.390"></a>
+<span class="sourceLineNo">391</span>                Character[] characterArray = (Character[]) sourceValue;<a name="line.391"></a>
+<span class="sourceLineNo">392</span>                char[] charArray = new char[characterArray.length];<a name="line.392"></a>
+<span class="sourceLineNo">393</span>                for (int i = 0; i &lt; characterArray.length; i++) {<a name="line.393"></a>
+<span class="sourceLineNo">394</span>                    charArray[i] = characterArray[i];<a name="line.394"></a>
+<span class="sourceLineNo">395</span>                }<a name="line.395"></a>
+<span class="sourceLineNo">396</span>                result = new String(charArray);<a name="line.396"></a>
+<span class="sourceLineNo">397</span>            } else {<a name="line.397"></a>
+<span class="sourceLineNo">398</span>                int length = Array.getLength(sourceValue);<a name="line.398"></a>
+<span class="sourceLineNo">399</span>                List values = new ArrayList(length);<a name="line.399"></a>
+<span class="sourceLineNo">400</span>                for (int i = 0; i &lt; length; i++) {<a name="line.400"></a>
+<span class="sourceLineNo">401</span>                    Object item = Array.get(sourceValue, i);<a name="line.401"></a>
+<span class="sourceLineNo">402</span>                    Object newValue = coercedTypeCasting(item, Object.class);<a name="line.402"></a>
+<span class="sourceLineNo">403</span>                    values.add(newValue);<a name="line.403"></a>
+<span class="sourceLineNo">404</span>                }<a name="line.404"></a>
+<span class="sourceLineNo">405</span>                result = values;<a name="line.405"></a>
+<span class="sourceLineNo">406</span>            }<a name="line.406"></a>
+<span class="sourceLineNo">407</span>        } else {<a name="line.407"></a>
+<span class="sourceLineNo">408</span>            result = coercedTypeCasting(sourceValue, Object.class);<a name="line.408"></a>
+<span class="sourceLineNo">409</span>        }<a name="line.409"></a>
+<span class="sourceLineNo">410</span>        return result;<a name="line.410"></a>
+<span class="sourceLineNo">411</span>    }<a name="line.411"></a>
+<span class="sourceLineNo">412</span><a name="line.412"></a>
+<span class="sourceLineNo">413</span><a name="line.413"></a>
+<span class="sourceLineNo">414</span>    public static void configureConfigurationProperties(JsonValue source, ConfigurationProperties target) throws JsonValueException {<a name="line.414"></a>
+<span class="sourceLineNo">415</span>        source.required();<a name="line.415"></a>
+<span class="sourceLineNo">416</span>        if (null != target) {<a name="line.416"></a>
+<span class="sourceLineNo">417</span>            List&lt;String&gt; configPropNames = target.getPropertyNames();<a name="line.417"></a>
+<span class="sourceLineNo">418</span>            for (Map.Entry&lt;String, Object&gt; e : source.asMap().entrySet()) {<a name="line.418"></a>
+<span class="sourceLineNo">419</span>                if (!configPropNames.contains(e.getKey())) {<a name="line.419"></a>
+<span class="sourceLineNo">420</span>                    /*<a name="line.420"></a>
+<span class="sourceLineNo">421</span>                    * The connector's Configuration does not define this property.<a name="line.421"></a>
+<span class="sourceLineNo">422</span>                    */<a name="line.422"></a>
+<span class="sourceLineNo">423</span>                    continue;<a name="line.423"></a>
+<span class="sourceLineNo">424</span>                }<a name="line.424"></a>
+<span class="sourceLineNo">425</span>                ConfigurationProperty property = target.getProperty(e.getKey());<a name="line.425"></a>
+<span class="sourceLineNo">426</span>                Class targetType = property.getType();<a name="line.426"></a>
+<span class="sourceLineNo">427</span>                Object propertyValue = null;<a name="line.427"></a>
+<span class="sourceLineNo">428</span>                if (targetType.isArray()) {<a name="line.428"></a>
+<span class="sourceLineNo">429</span>                    Class targetBaseType = targetType.getComponentType();<a name="line.429"></a>
+<span class="sourceLineNo">430</span>                    if (targetBaseType == byte.class || targetBaseType == char.class) {<a name="line.430"></a>
+<span class="sourceLineNo">431</span>                        propertyValue = coercedTypeCasting(e.getValue(), targetType);<a name="line.431"></a>
+<span class="sourceLineNo">432</span>                    } else if (e.getValue() instanceof List) {<a name="line.432"></a>
+<span class="sourceLineNo">433</span>                        List v = (List) e.getValue();<a name="line.433"></a>
+<span class="sourceLineNo">434</span>                        propertyValue = Array.newInstance(targetBaseType, v.size());<a name="line.434"></a>
+<span class="sourceLineNo">435</span>                        for (int i = 0; i &lt; v.size(); i++) {<a name="line.435"></a>
+<span class="sourceLineNo">436</span>                            Array.set(propertyValue, i, coercedTypeCasting(v.get(i), targetBaseType));<a name="line.436"></a>
+<span class="sourceLineNo">437</span>                        }<a name="line.437"></a>
+<span class="sourceLineNo">438</span>                    } else {<a name="line.438"></a>
+<span class="sourceLineNo">439</span>                        propertyValue = Array.newInstance(targetBaseType, 1);<a name="line.439"></a>
+<span class="sourceLineNo">440</span>                        Array.set(propertyValue, 0, coercedTypeCasting(e.getValue(), targetBaseType));<a name="line.440"></a>
+<span class="sourceLineNo">441</span>                    }<a name="line.441"></a>
+<span class="sourceLineNo">442</span>                } else {<a name="line.442"></a>
+<span class="sourceLineNo">443</span>                    propertyValue = coercedTypeCasting(e.getValue(), targetType);<a name="line.443"></a>
+<span class="sourceLineNo">444</span>                }<a name="line.444"></a>
+<span class="sourceLineNo">445</span>                property.setValue(propertyValue);<a name="line.445"></a>
+<span class="sourceLineNo">446</span>            }<a name="line.446"></a>
+<span class="sourceLineNo">447</span>        }<a name="line.447"></a>
+<span class="sourceLineNo">448</span>    }<a name="line.448"></a>
+<span class="sourceLineNo">449</span><a name="line.449"></a>
+<span class="sourceLineNo">450</span><a name="line.450"></a>
+<span class="sourceLineNo">451</span>    public static void configureDefaultAPIConfiguration(JsonValue source, APIConfiguration target) throws JsonValueException {<a name="line.451"></a>
+<span class="sourceLineNo">452</span>        JsonValue poolConfigOption = source.get(OPENICF_POOL_CONFIG_OPTION);<a name="line.452"></a>
+<span class="sourceLineNo">453</span>        if (poolConfigOption.isMap()) {<a name="line.453"></a>
+<span class="sourceLineNo">454</span>            configureObjectPoolConfiguration(poolConfigOption, target.getConnectorPoolConfiguration());<a name="line.454"></a>
+<span class="sourceLineNo">455</span>        }<a name="line.455"></a>
+<span class="sourceLineNo">456</span>        JsonValue resultsHandlerConfigOption = source.get(OPENICF_RESULTSHANDLER_CONFIG_OPTION);<a name="line.456"></a>
+<span class="sourceLineNo">457</span>        if (resultsHandlerConfigOption.isMap()) {<a name="line.457"></a>
+<span class="sourceLineNo">458</span>            configureResultsHandlerConfiguration(resultsHandlerConfigOption, target.getResultsHandlerConfiguration());<a name="line.458"></a>
+<span class="sourceLineNo">459</span>        }<a name="line.459"></a>
+<span class="sourceLineNo">460</span>        JsonValue operationTimeout = source.get(OPENICF_OPERATION_TIMEOUT);<a name="line.460"></a>
+<span class="sourceLineNo">461</span>        if (operationTimeout.isMap()) {<a name="line.461"></a>
+<span class="sourceLineNo">462</span>            configureTimeout(operationTimeout, target);<a name="line.462"></a>
+<span class="sourceLineNo">463</span>        }<a name="line.463"></a>
+<span class="sourceLineNo">464</span>        JsonValue configurationProperties = source.get(OPENICF_CONFIGURATION_PROPERTIES);<a name="line.464"></a>
+<span class="sourceLineNo">465</span>        configureConfigurationProperties(configurationProperties, target.getConfigurationProperties());<a name="line.465"></a>
+<span class="sourceLineNo">466</span>        if (source.isDefined(BUFFER_SIZE)) {<a name="line.466"></a>
+<span class="sourceLineNo">467</span>            target.setProducerBufferSize(source.get(BUFFER_SIZE).required().asInteger());<a name="line.467"></a>
+<span class="sourceLineNo">468</span>        }<a name="line.468"></a>
+<span class="sourceLineNo">469</span>    }<a name="line.469"></a>
+<span class="sourceLineNo">470</span><a name="line.470"></a>
+<span class="sourceLineNo">471</span>    public static void createSystemConfigurationFromAPIConfiguration(APIConfiguration source, JsonValue target) {<a name="line.471"></a>
+<span class="sourceLineNo">472</span>        target.put(OPENICF_POOL_CONFIG_OPTION, getObjectPoolConfiguration(source.getConnectorPoolConfiguration()));<a name="line.472"></a>
+<span class="sourceLineNo">473</span>        target.put(OPENICF_RESULTSHANDLER_CONFIG_OPTION, getResultsHandlerConfiguration(source.getResultsHandlerConfiguration()));<a name="line.473"></a>
+<span class="sourceLineNo">474</span>        target.put(OPENICF_OPERATION_TIMEOUT, getTimeout(source));<a name="line.474"></a>
+<span class="sourceLineNo">475</span>        Map&lt;String, Object&gt; configurationProperties = new LinkedHashMap&lt;String, Object&gt;();<a name="line.475"></a>
+<span class="sourceLineNo">476</span>        target.put(OPENICF_CONFIGURATION_PROPERTIES, configurationProperties);<a name="line.476"></a>
+<span class="sourceLineNo">477</span>        setConfigurationProperties(source.getConfigurationProperties(), configurationProperties);<a name="line.477"></a>
+<span class="sourceLineNo">478</span>    }<a name="line.478"></a>
+<span class="sourceLineNo">479</span><a name="line.479"></a>
+<span class="sourceLineNo">480</span><a name="line.480"></a>
+<span class="sourceLineNo">481</span>    /**<a name="line.481"></a>
+<span class="sourceLineNo">482</span>     * Convert the {@link ConnectorKey} into a Map.<a name="line.482"></a>
+<span class="sourceLineNo">483</span>     * &lt;p/&gt;<a name="line.483"></a>
+<span class="sourceLineNo">484</span>     * The connector key is saved in a JSON object and this method converts it to simple Map.<a name="line.484"></a>
+<span class="sourceLineNo">485</span>     *<a name="line.485"></a>
+<span class="sourceLineNo">486</span>     * @param info<a name="line.486"></a>
+<span class="sourceLineNo">487</span>     * @return<a name="line.487"></a>
+<span class="sourceLineNo">488</span>     */<a name="line.488"></a>
+<span class="sourceLineNo">489</span>    public static Map&lt;String, Object&gt; getConnectorKey(ConnectorKey info) {<a name="line.489"></a>
+<span class="sourceLineNo">490</span>        Map&lt;String, Object&gt; result = new HashMap&lt;String, Object&gt;(6);<a name="line.490"></a>
+<span class="sourceLineNo">491</span>        result.put(OPENICF_BUNDLENAME, info.getBundleName());<a name="line.491"></a>
+<span class="sourceLineNo">492</span>        result.put(OPENICF_BUNDLEVERSION, info.getBundleVersion());<a name="line.492"></a>
+<span class="sourceLineNo">493</span>        result.put(OPENICF_CONNECTOR_NAME, info.getConnectorName());<a name="line.493"></a>
+<span class="sourceLineNo">494</span>        return result;<a name="line.494"></a>
+<span class="sourceLineNo">495</span>    }<a name="line.495"></a>
+<span class="sourceLineNo">496</span><a name="line.496"></a>
+<span class="sourceLineNo">497</span>    /**<a name="line.497"></a>
+<span class="sourceLineNo">498</span>     * Create a new {@link ConnectorKey} newBuilder form the {@code configuration} object.<a name="line.498"></a>
+<span class="sourceLineNo">499</span>     * &lt;p/&gt;<a name="line.499"></a>
+<span class="sourceLineNo">500</span>     * The Configuration object MUST contain the three required String properties.<a name="line.500"></a>
+<span class="sourceLineNo">501</span>     * &lt;ul&gt;<a name="line.501"></a>
+<span class="sourceLineNo">502</span>     * &lt;li&gt;bundleName&lt;/li&gt;<a name="line.502"></a>
+<span class="sourceLineNo">503</span>     * &lt;li&gt;bundleVersion&lt;/li&gt;<a name="line.503"></a>
+<span class="sourceLineNo">504</span>     * &lt;li&gt;connectorName&lt;/li&gt;<a name="line.504"></a>
+<span class="sourceLineNo">505</span>     * &lt;/ul&gt;<a name="line.505"></a>
+<span class="sourceLineNo">506</span>     *<a name="line.506"></a>
+<span class="sourceLineNo">507</span>     * @param configuration<a name="line.507"></a>
+<span class="sourceLineNo">508</span>     * @return new newBuilder of {@link ConnectorKey}<a name="line.508"></a>
+<span class="sourceLineNo">509</span>     * @throws IllegalArgumentException when one of the three required parameter is null.<a name="line.509"></a>
+<span class="sourceLineNo">510</span>     * @throws IOException              when the property value can not be converted to String.<a name="line.510"></a>
+<span class="sourceLineNo">511</span>     */<a name="line.511"></a>
+<span class="sourceLineNo">512</span>    public static ConnectorKey getConnectorKey(JsonValue configuration) throws JsonValueException {<a name="line.512"></a>
+<span class="sourceLineNo">513</span>        String bundleName = configuration.get(OPENICF_BUNDLENAME).asString();<a name="line.513"></a>
+<span class="sourceLineNo">514</span>        String bundleVersion = configuration.get(OPENICF_BUNDLEVERSION).asString();<a name="line.514"></a>
+<span class="sourceLineNo">515</span>        String connectorName = configuration.get(OPENICF_CONNECTOR_NAME).asString();<a name="line.515"></a>
+<span class="sourceLineNo">516</span>        return new ConnectorKey(bundleName, bundleVersion, connectorName);<a name="line.516"></a>
+<span class="sourceLineNo">517</span>    }<a name="line.517"></a>
+<span class="sourceLineNo">518</span><a name="line.518"></a>
+<span class="sourceLineNo">519</span>    /**<a name="line.519"></a>
+<span class="sourceLineNo">520</span>     * @param info<a name="line.520"></a>
+<span class="sourceLineNo">521</span>     * @return<a name="line.521"></a>
+<span class="sourceLineNo">522</span>     * @throws IllegalArgumentException if the configuration can not be read from {@code info}<a name="line.522"></a>
+<span class="sourceLineNo">523</span>     */<a name="line.523"></a>
+<span class="sourceLineNo">524</span>    public static RemoteFrameworkConnectionInfo getRemoteFrameworkConnectionInfo(JsonValue info) {<a name="line.524"></a>
+<span class="sourceLineNo">525</span>        String _host = info.get(OPENICF_HOST).required().asString();<a name="line.525"></a>
+<span class="sourceLineNo">526</span><a name="line.526"></a>
+<span class="sourceLineNo">527</span>        JsonValue port = info.get(OPENICF_PORT).defaultTo(8759);<a name="line.527"></a>
+<span class="sourceLineNo">528</span>        int _port = ConnectorUtil.coercedTypeCasting(port, int.class);<a name="line.528"></a>
+<span class="sourceLineNo">529</span><a name="line.529"></a>
+<span class="sourceLineNo">530</span>        GuardedString _key = ConnectorUtil<a name="line.530"></a>
+<span class="sourceLineNo">531</span>                .coercedTypeCasting(info.get(OPENICF_KEY).required(), GuardedString.class);<a name="line.531"></a>
+<span class="sourceLineNo">532</span>        JsonValue useSSL = info.get(OPENICF_USE_SSL).defaultTo(Boolean.FALSE);<a name="line.532"></a>
+<span class="sourceLineNo">533</span>        boolean _useSSL = ConnectorUtil.coercedTypeCasting(useSSL, boolean.class);<a name="line.533"></a>
+<span class="sourceLineNo">534</span><a name="line.534"></a>
+<span class="sourceLineNo">535</span>        //List&lt;TrustManager&gt; _trustManagers;<a name="line.535"></a>
+<span class="sourceLineNo">536</span>        JsonValue timeout = info.get(OPENICF_TIMEOUT).defaultTo(0);<a name="line.536"></a>
+<span class="sourceLineNo">537</span>        int _timeout = ConnectorUtil.coercedTypeCasting(timeout, int.class);<a name="line.537"></a>
+<span class="sourceLineNo">538</span><a name="line.538"></a>
+<span class="sourceLineNo">539</span>        return new RemoteFrameworkConnectionInfo(_host, _port, _key, _useSSL, null, _timeout);<a name="line.539"></a>
+<span class="sourceLineNo">540</span>    }<a name="line.540"></a>
+<span class="sourceLineNo">541</span><a name="line.541"></a>
+<span class="sourceLineNo">542</span><a name="line.542"></a>
+<span class="sourceLineNo">543</span>    public static Map&lt;String, Object&gt; getRemoteFrameworkConnectionMap(RemoteFrameworkConnectionInfo info) {<a name="line.543"></a>
+<span class="sourceLineNo">544</span>        Map&lt;String, Object&gt; result = new HashMap&lt;String, Object&gt;(6);<a name="line.544"></a>
+<span class="sourceLineNo">545</span>        result.put(OPENICF_HOST, info.getHost());<a name="line.545"></a>
+<span class="sourceLineNo">546</span>        result.put(OPENICF_PORT, info.getPort());<a name="line.546"></a>
+<span class="sourceLineNo">547</span>        result.put(OPENICF_KEY, info.getKey().toString());<a name="line.547"></a>
+<span class="sourceLineNo">548</span>        result.put(OPENICF_USE_SSL, info.getUseSSL());<a name="line.548"></a>
+<span class="sourceLineNo">549</span>        result.put(OPENICF_TRUST_MANAGERS, info.getTrustManagers());<a name="line.549"></a>
+<span class="sourceLineNo">550</span>        result.put(OPENICF_TIMEOUT, info.getTimeout());<a name="line.550"></a>
+<span class="sourceLineNo">551</span>        return result;<a name="line.551"></a>
+<span class="sourceLineNo">552</span>    }<a name="line.552"></a>
+<span class="sourceLineNo">553</span><a name="line.553"></a>
+<span class="sourceLineNo">554</span><a name="line.554"></a>
+<span class="sourceLineNo">555</span>    public static ConnectorReference getConnectorReference(JsonValue configuration) throws JsonValueException {<a name="line.555"></a>
+<span class="sourceLineNo">556</span>        JsonValue connectorRef = configuration.get(OPENICF_CONNECTOR_REF).required().expect(Map.class);<a name="line.556"></a>
+<span class="sourceLineNo">557</span>        ConnectorKey key = getConnectorKey(connectorRef);<a name="line.557"></a>
+<span class="sourceLineNo">558</span>        String connectorHost = connectorRef.get(OPENICF_CONNECTOR_HOST_REF).defaultTo(ConnectorReference.SINGLE_LOCAL_CONNECTOR_MANAGER).asString();<a name="line.558"></a>
+<span class="sourceLineNo">559</span>        return new ConnectorReference(key, connectorHost);<a name="line.559"></a>
+<span class="sourceLineNo">560</span>    }<a name="line.560"></a>
+<span class="sourceLineNo">561</span><a name="line.561"></a>
+<span class="sourceLineNo">562</span>    public static void setConnectorReference(ConnectorReference source, JsonValue target) {<a name="line.562"></a>
+<span class="sourceLineNo">563</span>        Map&lt;String, Object&gt; connectorReference = getConnectorKey(source.getConnectorKey());<a name="line.563"></a>
+<span class="sourceLineNo">564</span>        connectorReference.put(OPENICF_CONNECTOR_HOST_REF, source.getConnectorHost());<a name="line.564"></a>
+<span class="sourceLineNo">565</span>        target.put(OPENICF_CONNECTOR_REF, connectorReference);<a name="line.565"></a>
+<span class="sourceLineNo">566</span>    }<a name="line.566"></a>
+<span class="sourceLineNo">567</span><a name="line.567"></a>
+<span class="sourceLineNo">568</span><a name="line.568"></a>
+<span class="sourceLineNo">569</span>    public static Map&lt;String, ObjectClassInfoHelper&gt; getObjectTypes(JsonValue configuration) throws JsonValueException, SchemaException {<a name="line.569"></a>
+<span class="sourceLineNo">570</span>        JsonValue objectTypes = configuration.get(OPENICF_OBJECT_TYPES);<a name="line.570"></a>
+<span class="sourceLineNo">571</span>        Map&lt;String, ObjectClassInfoHelper&gt; result = new HashMap&lt;String, ObjectClassInfoHelper&gt;(objectTypes.expect(Map.class).asMap().size());<a name="line.571"></a>
+<span class="sourceLineNo">572</span>        for (String objectType : objectTypes.keys()) {<a name="line.572"></a>
+<span class="sourceLineNo">573</span>            result.put(objectType, new ObjectClassInfoHelper(objectTypes.get(objectType)));<a name="line.573"></a>
+<span class="sourceLineNo">574</span>        }<a name="line.574"></a>
+<span class="sourceLineNo">575</span>        return result;<a name="line.575"></a>
+<span class="sourceLineNo">576</span>    }<a name="line.576"></a>
+<span class="sourceLineNo">577</span><a name="line.577"></a>
+<span class="sourceLineNo">578</span><a name="line.578"></a>
+<span class="sourceLineNo">579</span>    public static void setObjectAndOperationConfiguration(Schema source, JsonValue target) {<a name="line.579"></a>
+<span class="sourceLineNo">580</span>        Map&lt;String, Object&gt; objectTypes = new LinkedHashMap&lt;String, Object&gt;(source.getObjectClassInfo().size());<a name="line.580"></a>
+<span class="sourceLineNo">581</span>        for (ObjectClassInfo objectClassInfo : source.getObjectClassInfo()) {<a name="line.581"></a>
+<span class="sourceLineNo">582</span>            objectTypes.put(objectClassInfo.getType(), getObjectClassInfoMap(objectClassInfo));<a name="line.582"></a>
+<span class="sourceLineNo">583</span>        }<a name="line.583"></a>
+<span class="sourceLineNo">584</span>        target.put(OPENICF_OBJECT_TYPES, objectTypes);<a name="line.584"></a>
+<span class="sourceLineNo">585</span><a name="line.585"></a>
+<span class="sourceLineNo">586</span>        Map&lt;String, Object&gt; operationOptions = new LinkedHashMap&lt;String, Object&gt;(12);<a name="line.586"></a>
+<span class="sourceLineNo">587</span>        for (OperationType e : OperationType.values()) {<a name="line.587"></a>
+<span class="sourceLineNo">588</span>            Map&lt;String, Object&gt; operationOptionInfo = new LinkedHashMap&lt;String, Object&gt;();<a name="line.588"></a>
+<span class="sourceLineNo">589</span>            Map&lt;String, Object&gt; objectFeatures = new LinkedHashMap&lt;String, Object&gt;();<a name="line.589"></a>
+<span class="sourceLineNo">590</span>            operationOptionInfo.put(OPENICF_OBJECT_FEATURES, objectFeatures);<a name="line.590"></a>
+<span class="sourceLineNo">591</span>            for (ObjectClassInfo o : source.getSupportedObjectClassesByOperation(e.getValue())) {<a name="line.591"></a>
+<span class="sourceLineNo">592</span>                objectFeatures.put(o.getType(), OperationOptionInfoHelper.build(source.getSupportedOptionsByOperation(e.getValue())));<a name="line.592"></a>
+<span class="sourceLineNo">593</span>            }<a name="line.593"></a>
+<span class="sourceLineNo">594</span>            operationOptions.put(e.name(), operationOptionInfo);<a name="line.594"></a>
+<span class="sourceLineNo">595</span>        }<a name="line.595"></a>
+<span class="sourceLineNo">596</span>        target.put(OPENICF_OPERATION_OPTIONS, operationOptions);<a name="line.596"></a>
+<span class="sourceLineNo">597</span><a name="line.597"></a>
+<span class="sourceLineNo">598</span>    }<a name="line.598"></a>
+<span class="sourceLineNo">599</span><a name="line.599"></a>
+<span class="sourceLineNo">600</span>    public static Map&lt;String, Map&lt;Class&lt;? extends APIOperation&gt;, OperationOptionInfoHelper&gt;&gt; getOperationOptionConfiguration(JsonValue configuration) throws JsonValueException, SchemaException {<a name="line.600"></a>
+<span class="sourceLineNo">601</span>        Set&lt;String&gt; objectTypes = configuration.get(OPENICF_OBJECT_TYPES).keys();<a name="line.601"></a>
+<span class="sourceLineNo">602</span>        Map&lt;String, Map&lt;Class&lt;? extends APIOperation&gt;, OperationOptionInfoHelper&gt;&gt; operationOptionConfigurationMap =<a name="line.602"></a>
+<span class="sourceLineNo">603</span>                new HashMap&lt;String, Map&lt;Class&lt;? extends APIOperation&gt;, OperationOptionInfoHelper&gt;&gt;(objectTypes.size());<a name="line.603"></a>
+<span class="sourceLineNo">604</span><a name="line.604"></a>
+<span class="sourceLineNo">605</span>        JsonValue operationOptions = configuration.get(OPENICF_OPERATION_OPTIONS);<a name="line.605"></a>
+<span class="sourceLineNo">606</span><a name="line.606"></a>
+<span class="sourceLineNo">607</span>        if (operationOptions.expect(Map.class).isNull()) {<a name="line.607"></a>
+<span class="sourceLineNo">608</span>            for (String type : objectTypes) {<a name="line.608"></a>
+<span class="sourceLineNo">609</span>                Map&lt;Class&lt;? extends APIOperation&gt;, OperationOptionInfoHelper&gt; config = new HashMap&lt;Class&lt;? extends APIOperation&gt;, OperationOptionInfoHelper&gt;(12);<a name="line.609"></a>
+<span class="sourceLineNo">610</span>                operationOptionConfigurationMap.put(type, config);<a name="line.610"></a>
+<span class="sourceLineNo">611</span>                for (OperationType entry : OperationType.values()) {<a name="line.611"></a>
+<span class="sourceLineNo">612</span>                    config.put(entry.getValue(), new OperationOptionInfoHelper());<a name="line.612"></a>
+<span class="sourceLineNo">613</span>                }<a name="line.613"></a>
+<span class="sourceLineNo">614</span>            }<a name="line.614"></a>
+<span class="sourceLineNo">615</span>        } else {<a name="line.615"></a>
+<span class="sourceLineNo">616</span>            for (OperationType entry : OperationType.values()) {<a name="line.616"></a>
+<span class="sourceLineNo">617</span>                OperationOptionInfoHelper defaultOperationOptionInfoHelper = null;<a name="line.617"></a>
+<span class="sourceLineNo">618</span><a name="line.618"></a>
+<span class="sourceLineNo">619</span>                JsonValue operation = operationOptions.get(entry.name()).expect(Map.class);<a name="line.619"></a>
+<span class="sourceLineNo">620</span>                if (operation.isNull()) {<a name="line.620"></a>
+<span class="sourceLineNo">621</span>                    defaultOperationOptionInfoHelper = new OperationOptionInfoHelper();<a name="line.621"></a>
+<span class="sourceLineNo">622</span>                } else {<a name="line.622"></a>
+<span class="sourceLineNo">623</span>                    defaultOperationOptionInfoHelper = new OperationOptionInfoHelper(operation);<a name="line.623"></a>
+<span class="sourceLineNo">624</span>                }<a name="line.624"></a>
+<span class="sourceLineNo">625</span><a name="line.625"></a>
+<span class="sourceLineNo">626</span>                JsonValue objectFeatures = operation.get(OPENICF_OBJECT_FEATURES).expect(Map.class);<a name="line.626"></a>
+<span class="sourceLineNo">627</span>                for (String type : objectTypes) {<a name="line.627"></a>
+<span class="sourceLineNo">628</span>                    JsonValue objectFeature = objectFeatures.get(type);<a name="line.628"></a>
+<span class="sourceLineNo">629</span><a name="line.629"></a>
+<span class="sourceLineNo">630</span>                    Map&lt;Class&lt;? extends APIOperation&gt;, OperationOptionInfoHelper&gt; config = operationOptionConfigurationMap.get(type);<a name="line.630"></a>
+<span class="sourceLineNo">631</span>                    if (null == config) {<a name="line.631"></a>
+<span class="sourceLineNo">632</span>                        config = new HashMap&lt;Class&lt;? extends APIOperation&gt;, OperationOptionInfoHelper&gt;(12);<a name="line.632"></a>
+<span class="sourceLineNo">633</span>                        operationOptionConfigurationMap.put(type, config);<a name="line.633"></a>
+<span class="sourceLineNo">634</span>                    }<a name="line.634"></a>
+<span class="sourceLineNo">635</span>                    config.put(entry.getValue(), new OperationOptionInfoHelper(objectFeature, defaultOperationOptionInfoHelper));<a name="line.635"></a>
+<span class="sourceLineNo">636</span>                }<a name="line.636"></a>
+<span class="sourceLineNo">637</span>            }<a name="line.637"></a>
+<span class="sourceLineNo">638</span>        }<a name="line.638"></a>
+<span class="sourceLineNo">639</span><a name="line.639"></a>
+<span class="sourceLineNo">640</span>        return operationOptionConfigurationMap;<a name="line.640"></a>
+<span class="sourceLineNo">641</span>    }<a name="line.641"></a>
+<span class="sourceLineNo">642</span><a name="line.642"></a>
+<span class="sourceLineNo">643</span><a name="line.643"></a>
+<span class="sourceLineNo">644</span>    public static Map&lt;String, Object&gt; getObjectClassInfoMap(ObjectClassInfo info) {<a name="line.644"></a>
+<span class="sourceLineNo">645</span>        Map&lt;String, Object&gt; schema = new LinkedHashMap&lt;String, Object&gt;();<a name="line.645"></a>
+<span class="sourceLineNo">646</span>        schema.put(SCHEMA, JSON_SCHEMA_DRAFT03);<a name="line.646"></a>
+<span class="sourceLineNo">647</span>        schema.put(ID, info.getType());<a name="line.647"></a>
+<span class="sourceLineNo">648</span>        schema.put(TYPE, TYPE_OBJECT);<a name="line.648"></a>
+<span class="sourceLineNo">649</span>        schema.put(OPENICF_OBJECT_CLASS, info.getType());<a name="line.649"></a>
+<span class="sourceLineNo">650</span>        //schema.put(ConnectorUtil.PROPERTY_IS_CONTAINER, info.isContainer());<a name="line.650"></a>
+<span class="sourceLineNo">651</span>        Map&lt;String, Object&gt; properties = new LinkedHashMap&lt;String, Object&gt;(info.getAttributeInfo().size());<a name="line.651"></a>
+<span class="sourceLineNo">652</span>        schema.put(PROPERTIES, properties);<a name="line.652"></a>
+<span class="sourceLineNo">653</span>        for (AttributeInfo attributeInfo : info.getAttributeInfo()) {<a name="line.653"></a>
+<span class="sourceLineNo">654</span>            properties.put(attributeInfo.getName(), getAttributeInfoMap(attributeInfo));<a name="line.654"></a>
+<span class="sourceLineNo">655</span>        }<a name="line.655"></a>
+<span class="sourceLineNo">656</span>        return schema;<a name="line.656"></a>
+<span class="sourceLineNo">657</span>    }<a name="line.657"></a>
+<span class="sourceLineNo">658</span><a name="line.658"></a>
+<span class="sourceLineNo">659</span>    /**<a name="line.659"></a>
+<span class="sourceLineNo">660</span>     * Build a {@link Map} from the given {@link org.identityconnectors.framework.common.objects.AttributeInfo}<a name="line.660"></a>
+<span class="sourceLineNo">661</span>     * &lt;p/&gt;<a name="line.661"></a>
+<span class="sourceLineNo">662</span>     * The result will look like this:<a name="line.662"></a>
+<span class="sourceLineNo">663</span>     * {<a name="line.663"></a>
+<span class="sourceLineNo">664</span>     * "type"    : "number",<a name="line.664"></a>
+<span class="sourceLineNo">665</span>     * "mapName" : "lastLogin",<a name="line.665"></a>
+<span class="sourceLineNo">666</span>     * "mapType" : "JAVA_TYPE_DOUBLE",<a name="line.666"></a>
+<span class="sourceLineNo">667</span>     * "flags" : [<a name="line.667"></a>
+<span class="sourceLineNo">668</span>     * "REQUIRED",<a name="line.668"></a>
+<span class="sourceLineNo">669</span>     * "MULTIVALUED",<a name="line.669"></a>
+<span class="sourceLineNo">670</span>     * "NOT_CREATABLE",<a name="line.670"></a>
+<span class="sourceLineNo">671</span>     * "NOT_UPDATEABLE",<a name="line.671"></a>
+<span class="sourceLineNo">672</span>     * "NOT_READABLE",<a name="line.672"></a>
+<span class="sourceLineNo">673</span>     * "NOT_RETURNED_BY_DEFAULT"<a name="line.673"></a>
+<span class="sourceLineNo">674</span>     * ]<a name="line.674"></a>
+<span class="sourceLineNo">675</span>     * }<a name="line.675"></a>
+<span class="sourceLineNo">676</span>     *<a name="line.676"></a>
+<span class="sourceLineNo">677</span>     * @param info<a name="line.677"></a>
+<span class="sourceLineNo">678</span>     * @return<a name="line.678"></a>
+<span class="sourceLineNo">679</span>     */<a name="line.679"></a>
+<span class="sourceLineNo">680</span>    public static Map&lt;String, Object&gt; getAttributeInfoMap(AttributeInfo info) {<a name="line.680"></a>
+<span class="sourceLineNo">681</span>        Map&lt;String, Object&gt; schema = new LinkedHashMap&lt;String, Object&gt;();<a name="line.681"></a>
+<span class="sourceLineNo">682</span>        if (info.isMultiValued()) {<a name="line.682"></a>
+<span class="sourceLineNo">683</span>            schema.put(Constants.TYPE, Constants.TYPE_ARRAY);<a name="line.683"></a>
+<span class="sourceLineNo">684</span>            Map&lt;String, Object&gt; itemSchema = new LinkedHashMap&lt;String, Object&gt;(2);<a name="line.684"></a>
+<span class="sourceLineNo">685</span>            itemSchema.put(Constants.TYPE, findJSONTypeForClass(info.getType()));<a name="line.685"></a>
+<span class="sourceLineNo">686</span>            itemSchema.put(ConnectorUtil.OPENICF_NATIVE_TYPE, findNameForClass(info.getType()));<a name="line.686"></a>
+<span class="sourceLineNo">687</span>            schema.put(Constants.ITEMS, itemSchema);<a name="line.687"></a>
+<span class="sourceLineNo">688</span>        } else {<a name="line.688"></a>
+<span class="sourceLineNo">689</span>            schema.put(Constants.TYPE, findJSONTypeForClass(info.getType()));<a name="line.689"></a>
+<span class="sourceLineNo">690</span>        }<a name="line.690"></a>
+<span class="sourceLineNo">691</span>        if (info.isRequired()) {<a name="line.691"></a>
+<span class="sourceLineNo">692</span>            schema.put(Constants.REQUIRED, true);<a name="line.692"></a>
+<span class="sourceLineNo">693</span>        }<a name="line.693"></a>
+<span class="sourceLineNo">694</span>        schema.put(ConnectorUtil.OPENICF_NATIVE_NAME, info.getName());<a name="line.694"></a>
+<span class="sourceLineNo">695</span>        schema.put(ConnectorUtil.OPENICF_NATIVE_TYPE, findNameForClass(info.getType()));<a name="line.695"></a>
+<span class="sourceLineNo">696</span>        if (!info.getFlags().isEmpty()) {<a name="line.696"></a>
+<span class="sourceLineNo">697</span>            List&lt;String&gt; flags = null;<a name="line.697"></a>
+<span class="sourceLineNo">698</span>            for (AttributeInfo.Flags flag : info.getFlags()) {<a name="line.698"></a>
+<span class="sourceLineNo">699</span>                if (AttributeInfo.Flags.MULTIVALUED.equals(flag) || AttributeInfo.Flags.REQUIRED.equals(flag)) {<a name="line.699"></a>
+<span class="sourceLineNo">700</span>                    continue;<a name="line.700"></a>
+<span class="sourceLineNo">701</span>                }<a name="line.701"></a>
+<span class="sourceLineNo">702</span>                if (null == flags) {<a name="line.702"></a>
+<span class="sourceLineNo">703</span>                    flags = new ArrayList&lt;String&gt;(4);<a name="line.703"></a>
+<span class="sourceLineNo">704</span>                }<a name="line.704"></a>
+<span class="sourceLineNo">705</span>                flags.add(flag.name());<a name="line.705"></a>
+<span class="sourceLineNo">706</span>            }<a name="line.706"></a>
+<span class="sourceLineNo">707</span>            if (null != flags) {<a name="line.707"></a>
+<span class="sourceLineNo">708</span>                schema.put(ConnectorUtil.OPENICF_FLAGS, Collections.unmodifiableList(flags));<a name="line.708"></a>
+<span class="sourceLineNo">709</span>            }<a name="line.709"></a>
+<span class="sourceLineNo">710</span>        }<a name="line.710"></a>
+<span class="sourceLineNo">711</span>        return schema;<a name="line.711"></a>
+<span class="sourceLineNo">712</span>    }<a name="line.712"></a>
+<span class="sourceLineNo">713</span><a name="line.713"></a>
+<span class="sourceLineNo">714</span>    public static Map&lt;String, Object&gt; getOperationOptionInfoMap(OperationOptionInfo info) {<a name="line.714"></a>
+<span class="sourceLineNo">715</span>        Map&lt;String, Object&gt; schema = new LinkedHashMap&lt;String, Object&gt;();<a name="line.715"></a>
+<span class="sourceLineNo">716</span>        Class clazz = info.getType().isArray() ? info.getType().getComponentType() : info.getType();<a name="line.716"></a>
+<span class="sourceLineNo">717</span>        if (info.getType().isArray()) {<a name="line.717"></a>
+<span class="sourceLineNo">718</span>            schema.put(Constants.TYPE, Constants.TYPE_ARRAY);<a name="line.718"></a>
+<span class="sourceLineNo">719</span>            Map&lt;String, Object&gt; itemSchema = new LinkedHashMap&lt;String, Object&gt;(2);<a name="line.719"></a>
+<span class="sourceLineNo">720</span>            itemSchema.put(Constants.TYPE, findJSONTypeForClass(clazz));<a name="line.720"></a>
+<span class="sourceLineNo">721</span>            itemSchema.put(ConnectorUtil.OPENICF_NATIVE_TYPE, findNameForClass(clazz));<a name="line.721"></a>
+<span class="sourceLineNo">722</span>            schema.put(Constants.ITEMS, itemSchema);<a name="line.722"></a>
+<span class="sourceLineNo">723</span>        } else {<a name="line.723"></a>
+<span class="sourceLineNo">724</span>            schema.put(Constants.TYPE, findJSONTypeForClass(clazz));<a name="line.724"></a>
+<span class="sourceLineNo">725</span>        }<a name="line.725"></a>
+<span class="sourceLineNo">726</span>        schema.put(ConnectorUtil.OPENICF_NATIVE_TYPE, findNameForClass(clazz));<a name="line.726"></a>
+<span class="sourceLineNo">727</span>        return schema;<a name="line.727"></a>
+<span class="sourceLineNo">728</span>    }<a name="line.728"></a>
+<span class="sourceLineNo">729</span><a name="line.729"></a>
+<span class="sourceLineNo">730</span><a name="line.730"></a>
+<span class="sourceLineNo">731</span>    /**<a name="line.731"></a>
+<span class="sourceLineNo">732</span>     * Create a new {@link SyncToken} from the input.<a name="line.732"></a>
+<span class="sourceLineNo">733</span>     * &lt;p/&gt;<a name="line.733"></a>
+<span class="sourceLineNo">734</span>     * The source object:<a name="line.734"></a>
+<span class="sourceLineNo">735</span>     * {@code<a name="line.735"></a>
+<span class="sourceLineNo">736</span>     * {<a name="line.736"></a>
+<span class="sourceLineNo">737</span>     * "syncToken" : "1305555929000",<a name="line.737"></a>
+<span class="sourceLineNo">738</span>     * "nativeType" : "JAVA_TYPE_LONG"<a name="line.738"></a>
+<span class="sourceLineNo">739</span>     * }}<a name="line.739"></a>
+<span class="sourceLineNo">740</span>     *<a name="line.740"></a>
+<span class="sourceLineNo">741</span>     * @param token<a name="line.741"></a>
+<span class="sourceLineNo">742</span>     * @return<a name="line.742"></a>
+<span class="sourceLineNo">743</span>     * @throws JsonValueException        if {@code syncToken} is null or {@code nativeType} is not String<a name="line.743"></a>
+<span class="sourceLineNo">744</span>     * @throws IllegalArgumentException if the value of {@code syncToken} can not be converted to expected type.<a name="line.744"></a>
+<span class="sourceLineNo">745</span>     */<a name="line.745"></a>
+<span class="sourceLineNo">746</span>    public static SyncToken convertToSyncToken(JsonValue token) {<a name="line.746"></a>
+<span class="sourceLineNo">747</span>        JsonValue nativeType = token.get(OPENICF_NATIVE_TYPE);<a name="line.747"></a>
+<span class="sourceLineNo">748</span>        JsonValue tokenValue = token.get(OPENICF_SYNC_TOKEN).required();<a name="line.748"></a>
+<span class="sourceLineNo">749</span>        SyncToken result = null;<a name="line.749"></a>
+<span class="sourceLineNo">750</span>        if (null == nativeType) {<a name="line.750"></a>
+<span class="sourceLineNo">751</span>            result = new SyncToken(tokenValue.getObject());<a name="line.751"></a>
+<span class="sourceLineNo">752</span>        } else {<a name="line.752"></a>
+<span class="sourceLineNo">753</span>            result = new SyncToken(coercedTypeCasting(tokenValue.getObject(), findClassForName(nativeType.asString())));<a name="line.753"></a>
+<span class="sourceLineNo">754</span>        }<a name="line.754"></a>
+<span class="sourceLineNo">755</span>        return result;<a name="line.755"></a>
+<span class="sourceLineNo">756</span>    }<a name="line.756"></a>
+<span class="sourceLineNo">757</span><a name="line.757"></a>
+<span class="sourceLineNo">758</span>    /**<a name="line.758"></a>
+<span class="sourceLineNo">759</span>     * Create a new Map from the given {@link SyncToken}.<a name="line.759"></a>
+<span class="sourceLineNo">760</span>     * &lt;p/&gt;<a name="line.760"></a>
+<span class="sourceLineNo">761</span>     * The target object:<a name="line.761"></a>
+<span class="sourceLineNo">762</span>     * {@code<a name="line.762"></a>
+<span class="sourceLineNo">763</span>     * {<a name="line.763"></a>
+<span class="sourceLineNo">764</span>     * "syncToken" : "1305555929000",<a name="line.764"></a>
+<span class="sourceLineNo">765</span>     * "nativeType" : "JAVA_TYPE_LONG"<a name="line.765"></a>
+<span class="sourceLineNo">766</span>     * }}<a name="line.766"></a>
+<span class="sourceLineNo">767</span>     *<a name="line.767"></a>
+<span class="sourceLineNo">768</span>     * @param token<a name="line.768"></a>
+<span class="sourceLineNo">769</span>     * @return<a name="line.769"></a>
+<span class="sourceLineNo">770</span>     * @throws IllegalArgumentException if the value of {@code token} can not be converted to simple Java type.<a name="line.770"></a>
+<span class="sourceLineNo">771</span>     */<a name="line.771"></a>
+<span class="sourceLineNo">772</span>    public static Map&lt;String, Object&gt; convertFromSyncToken(SyncToken token) {<a name="line.772"></a>
+<span class="sourceLineNo">773</span>        Map&lt;String, Object&gt; result = new HashMap&lt;String, Object&gt;(2);<a name="line.773"></a>
+<span class="sourceLineNo">774</span>        result.put(OPENICF_NATIVE_TYPE, findNameForClass(token.getValue().getClass()));<a name="line.774"></a>
+<span class="sourceLineNo">775</span>        result.put(OPENICF_SYNC_TOKEN, coercedTypeCasting(token.getValue(), Object.class));<a name="line.775"></a>
+<span class="sourceLineNo">776</span>        return result;<a name="line.776"></a>
+<span class="sourceLineNo">777</span>    }<a name="line.777"></a>
+<span class="sourceLineNo">778</span><a name="line.778"></a>
+<span class="sourceLineNo">779</span>    public static String normalizeConnectorName(String connectorName) {<a name="line.779"></a>
+<span class="sourceLineNo">780</span>        String name = null;<a name="line.780"></a>
+<span class="sourceLineNo">781</span>        if (connectorName != null) {<a name="line.781"></a>
+<span class="sourceLineNo">782</span>            int lastDot = connectorName.lastIndexOf(46);<a name="line.782"></a>
+<span class="sourceLineNo">783</span>            if (lastDot != -1) {<a name="line.783"></a>
+<span class="sourceLineNo">784</span>                name = connectorName.substring(lastDot + 1);<a name="line.784"></a>
+<span class="sourceLineNo">785</span>            }<a name="line.785"></a>
+<span class="sourceLineNo">786</span>        }<a name="line.786"></a>
+<span class="sourceLineNo">787</span><a name="line.787"></a>
+<span class="sourceLineNo">788</span>        return name;<a name="line.788"></a>
+<span class="sourceLineNo">789</span>    }<a name="line.789"></a>
+<span class="sourceLineNo">790</span><a name="line.790"></a>
+<span class="sourceLineNo">791</span>    /**<a name="line.791"></a>
+<span class="sourceLineNo">792</span>     * Coerce the {@code source} object to an object of {@code clazz} type.<a name="line.792"></a>
+<span class="sourceLineNo">793</span>     * &lt;p/&gt;<a name="line.793"></a>
+<span class="sourceLineNo">794</span>     *<a name="line.794"></a>
+<span class="sourceLineNo">795</span>     * @param &lt;T&gt;<a name="line.795"></a>
+<span class="sourceLineNo">796</span>     * @param source<a name="line.796"></a>
+<span class="sourceLineNo">797</span>     * @param clazz<a name="line.797"></a>
+<span class="sourceLineNo">798</span>     * @return<a name="line.798"></a>
+<span class="sourceLineNo">799</span>     * @throws NumberFormatException<a name="line.799"></a>
+<span class="sourceLineNo">800</span>     * @throws URISyntaxException<a name="line.800"></a>
+<span class="sourceLineNo">801</span>     * @throws UnsupportedOperationException<a name="line.801"></a>
+<span class="sourceLineNo">802</span>     */<a name="line.802"></a>
+<span class="sourceLineNo">803</span>    @SuppressWarnings("unchecked")<a name="line.803"></a>
+<span class="sourceLineNo">804</span>    public static &lt;T&gt; T coercedTypeCasting(Object source, Class&lt;T&gt; clazz) throws IllegalArgumentException {<a name="line.804"></a>
+<span class="sourceLineNo">805</span>        if (null == clazz) {<a name="line.805"></a>
+<span class="sourceLineNo">806</span>            throw new IllegalArgumentException("Target Class can not be null");<a name="line.806"></a>
+<span class="sourceLineNo">807</span>        }<a name="line.807"></a>
+<span class="sourceLineNo">808</span>        if (source instanceof JsonValue) {<a name="line.808"></a>
+<span class="sourceLineNo">809</span>            source = ((JsonValue)source).getObject();<a name="line.809"></a>
+<span class="sourceLineNo">810</span>        }<a name="line.810"></a>
+<span class="sourceLineNo">811</span><a name="line.811"></a>
+<span class="sourceLineNo">812</span>        Class&lt;T&gt; targetClazz = clazz;<a name="line.812"></a>
+<span class="sourceLineNo">813</span>        Class sourceClass = (source == null ? null : source.getClass());<a name="line.813"></a>
+<span class="sourceLineNo">814</span>        boolean coerced = false;<a name="line.814"></a>
+<span class="sourceLineNo">815</span>        T result = null;<a name="line.815"></a>
+<span class="sourceLineNo">816</span>        try {<a name="line.816"></a>
+<span class="sourceLineNo">817</span>            if (source == null) {<a name="line.817"></a>
+<span class="sourceLineNo">818</span>                return null;<a name="line.818"></a>
+<span class="sourceLineNo">819</span>            }<a name="line.819"></a>
+<span class="sourceLineNo">820</span><a name="line.820"></a>
+<span class="sourceLineNo">821</span>            //Default JSON Type conversion<a name="line.821"></a>
+<span class="sourceLineNo">822</span>            if (targetClazz.equals(Object.class)) {<a name="line.822"></a>
+<span class="sourceLineNo">823</span>                if ((Number.class.isAssignableFrom(sourceClass)) || (int.class == clazz) || (double.class == clazz) || (float.class == clazz) || (long.class == clazz)) {<a name="line.823"></a>
+<span class="sourceLineNo">824</span>                    return (T) source;<a name="line.824"></a>
+<span class="sourceLineNo">825</span>                } else if ((Boolean.class.isAssignableFrom(sourceClass)) || (boolean.class == clazz)) {<a name="line.825"></a>
+<span class="sourceLineNo">826</span>                    return (T) source;<a name="line.826"></a>
+<span class="sourceLineNo">827</span>                } else if (String.class.isAssignableFrom(sourceClass)) {<a name="line.827"></a>
+<span class="sourceLineNo">828</span>                    return (T) source;<a name="line.828"></a>
+<span class="sourceLineNo">829</span>                } else if (Map.class.isAssignableFrom(sourceClass)) {<a name="line.829"></a>
+<span class="sourceLineNo">830</span>                    return (T) source;<a name="line.830"></a>
+<span class="sourceLineNo">831</span>                } else if (List.class.isAssignableFrom(sourceClass)) {<a name="line.831"></a>
+<span class="sourceLineNo">832</span>                    return (T) source;<a name="line.832"></a>
+<span class="sourceLineNo">833</span>                } else if (byte[].class.isAssignableFrom(sourceClass) || Byte[].class.isAssignableFrom(sourceClass) || byte[].class == clazz) {<a name="line.833"></a>
+<span class="sourceLineNo">834</span>                    return (T) source;<a name="line.834"></a>
+<span class="sourceLineNo">835</span>                } else if (sourceClass == QualifiedUid.class) {<a name="line.835"></a>
+<span class="sourceLineNo">836</span>                    //@TODO: Not null safe!!!<a name="line.836"></a>
+<span class="sourceLineNo">837</span>                    Map&lt;String, Object&gt; v = new HashMap&lt;String, Object&gt;(2);<a name="line.837"></a>
+<span class="sourceLineNo">838</span>                    v.put("_id", ((QualifiedUid) source).getUid().getUidValue());<a name="line.838"></a>
+<span class="sourceLineNo">839</span>                    v.put("_type", ((QualifiedUid) source).getObjectClass().getObjectClassValue());<a name="line.839"></a>
+<span class="sourceLineNo">840</span>                    return (T) v;<a name="line.840"></a>
+<span class="sourceLineNo">841</span>                } else if (sourceClass == Script.class) {<a name="line.841"></a>
+<span class="sourceLineNo">842</span>                    Map&lt;String, Object&gt; v = new HashMap&lt;String, Object&gt;(2);<a name="line.842"></a>
+<span class="sourceLineNo">843</span>                    v.put("scriptLanguage", ((Script) source).getScriptLanguage());<a name="line.843"></a>
+<span class="sourceLineNo">844</span>                    v.put("scriptText", ((Script) source).getScriptText());<a name="line.844"></a>
+<span class="sourceLineNo">845</span>                    return (T) v;<a name="line.845"></a>
+<span class="sourceLineNo">846</span>                } else {<a name="line.846"></a>
+<span class="sourceLineNo">847</span>                    targetClazz = (Class&lt;T&gt;) String.class;<a name="line.847"></a>
+<span class="sourceLineNo">848</span>                }<a name="line.848"></a>
+<span class="sourceLineNo">849</span>            }<a name="line.849"></a>
+<span class="sourceLineNo">850</span><a name="line.850"></a>
+<span class="sourceLineNo">851</span>            if (targetClazz.isAssignableFrom(sourceClass)) {<a name="line.851"></a>
+<span class="sourceLineNo">852</span>                return (T) source;<a name="line.852"></a>
+<span class="sourceLineNo">853</span>            } else if (targetClazz == sourceClass) {<a name="line.853"></a>
+<span class="sourceLineNo">854</span>                return (T) source;<a name="line.854"></a>
+<span class="sourceLineNo">855</span>            } else if (targetClazz.equals(java.math.BigDecimal.class)) {<a name="line.855"></a>
+<span class="sourceLineNo">856</span>                if (Double.class.isAssignableFrom(sourceClass) || sourceClass == double.class) {<a name="line.856"></a>
+<span class="sourceLineNo">857</span>                    result = (T) BigDecimal.valueOf((Double) source);<a name="line.857"></a>
+<span class="sourceLineNo">858</span>                    coerced = true;<a name="line.858"></a>
+<span class="sourceLineNo">859</span>                } else if (Integer.class.isAssignableFrom(sourceClass) || sourceClass == int.class) {<a name="line.859"></a>
+<span class="sourceLineNo">860</span>                    result = (T) BigDecimal.valueOf((Integer) source);<a name="line.860"></a>
+<span class="sourceLineNo">861</span>                    coerced = true;<a name="line.861"></a>
+<span class="sourceLineNo">862</span>                } else if (Long.class.isAssignableFrom(sourceClass) || sourceClass == long.class) {<a name="line.862"></a>
+<span class="sourceLineNo">863</span>                    result = (T) BigDecimal.valueOf((Long) source);<a name="line.863"></a>
+<span class="sourceLineNo">864</span>                    coerced = true;<a name="line.864"></a>
+<span class="sourceLineNo">865</span>                } else if (sourceClass == String.class) {<a name="line.865"></a>
+<span class="sourceLineNo">866</span>                    java.math.BigDecimal v = new java.math.BigDecimal((String) source);<a name="line.866"></a>
+<span class="sourceLineNo">867</span>                    result = targetClazz.cast(v);<a name="line.867"></a>
+<span class="sourceLineNo">868</span>                    coerced = true;<a name="line.868"></a>
+<span class="sourceLineNo">869</span>                }<a name="line.869"></a>
+<span class="sourceLineNo">870</span>            } else if (targetClazz.equals(java.math.BigInteger.class)) {<a name="line.870"></a>
+<span class="sourceLineNo">871</span>                if (Long.class.isAssignableFrom(sourceClass) || sourceClass == long.class) {<a name="line.871"></a>
+<span class="sourceLineNo">872</span>                    result = (T) BigInteger.valueOf((Long) source);<a name="line.872"></a>
+<span class="sourceLineNo">873</span>                    coerced = true;<a name="line.873"></a>
+<span class="sourceLineNo">874</span>                } else if (sourceClass == String.class) {<a name="line.874"></a>
+<span class="sourceLineNo">875</span>                    java.math.BigInteger v = new java.math.BigInteger((String) source);<a name="line.875"></a>
+<span class="sourceLineNo">876</span>                    result = targetClazz.cast(v);<a name="line.876"></a>
+<span class="sourceLineNo">877</span>                    coerced = true;<a name="line.877"></a>
+<span class="sourceLineNo">878</span>                } else {<a name="line.878"></a>
+<span class="sourceLineNo">879</span>                    result = (T) BigInteger.valueOf(coercedTypeCasting(source, Long.class));<a name="line.879"></a>
+<span class="sourceLineNo">880</span>                    coerced = true;<a name="line.880"></a>
+<span class="sourceLineNo">881</span>                }<a name="line.881"></a>
+<span class="sourceLineNo">882</span>            } else if (targetClazz.equals(boolean.class) || targetClazz.equals(Boolean.class)) {<a name="line.882"></a>
+<span class="sourceLineNo">883</span>                if (sourceClass == Boolean.class) {<a name="line.883"></a>
+<span class="sourceLineNo">884</span>                    result = (T) source;<a name="line.884"></a>
+<span class="sourceLineNo">885</span>                    coerced = true;<a name="line.885"></a>
+<span class="sourceLineNo">886</span>                } else if (sourceClass == Integer.class) {<a name="line.886"></a>
+<span class="sourceLineNo">887</span>                    int val = ((Integer) source).intValue();<a name="line.887"></a>
+<span class="sourceLineNo">888</span>                    if (val == 0) {<a name="line.888"></a>
+<span class="sourceLineNo">889</span>                        result = targetClazz.cast(Boolean.FALSE);<a name="line.889"></a>
+<span class="sourceLineNo">890</span>                        coerced = true;<a name="line.890"></a>
+<span class="sourceLineNo">891</span>                    } else if (val == 1) {<a name="line.891"></a>
+<span class="sourceLineNo">892</span>                        result = targetClazz.cast(Boolean.TRUE);<a name="line.892"></a>
+<span class="sourceLineNo">893</span>                        coerced = true;<a name="line.893"></a>
+<span class="sourceLineNo">894</span>                    }<a name="line.894"></a>
+<span class="sourceLineNo">895</span>                } else if (sourceClass == String.class) {<a name="line.895"></a>
+<span class="sourceLineNo">896</span>                    String s = (String) source;<a name="line.896"></a>
+<span class="sourceLineNo">897</span>                    if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false")) {<a name="line.897"></a>
+<span class="sourceLineNo">898</span>                        result = (T) Boolean.valueOf((String) source);<a name="line.898"></a>
+<span class="sourceLineNo">899</span>                        coerced = true;<a name="line.899"></a>
+<span class="sourceLineNo">900</span>                    }<a name="line.900"></a>
+<span class="sourceLineNo">901</span>                }<a name="line.901"></a>
+<span class="sourceLineNo">902</span>            } else if (targetClazz.equals(Byte.TYPE) || targetClazz.equals(Byte.class)) {<a name="line.902"></a>
+<span class="sourceLineNo">903</span>                if (sourceClass == Byte.TYPE || sourceClass == Byte.class) {<a name="line.903"></a>
+<span class="sourceLineNo">904</span>                    result = (T) source;<a name="line.904"></a>
+<span class="sourceLineNo">905</span>                    coerced = true;<a name="line.905"></a>
+<span class="sourceLineNo">906</span>                } else if (sourceClass == String.class) {<a name="line.906"></a>
+<span class="sourceLineNo">907</span>                    if (targetClazz.equals(Byte.class)) {<a name="line.907"></a>
+<span class="sourceLineNo">908</span>                        result = (T) new Byte((String) source);<a name="line.908"></a>
+<span class="sourceLineNo">909</span>                        coerced = true;<a name="line.909"></a>
+<span class="sourceLineNo">910</span>                    } else {<a name="line.910"></a>
+<span class="sourceLineNo">911</span>                        result = (T) Byte.valueOf((String) source);<a name="line.911"></a>
+<span class="sourceLineNo">912</span>                        coerced = true;<a name="line.912"></a>
+<span class="sourceLineNo">913</span>                    }<a name="line.913"></a>
+<span class="sourceLineNo">914</span>                } else if (source instanceof Number) {<a name="line.914"></a>
+<span class="sourceLineNo">915</span>                    int sourceInt = ((Number) source).intValue();<a name="line.915"></a>
+<span class="sourceLineNo">916</span>                    if (targetClazz.equals(Byte.TYPE)) {<a name="line.916"></a>
+<span class="sourceLineNo">917</span>                        result = (T) Byte.valueOf((byte) sourceInt);<a name="line.917"></a>
+<span class="sourceLineNo">918</span>                        coerced = true;<a name="line.918"></a>
+<span class="sourceLineNo">919</span>                    } else if (sourceInt &gt; Byte.MIN_VALUE || sourceInt &lt; Byte.MAX_VALUE) {<a name="line.919"></a>
+<span class="sourceLineNo">920</span>                        result = (T) Byte.valueOf((byte) sourceInt);<a name="line.920"></a>
+<span class="sourceLineNo">921</span>                        coerced = true;<a name="line.921"></a>
+<span class="sourceLineNo">922</span>                    }<a name="line.922"></a>
+<span class="sourceLineNo">923</span>                }<a name="line.923"></a>
+<span class="sourceLineNo">924</span>            } else if (targetClazz.equals(byte[].class)) {<a name="line.924"></a>
+<span class="sourceLineNo">925</span>                if (sourceClass == String.class) {<a name="line.925"></a>
+<span class="sourceLineNo">926</span>                    result = targetClazz.cast(((String) source).getBytes());<a name="line.926"></a>
+<span class="sourceLineNo">927</span>                    coerced = true;<a name="line.927"></a>
+<span class="sourceLineNo">928</span>                } else if (sourceClass == String.class) {<a name="line.928"></a>
+<span class="sourceLineNo">929</span>                    result = targetClazz.cast(Base64.decode((String) source));<a name="line.929"></a>
+<span class="sourceLineNo">930</span>                    coerced = true;<a name="line.930"></a>
+<span class="sourceLineNo">931</span>                } else if (sourceClass == GuardedByteArray.class) {<a name="line.931"></a>
+<span class="sourceLineNo">932</span>                    GuardedByteArray gba = (GuardedByteArray) source;<a name="line.932"></a>
+<span class="sourceLineNo">933</span>                    byte[] byteArray = decrypt(gba);<a name="line.933"></a>
+<span class="sourceLineNo">934</span>                    result = targetClazz.cast(byteArray);<a name="line.934"></a>
+<span class="sourceLineNo">935</span>                    coerced = true;<a name="line.935"></a>
+<span class="sourceLineNo">936</span>                }<a name="line.936"></a>
+<span class="sourceLineNo">937</span>            } else if ((targetClazz.equals(Character.class)) || (targetClazz.equals(char.class))) {<a name="line.937"></a>
+<span class="sourceLineNo">938</span>                if (sourceClass == String.class) {<a name="line.938"></a>
+<span class="sourceLineNo">939</span>                    Character v = ((String) source).charAt(0);<a name="line.939"></a>
+<span class="sourceLineNo">940</span>                    result = (T) v;<a name="line.940"></a>
+<span class="sourceLineNo">941</span>                    coerced = true;<a name="line.941"></a>
+<span class="sourceLineNo">942</span>                }<a name="line.942"></a>
+<span class="sourceLineNo">943</span>            } else if (targetClazz.equals(Character[].class)) {<a name="line.943"></a>
+<span class="sourceLineNo">944</span>                if (sourceClass == String.class) {<a name="line.944"></a>
+<span class="sourceLineNo">945</span>                    char[] charArray = ((String) source).toCharArray();<a name="line.945"></a>
+<span class="sourceLineNo">946</span>                    Character[] characterArray = new Character[charArray.length];<a name="line.946"></a>
+<span class="sourceLineNo">947</span>                    for (int i = 0; i &lt; charArray.length; i++) {<a name="line.947"></a>
+<span class="sourceLineNo">948</span>                        characterArray[i] = new Character(charArray[i]);<a name="line.948"></a>
+<span class="sourceLineNo">949</span>                    }<a name="line.949"></a>
+<span class="sourceLineNo">950</span>                    result = targetClazz.cast(characterArray);<a name="line.950"></a>
+<span class="sourceLineNo">951</span>                    coerced = true;<a name="line.951"></a>
+<span class="sourceLineNo">952</span>                }<a name="line.952"></a>
+<span class="sourceLineNo">953</span>            } else if (targetClazz.equals(char[].class)) {<a name="line.953"></a>
+<span class="sourceLineNo">954</span>                if (sourceClass == String.class) {<a name="line.954"></a>
+<span class="sourceLineNo">955</span>                    char[] charArray = ((String) source).toCharArray();<a name="line.955"></a>
+<span class="sourceLineNo">956</span>                    result = targetClazz.cast(charArray);<a name="line.956"></a>
+<span class="sourceLineNo">957</span>                    coerced = true;<a name="line.957"></a>
+<span class="sourceLineNo">958</span>                }<a name="line.958"></a>
+<span class="sourceLineNo">959</span>            } else if (targetClazz.equals(Date.class)) {<a name="line.959"></a>
+<span class="sourceLineNo">960</span>                if (sourceClass == String.class) {<a name="line.960"></a>
+<span class="sourceLineNo">961</span>                    //TODO AttributeUtil.getDateValue()<a name="line.961"></a>
+<span class="sourceLineNo">962</span>                }<a name="line.962"></a>
+<span class="sourceLineNo">963</span>            } else if (targetClazz.equals(double.class)) {<a name="line.963"></a>
+<span class="sourceLineNo">964</span>                if (sourceClass == Double.class) {<a name="line.964"></a>
+<span class="sourceLineNo">965</span>                    result = (T) source;<a name="line.965"></a>
+<span class="sourceLineNo">966</span>                    coerced = true;<a name="line.966"></a>
+<span class="sourceLineNo">967</span>                } else if (sourceClass == int.class) {<a name="line.967"></a>
+<span class="sourceLineNo">968</span>                    //noinspection BoxingBoxedValue<a name="line.968"></a>
+<span class="sourceLineNo">969</span>                    result = (T) Double.valueOf((((Integer) source).doubleValue()));<a name="line.969"></a>
+<span class="sourceLineNo">970</span>                    coerced = true;<a name="line.970"></a>
+<span class="sourceLineNo">971</span>                } else if (sourceClass == Integer.class) {<a name="line.971"></a>
+<span class="sourceLineNo">972</span>                    result = (T) Double.valueOf(((Integer) source).doubleValue());<a name="line.972"></a>
+<span class="sourceLineNo">973</span>                    coerced = true;<a name="line.973"></a>
+<span class="sourceLineNo">974</span>                } else if (sourceClass == String.class) {<a name="line.974"></a>
+<span class="sourceLineNo">975</span>                    result = targetClazz.cast(Double.valueOf((String) source));<a name="line.975"></a>
+<span class="sourceLineNo">976</span>                    coerced = true;<a name="line.976"></a>
+<span class="sourceLineNo">977</span>                }<a name="line.977"></a>
+<span class="sourceLineNo">978</span>            } else if (targetClazz.equals(Double.class)) {<a name="line.978"></a>
+<span class="sourceLineNo">979</span>                if (sourceClass == double.class) {<a name="line.979"></a>
+<span class="sourceLineNo">980</span>                    result = (T) source;<a name="line.980"></a>
+<span class="sourceLineNo">981</span>                    coerced = true;<a name="line.981"></a>
+<span class="sourceLineNo">982</span>                } else if (sourceClass == int.class) {<a name="line.982"></a>
+<span class="sourceLineNo">983</span>                    result = (T) Double.valueOf((((Integer) source).doubleValue()));<a name="line.983"></a>
+<span class="sourceLineNo">984</span>                    coerced = true;<a name="line.984"></a>
+<span class="sourceLineNo">985</span>                } else if (sourceClass == Integer.class) {<a name="line.985"></a>
+<span class="sourceLineNo">986</span>                    result = (T) Double.valueOf(((Integer) source).doubleValue());<a name="line.986"></a>
+<span class="sourceLineNo">987</span>                    coerced = true;<a name="line.987"></a>
+<span class="sourceLineNo">988</span>                } else if (sourceClass == String.class) {<a name="line.988"></a>
+<span class="sourceLineNo">989</span>                    result = targetClazz.cast(Double.valueOf((String) source));<a name="line.989"></a>
+<span class="sourceLineNo">990</span>                    coerced = true;<a name="line.990"></a>
+<span class="sourceLineNo">991</span>                }<a name="line.991"></a>
+<span class="sourceLineNo">992</span>            } else if (targetClazz.equals(java.io.File.class)) {<a name="line.992"></a>
+<span class="sourceLineNo">993</span>                if (sourceClass == String.class) {<a name="line.993"></a>
+<span class="sourceLineNo">994</span>                    result = (T) new File((String) source);<a name="line.994"></a>
+<span class="sourceLineNo">995</span>                    coerced = true;<a name="line.995"></a>
+<span class="sourceLineNo">996</span>                }<a name="line.996"></a>
+<span class="sourceLineNo">997</span>            } else if (targetClazz.equals(float.class) || targetClazz.equals(Float.class)) {<a name="line.997"></a>
+<span class="sourceLineNo">998</span>                if (sourceClass == Float.class || sourceClass == float.class) {<a name="line.998"></a>
+<span class="sourceLineNo">999</span>                    result = (T) source;<a name="line.999"></a>
+<span class="sourceLineNo">1000</span>                    coerced = true;<a name="line.1000"></a>
+<span class="sourceLineNo">1001</span>                } else if (sourceClass == Double.class || sourceClass == double.class) {<a name="line.1001"></a>
+<span class="sourceLineNo">1002</span>                    result = (T) new Float((Double) source);<a name="line.1002"></a>
+<span class="sourceLineNo">1003</span>                    coerced = true;<a name="line.1003"></a>
+<span class="sourceLineNo">1004</span>                } else if (sourceClass == int.class) {<a name="line.1004"></a>
+<span class="sourceLineNo">1005</span>                    result = (T) Float.valueOf((((Integer) source).floatValue()));<a name="line.1005"></a>
+<span class="sourceLineNo">1006</span>                    coerced = true;<a name="line.1006"></a>
+<span class="sourceLineNo">1007</span>                } else if (sourceClass == Integer.class) {<a name="line.1007"></a>
+<span class="sourceLineNo">1008</span>                    result = (T) Float.valueOf(((Integer) source).floatValue());<a name="line.1008"></a>
+<span class="sourceLineNo">1009</span>                    coerced = true;<a name="line.1009"></a>
+<span class="sourceLineNo">1010</span>                } else if (sourceClass == String.class) {<a name="line.1010"></a>
+<span class="sourceLineNo">1011</span>                    result = (T) Float.valueOf((String) source);<a name="line.1011"></a>
+<span class="sourceLineNo">1012</span>                    coerced = true;<a name="line.1012"></a>
+<span class="sourceLineNo">1013</span>                }<a name="line.1013"></a>
+<span class="sourceLineNo">1014</span>            } else if (targetClazz.equals(GuardedByteArray.class)) {<a name="line.1014"></a>
+<span class="sourceLineNo">1015</span>                if (sourceClass == String.class) {<a name="line.1015"></a>
+<span class="sourceLineNo">1016</span>                    byte[] byteArray = ((String) source).getBytes();<a name="line.1016"></a>
+<span class="sourceLineNo">1017</span>                    GuardedByteArray v = new GuardedByteArray(byteArray);<a name="line.1017"></a>
+<span class="sourceLineNo">1018</span>                    result = targetClazz.cast(v);<a name="line.1018"></a>
+<span class="sourceLineNo">1019</span>                    coerced = true;<a name="line.1019"></a>
+<span class="sourceLineNo">1020</span>                }<a name="line.1020"></a>
+<span class="sourceLineNo">1021</span>            } else if (targetClazz.equals(GuardedString.class)) {<a name="line.1021"></a>
+<span class="sourceLineNo">1022</span>                if (sourceClass == String.class) {<a name="line.1022"></a>
+<span class="sourceLineNo">1023</span>                    char[] charArray = ((String) source).toCharArray();<a name="line.1023"></a>
+<span class="sourceLineNo">1024</span>                    GuardedString v = new GuardedString(charArray);<a name="line.1024"></a>
+<span class="sourceLineNo">1025</span>                    result = targetClazz.cast(v);<a name="line.1025"></a>
+<span class="sourceLineNo">1026</span>                    coerced = true;<a name="line.1026"></a>
+<span class="sourceLineNo">1027</span>                }<a name="line.1027"></a>
+<span class="sourceLineNo">1028</span>            } else if (targetClazz.equals(int.class) || targetClazz.equals(Integer.class)) {<a name="line.1028"></a>
+<span class="sourceLineNo">1029</span>                if (sourceClass == Integer.class || sourceClass == int.class) {<a name="line.1029"></a>
+<span class="sourceLineNo">1030</span>                    result = (T) source;<a name="line.1030"></a>
+<span class="sourceLineNo">1031</span>                    coerced = true;<a name="line.1031"></a>
+<span class="sourceLineNo">1032</span>                } else if (sourceClass == String.class) {<a name="line.1032"></a>
+<span class="sourceLineNo">1033</span>                    result = (T) Integer.valueOf((String) source);<a name="line.1033"></a>
+<span class="sourceLineNo">1034</span>                    coerced = true;<a name="line.1034"></a>
+<span class="sourceLineNo">1035</span>                } else if (sourceClass == Float.class) {<a name="line.1035"></a>
+<span class="sourceLineNo">1036</span>                    result = targetClazz.cast(((Float) source).intValue());<a name="line.1036"></a>
+<span class="sourceLineNo">1037</span>                    coerced = true;<a name="line.1037"></a>
+<span class="sourceLineNo">1038</span>                } else if (sourceClass == Long.class) {<a name="line.1038"></a>
+<span class="sourceLineNo">1039</span>                    Long l = (Long) source;<a name="line.1039"></a>
+<span class="sourceLineNo">1040</span>                    if (l.longValue() &lt;= Integer.MAX_VALUE) {<a name="line.1040"></a>
+<span class="sourceLineNo">1041</span>                        result = targetClazz.cast(l.intValue());<a name="line.1041"></a>
+<span class="sourceLineNo">1042</span>                        coerced = true;<a name="line.1042"></a>
+<span class="sourceLineNo">1043</span>                    }<a name="line.1043"></a>
+<span class="sourceLineNo">1044</span>                } else if (sourceClass == Boolean.class) {<a name="line.1044"></a>
+<span class="sourceLineNo">1045</span>                    boolean val = ((Boolean) source).booleanValue();<a name="line.1045"></a>
+<span class="sourceLineNo">1046</span>                    if (val) {<a name="line.1046"></a>
+<span class="sourceLineNo">1047</span>                        result = targetClazz.cast(1);<a name="line.1047"></a>
+<span class="sourceLineNo">1048</span>                    } else {<a name="line.1048"></a>
+<span class="sourceLineNo">1049</span>                        result = targetClazz.cast(new Integer(0));<a name="line.1049"></a>
+<span class="sourceLineNo">1050</span>                    }<a name="line.1050"></a>
+<span class="sourceLineNo">1051</span>                    coerced = true;<a name="line.1051"></a>
+<span class="sourceLineNo">1052</span>                }<a name="line.1052"></a>
+<span class="sourceLineNo">1053</span>            } else if (targetClazz.equals(long.class) || targetClazz.equals(Long.class)) {<a name="line.1053"></a>
+<span class="sourceLineNo">1054</span>                if (sourceClass == int.class) {<a name="line.1054"></a>
+<span class="sourceLineNo">1055</span>                    result = (T) Long.valueOf((((Integer) source).longValue()));<a name="line.1055"></a>
+<span class="sourceLineNo">1056</span>                    coerced = true;<a name="line.1056"></a>
+<span class="sourceLineNo">1057</span>                } else if (sourceClass == Integer.class) {<a name="line.1057"></a>
+<span class="sourceLineNo">1058</span>                    result = (T) Long.valueOf(((Integer) source).longValue());<a name="line.1058"></a>
+<span class="sourceLineNo">1059</span>                    coerced = true;<a name="line.1059"></a>
+<span class="sourceLineNo">1060</span>                } else if (sourceClass == Long.class || sourceClass == long.class) {<a name="line.1060"></a>
+<span class="sourceLineNo">1061</span>                    result = (T) source;<a name="line.1061"></a>
+<span class="sourceLineNo">1062</span>                    coerced = true;<a name="line.1062"></a>
+<span class="sourceLineNo">1063</span>                } else if (sourceClass == String.class) {<a name="line.1063"></a>
+<span class="sourceLineNo">1064</span>                    result = (T) Long.valueOf((String) source);<a name="line.1064"></a>
+<span class="sourceLineNo">1065</span>                    coerced = true;<a name="line.1065"></a>
+<span class="sourceLineNo">1066</span>                }<a name="line.1066"></a>
+<span class="sourceLineNo">1067</span>            } else if (targetClazz.equals(Name.class)) {<a name="line.1067"></a>
+<span class="sourceLineNo">1068</span>                if (sourceClass == String.class) {<a name="line.1068"></a>
+<span class="sourceLineNo">1069</span>                    result = targetClazz.cast(new Name((String) source));<a name="line.1069"></a>
+<span class="sourceLineNo">1070</span>                    coerced = true;<a name="line.1070"></a>
+<span class="sourceLineNo">1071</span>                }<a name="line.1071"></a>
+<span class="sourceLineNo">1072</span>            } else if (targetClazz.equals(ObjectClass.class)) {<a name="line.1072"></a>
+<span class="sourceLineNo">1073</span>                if (sourceClass == String.class) {<a name="line.1073"></a>
+<span class="sourceLineNo">1074</span>                    ScriptBuilder sb = new ScriptBuilder();<a name="line.1074"></a>
+<span class="sourceLineNo">1075</span>                    sb.setScriptLanguage("");<a name="line.1075"></a>
+<span class="sourceLineNo">1076</span>                    sb.setScriptText("");<a name="line.1076"></a>
+<span class="sourceLineNo">1077</span>                    result = targetClazz.cast(sb.build());<a name="line.1077"></a>
+<span class="sourceLineNo">1078</span>                    coerced = true;<a name="line.1078"></a>
+<span class="sourceLineNo">1079</span>                }<a name="line.1079"></a>
+<span class="sourceLineNo">1080</span>            } else if (targetClazz.equals(QualifiedUid.class)) {<a name="line.1080"></a>
+<span class="sourceLineNo">1081</span>                if (sourceClass == String.class) {<a name="line.1081"></a>
+<span class="sourceLineNo">1082</span>                    ScriptBuilder sb = new ScriptBuilder();<a name="line.1082"></a>
+<span class="sourceLineNo">1083</span>                    sb.setScriptLanguage("");<a name="line.1083"></a>
+<span class="sourceLineNo">1084</span>                    sb.setScriptText("");<a name="line.1084"></a>
+<span class="sourceLineNo">1085</span>                    result = targetClazz.cast(sb.build());<a name="line.1085"></a>
+<span class="sourceLineNo">1086</span>                    coerced = true;<a name="line.1086"></a>
+<span class="sourceLineNo">1087</span>                }<a name="line.1087"></a>
+<span class="sourceLineNo">1088</span>            } else if (targetClazz.equals(Script.class)) {<a name="line.1088"></a>
+<span class="sourceLineNo">1089</span>                if (sourceClass == String.class) {<a name="line.1089"></a>
+<span class="sourceLineNo">1090</span>                    ScriptBuilder sb = new ScriptBuilder();<a name="line.1090"></a>
+<span class="sourceLineNo">1091</span>                    sb.setScriptLanguage("");<a name="line.1091"></a>
+<span class="sourceLineNo">1092</span>                    sb.setScriptText("");<a name="line.1092"></a>
+<span class="sourceLineNo">1093</span>                    result = targetClazz.cast(sb.build());<a name="line.1093"></a>
+<span class="sourceLineNo">1094</span>                    coerced = true;<a name="line.1094"></a>
+<span class="sourceLineNo">1095</span>                } else if (Map.class.isAssignableFrom(sourceClass)) {<a name="line.1095"></a>
+<span class="sourceLineNo">1096</span>                    ScriptBuilder sb = new ScriptBuilder();<a name="line.1096"></a>
+<span class="sourceLineNo">1097</span>                    sb.setScriptLanguage((String) ((Map) source).get("scriptLanguage"));<a name="line.1097"></a>
+<span class="sourceLineNo">1098</span>                    sb.setScriptText((String) ((Map) source).get("scriptText"));<a name="line.1098"></a>
+<span class="sourceLineNo">1099</span>                    result = targetClazz.cast(sb.build());<a name="line.1099"></a>
+<span class="sourceLineNo">1100</span>                    coerced = true;<a name="line.1100"></a>
+<span class="sourceLineNo">1101</span>                }<a name="line.1101"></a>
+<span class="sourceLineNo">1102</span>            } else if (targetClazz.equals(String.class)) {<a name="line.1102"></a>
+<span class="sourceLineNo">1103</span>                if (sourceClass == byte[].class) {<a name="line.1103"></a>
+<span class="sourceLineNo">1104</span>                    result = (T) Base64.encode((byte[])source);<a name="line.1104"></a>
+<span class="sourceLineNo">1105</span>                    coerced = true;<a name="line.1105"></a>
+<span class="sourceLineNo">1106</span>                } else if (sourceClass == Byte.class) {<a name="line.1106"></a>
+<span class="sourceLineNo">1107</span>                    result = (T) Base64.encode(new byte[] {((Byte)source).byteValue()});<a name="line.1107"></a>
+<span class="sourceLineNo">1108</span>                    coerced = true;<a name="line.1108"></a>
+<span class="sourceLineNo">1109</span>                } else if (sourceClass == char.class) {<a name="line.1109"></a>
+<span class="sourceLineNo">1110</span>                    result = (T) new String((char[]) source);<a name="line.1110"></a>
+<span class="sourceLineNo">1111</span>                    coerced = true;<a name="line.1111"></a>
+<span class="sourceLineNo">1112</span>                } else if (sourceClass == Character[].class) {<a name="line.1112"></a>
+<span class="sourceLineNo">1113</span>                    Character[] characterArray = (Character[]) source;<a name="line.1113"></a>
+<span class="sourceLineNo">1114</span>                    char[] charArray = new char[characterArray.length];<a name="line.1114"></a>
+<span class="sourceLineNo">1115</span>                    for (int i = 0; i &lt; characterArray.length; i++) {<a name="line.1115"></a>
+<span class="sourceLineNo">1116</span>                        charArray[i] = characterArray[i];<a name="line.1116"></a>
+<span class="sourceLineNo">1117</span>                    }<a name="line.1117"></a>
+<span class="sourceLineNo">1118</span>                    result = (T) new String(charArray);<a name="line.1118"></a>
+<span class="sourceLineNo">1119</span>                    coerced = true;<a name="line.1119"></a>
+<span class="sourceLineNo">1120</span>                } else if (sourceClass == Double.class) {<a name="line.1120"></a>
+<span class="sourceLineNo">1121</span>                    String s = ((Double) source).toString();<a name="line.1121"></a>
+<span class="sourceLineNo">1122</span>                    result = targetClazz.cast(s);<a name="line.1122"></a>
+<span class="sourceLineNo">1123</span>                    coerced = true;<a name="line.1123"></a>
+<span class="sourceLineNo">1124</span>                } else if (sourceClass == Float.class) {<a name="line.1124"></a>
+<span class="sourceLineNo">1125</span>                    String s = ((Float) source).toString();<a name="line.1125"></a>
+<span class="sourceLineNo">1126</span>                    result = targetClazz.cast(s);<a name="line.1126"></a>
+<span class="sourceLineNo">1127</span>                    coerced = true;<a name="line.1127"></a>
+<span class="sourceLineNo">1128</span>                } else if (sourceClass == Boolean.class) {<a name="line.1128"></a>
+<span class="sourceLineNo">1129</span>                    Boolean b = (Boolean) source;<a name="line.1129"></a>
+<span class="sourceLineNo">1130</span>                    result = targetClazz.cast(Boolean.toString(b.booleanValue()));<a name="line.1130"></a>
+<span class="sourceLineNo">1131</span>                    coerced = true;<a name="line.1131"></a>
+<span class="sourceLineNo">1132</span>                } else if (sourceClass == Long.class) {<a name="line.1132"></a>
+<span class="sourceLineNo">1133</span>                    String s = ((Long) source).toString();<a name="line.1133"></a>
+<span class="sourceLineNo">1134</span>                    result = targetClazz.cast(s);<a name="line.1134"></a>
+<span class="sourceLineNo">1135</span>                    coerced = true;<a name="line.1135"></a>
+<span class="sourceLineNo">1136</span>                } else if (sourceClass == Integer.class) {<a name="line.1136"></a>
+<span class="sourceLineNo">1137</span>                    String s = ((Integer) source).toString();<a name="line.1137"></a>
+<span class="sourceLineNo">1138</span>                    result = targetClazz.cast(s);<a name="line.1138"></a>
+<span class="sourceLineNo">1139</span>                    coerced = true;<a name="line.1139"></a>
+<span class="sourceLineNo">1140</span>                } else if (sourceClass == java.math.BigInteger.class) {<a name="line.1140"></a>
+<span class="sourceLineNo">1141</span>                    String s = source.toString();<a name="line.1141"></a>
+<span class="sourceLineNo">1142</span>                    result = targetClazz.cast(s);<a name="line.1142"></a>
+<span class="sourceLineNo">1143</span>                    coerced = true;<a name="line.1143"></a>
+<span class="sourceLineNo">1144</span>                } else if (sourceClass == java.math.BigDecimal.class) {<a name="line.1144"></a>
+<span class="sourceLineNo">1145</span>                    String s = ((java.math.BigDecimal) source).toString();<a name="line.1145"></a>
+<span class="sourceLineNo">1146</span>                    result = targetClazz.cast(s);<a name="line.1146"></a>
+<span class="sourceLineNo">1147</span>                    coerced = true;<a name="line.1147"></a>
+<span class="sourceLineNo">1148</span>                } else if (sourceClass == java.io.File.class) {<a name="line.1148"></a>
+<span class="sourceLineNo">1149</span>                    File file = (File) source;<a name="line.1149"></a>
+<span class="sourceLineNo">1150</span>                    String s = file.getPath();<a name="line.1150"></a>
+<span class="sourceLineNo">1151</span>                    result = targetClazz.cast(s);<a name="line.1151"></a>
+<span class="sourceLineNo">1152</span>                    coerced = true;<a name="line.1152"></a>
+<span class="sourceLineNo">1153</span>                } else if (sourceClass == java.net.URI.class) {<a name="line.1153"></a>
+<span class="sourceLineNo">1154</span>                    java.net.URI uri = (java.net.URI) source;<a name="line.1154"></a>
+<span class="sourceLineNo">1155</span>                    String s = uri.toString();<a name="line.1155"></a>
+<span class="sourceLineNo">1156</span>                    result = targetClazz.cast(s);<a name="line.1156"></a>
+<span class="sourceLineNo">1157</span>                    coerced = true;<a name="line.1157"></a>
+<span class="sourceLineNo">1158</span>                } else if (sourceClass == Character.class) {<a name="line.1158"></a>
+<span class="sourceLineNo">1159</span>                    Character c = (Character) source;<a name="line.1159"></a>
+<span class="sourceLineNo">1160</span>                    char[] charArray = new char[1];<a name="line.1160"></a>
+<span class="sourceLineNo">1161</span>                    charArray[0] = c.charValue();<a name="line.1161"></a>
+<span class="sourceLineNo">1162</span>                    String s = new String(charArray);<a name="line.1162"></a>
+<span class="sourceLineNo">1163</span>                    result = targetClazz.cast(s);<a name="line.1163"></a>
+<span class="sourceLineNo">1164</span>                    coerced = true;<a name="line.1164"></a>
+<span class="sourceLineNo">1165</span>                } else if (sourceClass == GuardedString.class) {<a name="line.1165"></a>
+<span class="sourceLineNo">1166</span>                    String s = decrypt((GuardedString) source);<a name="line.1166"></a>
+<span class="sourceLineNo">1167</span>                    result = targetClazz.cast(s);<a name="line.1167"></a>
+<span class="sourceLineNo">1168</span>                    coerced = true;<a name="line.1168"></a>
+<span class="sourceLineNo">1169</span>                } else if (sourceClass == GuardedByteArray.class) {<a name="line.1169"></a>
+<span class="sourceLineNo">1170</span>                    byte[] s = decrypt((GuardedByteArray) source);<a name="line.1170"></a>
+<span class="sourceLineNo">1171</span>                    result = targetClazz.cast(new String(s));<a name="line.1171"></a>
+<span class="sourceLineNo">1172</span>                    coerced = true;<a name="line.1172"></a>
+<span class="sourceLineNo">1173</span>                }<a name="line.1173"></a>
+<span class="sourceLineNo">1174</span>            } else if (targetClazz.equals(Uid.class)) {<a name="line.1174"></a>
+<span class="sourceLineNo">1175</span>                if (sourceClass == String.class) {<a name="line.1175"></a>
+<span class="sourceLineNo">1176</span>                    Uid v = new Uid((String) source);<a name="line.1176"></a>
+<span class="sourceLineNo">1177</span>                    result = targetClazz.cast(v);<a name="line.1177"></a>
+<span class="sourceLineNo">1178</span>                    coerced = true;<a name="line.1178"></a>
+<span class="sourceLineNo">1179</span>                }<a name="line.1179"></a>
+<span class="sourceLineNo">1180</span>            } else if (targetClazz.equals(java.net.URI.class)) {<a name="line.1180"></a>
+<span class="sourceLineNo">1181</span>                if (sourceClass == String.class) {<a name="line.1181"></a>
+<span class="sourceLineNo">1182</span>                    try {<a name="line.1182"></a>
+<span class="sourceLineNo">1183</span>                        java.net.URI v = new java.net.URI((String) source);<a name="line.1183"></a>
+<span class="sourceLineNo">1184</span>                        result = targetClazz.cast(v);<a name="line.1184"></a>
+<span class="sourceLineNo">1185</span>                        coerced = true;<a name="line.1185"></a>
+<span class="sourceLineNo">1186</span>                    } catch (URISyntaxException e) {<a name="line.1186"></a>
+<span class="sourceLineNo">1187</span>                        throw new IOException(e);<a name="line.1187"></a>
+<span class="sourceLineNo">1188</span>                    }<a name="line.1188"></a>
+<span class="sourceLineNo">1189</span>                }<a name="line.1189"></a>
+<span class="sourceLineNo">1190</span>            }<a name="line.1190"></a>
+<span class="sourceLineNo">1191</span>        } catch (Exception e) {<a name="line.1191"></a>
+<span class="sourceLineNo">1192</span>            if (logger.isDebugEnabled()) {<a name="line.1192"></a>
+<span class="sourceLineNo">1193</span>                logger.error("Failed to coerce {} from {} to {} ", new Object[]{source, sourceClass.getCanonicalName(), targetClazz.getCanonicalName()}, e);<a name="line.1193"></a>
+<span class="sourceLineNo">1194</span>            } else {<a name="line.1194"></a>
+<span class="sourceLineNo">1195</span>                logger.error("Failed to coerce from {} to {} ", new Object[]{sourceClass.getCanonicalName(), targetClazz.getCanonicalName()}, e);<a name="line.1195"></a>
+<span class="sourceLineNo">1196</span>            }<a name="line.1196"></a>
+<span class="sourceLineNo">1197</span>            throw new IllegalArgumentException(source.getClass().getCanonicalName() + " to " + targetClazz.getCanonicalName(), e);<a name="line.1197"></a>
+<span class="sourceLineNo">1198</span>        }<a name="line.1198"></a>
+<span class="sourceLineNo">1199</span><a name="line.1199"></a>
+<span class="sourceLineNo">1200</span>        if (!coerced) {<a name="line.1200"></a>
+<span class="sourceLineNo">1201</span>            logger.error("Can not coerce {} to {}", sourceClass.getCanonicalName(), targetClazz.getCanonicalName());<a name="line.1201"></a>
+<span class="sourceLineNo">1202</span>            throw new IllegalArgumentException(source.getClass().getCanonicalName() + " to " + targetClazz.getCanonicalName());<a name="line.1202"></a>
+<span class="sourceLineNo">1203</span>        }<a name="line.1203"></a>
+<span class="sourceLineNo">1204</span>        return result;<a name="line.1204"></a>
+<span class="sourceLineNo">1205</span>    }<a name="line.1205"></a>
+<span class="sourceLineNo">1206</span><a name="line.1206"></a>
+<span class="sourceLineNo">1207</span>    private static byte[] decrypt(GuardedByteArray guardedByteArray) {<a name="line.1207"></a>
+<span class="sourceLineNo">1208</span>        final ByteArrayOutputStream clearStream = new ByteArrayOutputStream();<a name="line.1208"></a>
+<span class="sourceLineNo">1209</span>        GuardedByteArray.Accessor accessor = new GuardedByteArray.Accessor() {<a name="line.1209"></a>
+<span class="sourceLineNo">1210</span><a name="line.1210"></a>
+<span class="sourceLineNo">1211</span>            public void access(byte[] clearBytes) {<a name="line.1211"></a>
+<span class="sourceLineNo">1212</span>                clearStream.write(clearBytes, 0, clearBytes.length);<a name="line.1212"></a>
+<span class="sourceLineNo">1213</span>            }<a name="line.1213"></a>
+<span class="sourceLineNo">1214</span>        };<a name="line.1214"></a>
+<span class="sourceLineNo">1215</span>        guardedByteArray.access(accessor);<a name="line.1215"></a>
+<span class="sourceLineNo">1216</span>        return clearStream.toByteArray();<a name="line.1216"></a>
+<span class="sourceLineNo">1217</span>    }<a name="line.1217"></a>
+<span class="sourceLineNo">1218</span><a name="line.1218"></a>
+<span class="sourceLineNo">1219</span>    private static String decrypt(GuardedString guardedString) {<a name="line.1219"></a>
+<span class="sourceLineNo">1220</span>        final String[] clearText = new String[1];<a name="line.1220"></a>
+<span class="sourceLineNo">1221</span>        GuardedString.Accessor accessor = new GuardedString.Accessor() {<a name="line.1221"></a>
+<span class="sourceLineNo">1222</span><a name="line.1222"></a>
+<span class="sourceLineNo">1223</span>            public void access(char[] clearChars) {<a name="line.1223"></a>
+<span class="sourceLineNo">1224</span>                clearText[0] = new String(clearChars);<a name="line.1224"></a>
+<span class="sourceLineNo">1225</span>            }<a name="line.1225"></a>
+<span class="sourceLineNo">1226</span>        };<a name="line.1226"></a>
+<span class="sourceLineNo">1227</span><a name="line.1227"></a>
+<span class="sourceLineNo">1228</span>        guardedString.access(accessor);<a name="line.1228"></a>
+<span class="sourceLineNo">1229</span>        return clearText[0];<a name="line.1229"></a>
+<span class="sourceLineNo">1230</span>    }<a name="line.1230"></a>
+<span class="sourceLineNo">1231</span>}<a name="line.1231"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

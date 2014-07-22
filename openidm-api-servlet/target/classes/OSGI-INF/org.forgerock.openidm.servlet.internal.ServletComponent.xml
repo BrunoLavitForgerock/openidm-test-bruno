@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.api-servlet" configuration-policy="ignore" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.servlet.internal.ServletComponent"/>
+        <service servicefactory="false">
+            <provide interface="org.osgi.service.event.EventHandler"/>
+        </service>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="service.description" value="OpenIDM Common REST HttpServlet"/>
+        <property name="event.topics" value="org/forgerock/openidm/servlet/*"/>
+        <property name="service.pid" value="org.forgerock.openidm.api-servlet"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="dynamic" target="(service.pid=org.forgerock.openidm.router)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+        <reference name="servletRegistration" interface="org.forgerock.openidm.servletregistration.ServletRegistration" cardinality="1..1" policy="static" bind="bindServletRegistration" unbind="unbindServletRegistration"/>
+        <reference name="scriptRegistry" interface="org.forgerock.script.ScriptRegistry" cardinality="1..1" policy="dynamic" bind="bindScriptRegistry" unbind="unbindScriptRegistry"/>
+        <reference name="reference_Servlet_ServletFilterRegistrator" interface="org.forgerock.openidm.servletregistration.ServletFilterRegistrator" cardinality="0..n" policy="dynamic" bind="bindRegistrator" unbind="unbindRegistrator"/>
+    </scr:component>
+</components>

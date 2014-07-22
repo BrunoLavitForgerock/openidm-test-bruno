@@ -1,0 +1,5 @@
+org/forgerock/openidm/repo/orientdb/impl/EmbeddedOServerServiceTest.class
+org/forgerock/openidm/repo/orientdb/impl/DBHelperTest.class
+org/forgerock/openidm/repo/orientdb/impl/query/TokenHandlerTest.class
+org/forgerock/openidm/repo/orientdb/impl/query/QueryInfoTest.class
+org/forgerock/openidm/repo/orientdb/impl/DocumentUtilTest.class

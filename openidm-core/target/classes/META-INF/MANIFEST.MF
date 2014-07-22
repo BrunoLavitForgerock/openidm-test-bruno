@@ -1,0 +1,39 @@
+Manifest-Version: 1.0
+Bundle-Description: This bundle contains OpenIDM
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Core Bundle
+Bundle-SymbolicName: org.forgerock.openidm.core
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.core.filter;uses:="org.apache.comm
+ ons.lang3.tuple,org.forgerock.json.fluent,org.forgerock.json.resource,o
+ rg.forgerock.script";version="3.0.0",org.forgerock.openidm.managed;uses
+ :="org.forgerock.json.fluent,org.forgerock.json.resource,org.forgerock.
+ openidm.crypto,org.forgerock.script,org.osgi.service.component";version
+ ="3.0.0",org.forgerock.openidm.sync;uses:="org.forgerock.json.fluent,or
+ g.forgerock.json.resource";version="3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.audit.util;version="[3.0,3.1)",org
+ .forgerock.openidm.config.enhanced;version="[3.0,3.1)",org.forgerock.op
+ enidm.core;version="[3.0,3.1)",org.forgerock.openidm.crypto;version="[3
+ .0,3.1)",org.forgerock.openidm.metadata;version="[3.0,3.1)",org.forgero
+ ck.openidm.patch;version="[3.0,3.1)",org.forgerock.openidm.quartz.impl;
+ version="[3.0,3.1)",org.forgerock.openidm.router;version="[3.0,3.1)",or
+ g.forgerock.openidm.smartevent;version="[3.0,3.1)",org.forgerock.openid
+ m.sync,org.forgerock.openidm.util;version="[3.0,3.1)",org.forgerock.jso
+ n.crypto;version="[2.3,2.4)",org.forgerock.json.fluent;version="[2.3,2.
+ 4)",org.forgerock.json.patch;version="[2.3,2.4)",org.forgerock.json.res
+ ource;version="[2.3,2.4)",org.forgerock.json.resource.servlet;version="
+ [2.3,2.4)",javax.script,org.apache.commons.lang3.tuple;version="[3.1,4)
+ ",org.forgerock.script;version="[1.3,2)",org.forgerock.script.engine;ve
+ rsion="[1.3,2)",org.forgerock.script.exception;version="[1.3,2)",org.fo
+ rgerock.util;version="[1.3,2)",org.osgi.service.component;version="[1.1
+ ,2)",org.slf4j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.sync.impl.Synchronizat
+ ionService.xml,OSGI-INF/org.forgerock.openidm.sync.impl.ReconciliationS
+ ervice.xml,OSGI-INF/org.forgerock.openidm.managed.ManagedObjectService.
+ xml

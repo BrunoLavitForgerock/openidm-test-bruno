@@ -1,0 +1,5 @@
+org.forgerock.openidm.repo.jdbc
+org.forgerock.openidm.repo.jdbc.impl
+org.forgerock.openidm.repo.jdbc.impl.metadata
+org.forgerock.openidm.repo.jdbc.impl.pool
+org.forgerock.openidm.repo.jdbc.impl.query

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.authnfilterbuilder" configuration-policy="ignore" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.jaspi.config.OSGiAuthnFilterBuilder"/>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="service.description" value="OpenIDM Commons Authentication Filter Configuration"/>
+        <property name="service.pid" value="org.forgerock.openidm.authnfilterbuilder"/>
+        <reference name="AuthenticationConfig" interface="org.forgerock.openidm.jaspi.config.AuthenticationConfig" cardinality="1..1" policy="static" bind="bindAuthenticationConfig" unbind="unBindAuthenticationConfig"/>
+        <reference name="repositoryRoute" interface="org.forgerock.openidm.router.RouteService" cardinality="1..1" policy="static" target="(openidm.router.prefix=/repo/*)" bind="bindRepositoryRoute" unbind="unbindRepositoryRoute"/>
+        <reference name="cryptoService" interface="org.forgerock.openidm.crypto.CryptoService" cardinality="1..1" policy="dynamic" bind="bindCryptoService" unbind="unbindCryptoService"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+        <reference name="scriptRegistry" interface="org.forgerock.script.ScriptRegistry" cardinality="1..1" policy="dynamic" bind="bindScriptRegistry" unbind="unbindScriptRegistry"/>
+        <reference name="ref_ServletFilterRegistration" interface="org.forgerock.openidm.servletregistration.ServletRegistration" cardinality="1..1" policy="static" bind="bindRef_ServletFilterRegistration" unbind="unbindRef_ServletFilterRegistration"/>
+    </scr:component>
+</components>

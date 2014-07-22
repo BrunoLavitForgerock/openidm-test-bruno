@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.provisioner.openicf.connectorinfoprovider" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.provisioner.openicf.impl.ConnectorInfoProviderService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider"/>
+            <provide interface="org.forgerock.openidm.metadata.MetaDataProvider"/>
+            <provide interface="org.forgerock.openidm.provisioner.ConfigurationService"/>
+        </service>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="service.description" value="OpenICF Connector Info Service"/>
+        <property name="service.pid" value="org.forgerock.openidm.provisioner.openicf.connectorinfoprovider"/>
+        <reference name="osgiConnectorEventPublisher" interface="org.identityconnectors.common.event.ConnectorEventPublisher" cardinality="0..n" policy="dynamic" bind="bindConnectorEventPublisher" unbind="unbindConnectorEventPublisher"/>
+        <reference name="connectorInfoManager" interface="org.identityconnectors.framework.api.ConnectorInfoManager" cardinality="0..1" policy="static" bind="bindConnectorInfoManager" unbind="unbindConnectorInfoManager"/>
+        <reference name="connectorFacadeFactory" interface="org.identityconnectors.framework.api.ConnectorFacadeFactory" cardinality="0..1" policy="static" bind="bindConnectorFacadeFactory" unbind="unbindConnectorFacadeFactory"/>
+    </scr:component>
+</components>

@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-Description: This bundle implement the Scripting support for the 
+ Common Resource Access Protocol
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Script Bundle
+Bundle-SymbolicName: org.forgerock.openidm.script
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.script;uses:="javax.script,org.for
+ gerock.json.fluent,org.forgerock.json.resource,org.forgerock.script,org
+ .osgi.framework";version="3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.config.enhanced;version="[3.0,3.1)
+ ",org.forgerock.openidm.core;version="[3.0,3.1)",org.forgerock.openidm.
+ crypto;version="[3.0,3.1)",org.forgerock.openidm.metadata;version="[3.0
+ ,3.1)",org.forgerock.openidm.quartz.impl;version="[3.0,3.1)",org.forger
+ ock.openidm.util;version="[3.0,3.1)",org.forgerock.json.crypto;version=
+ "[2.3,2.4)",org.forgerock.json.fluent;version="[2.3,2.4)",org.forgerock
+ .json.resource;version="[2.3,2.4)",javax.script,org.apache.commons.lang
+ 3;version="[3.1,4)",org.forgerock.script;version="[1.3,2)",org.forgeroc
+ k.script.exception;version="[1.3,2)",org.forgerock.script.registry;vers
+ ion="[1.3,2)",org.forgerock.script.scope;version="[1.3,2)",org.forgeroc
+ k.script.source;version="[1.3,2)",org.forgerock.util;version="[1.3,2)",
+ org.ops4j.pax.swissbox.extender;version="[1.6,2)";resolution:=optional,
+ org.osgi.framework;version="[1.6,2)",org.osgi.service.component;version
+ ="[1.1,2)",org.slf4j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.script.impl.ScriptRegi
+ stryService.xml

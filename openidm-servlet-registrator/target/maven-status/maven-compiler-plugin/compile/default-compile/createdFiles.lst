@@ -1,0 +1,9 @@
+org/forgerock/openidm/servletregistration/ServletRegistration.class
+org/forgerock/openidm/servletregistration/impl/ServletFilterRegistratorSvc.class
+org/forgerock/openidm/servletregistration/impl/ServletRegistrationSingleton$FilterProxy.class
+org/forgerock/openidm/servletregistration/impl/ServletRegistrationSingleton$1.class
+org/forgerock/openidm/servletregistration/impl/RegisteredFilterImpl.class
+org/forgerock/openidm/servletregistration/ServletFilterRegistrator.class
+org/forgerock/openidm/servletregistration/impl/ServletFilterConfiguration.class
+org/forgerock/openidm/servletregistration/impl/ServletRegistrationSingleton.class
+org/forgerock/openidm/servletregistration/RegisteredFilter.class

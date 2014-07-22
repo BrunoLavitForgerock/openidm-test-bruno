@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-Activator: org.forgerock.openidm.crypto.impl.Activator
+Bundle-Description: This bundle provides the JSON Cryptography
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Cryptography Bundle
+Bundle-SymbolicName: org.forgerock.openidm.crypto
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.crypto.factory;uses:="org.forgeroc
+ k.openidm.crypto";version="3.0.0",org.forgerock.openidm.crypto.util;ver
+ sion="3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.core;version="[3.0,3.1)",org.forge
+ rock.openidm.crypto;version="[3.0,3.1)",org.forgerock.openidm.util;vers
+ ion="[3.0,3.1)",org.forgerock.json.crypto;version="[2.3,2.4)",org.forge
+ rock.json.crypto.simple;version="[2.3,2.4)",org.forgerock.json.fluent;v
+ ersion="[2.3,2.4)",javax.crypto,javax.crypto.spec,org.osgi.framework;ve
+ rsion="[1.6,2)",org.slf4j;version="[1.7,2)"
+Main-Class: org.forgerock.openidm.crypto.impl.Main
+SCM-Revision: 0

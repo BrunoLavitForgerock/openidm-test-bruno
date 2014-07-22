@@ -1,0 +1,3 @@
+org.forgerock.openidm.core
+org.forgerock.openidm.core.internal
+org.forgerock.openidm.logging.util

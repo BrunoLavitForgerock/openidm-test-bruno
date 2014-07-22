@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-Description: This bundle suppose to assembly the OpenIDM web appl
+ ication just like a web.xml
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM HTTP Bundle
+Bundle-SymbolicName: org.forgerock.openidm.httpcontext
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.http;uses:="org.ops4j.pax.web.serv
+ ice,org.osgi.framework,org.osgi.service.component,org.osgi.service.http
+ ";version="3.0.0"
+Implementation-Build: 0
+Import-Package: org.ops4j.pax.web.service;version="[3.0,4)",org.osgi.fra
+ mework;version="[1.6,2)",org.osgi.service.component;version="[1.1,2)",o
+ rg.osgi.service.http;version="[1.2,2)",org.slf4j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.http.ContextRegistrato
+ r.xml

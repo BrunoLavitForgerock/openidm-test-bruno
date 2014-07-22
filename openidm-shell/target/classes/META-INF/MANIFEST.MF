@@ -1,0 +1,46 @@
+Manifest-Version: 1.0
+Bundle-Activator: org.forgerock.openidm.shell.felixgogo.Activator
+Bundle-ClassPath: .,asm-all-3.3.1.jar
+Bundle-Description: OpenIDM is an open standards based Identity Manageme
+ nt, Provisioning and Compliance solution.        Experience shows that 
+ the most important features of an identity management product are: high
+  flexibility in        Business Process handling and compliance with op
+ en standards and interfaces. A highly flexible user interface        co
+ mbined with a very robust workflow engine make OpenIDM ready for any Id
+ entity Management project.
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Felix Gogo Shell
+Bundle-SymbolicName: org.forgerock.openidm.shell
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Embed-Dependency: *;artifactId=asm-all;inline=false
+Embedded-Artifacts: asm-all-3.3.1.jar;g="asm";a="asm-all";v="3.3.1"
+Export-Package: org.forgerock.openidm.shell;version="3.0.0",org.forgeroc
+ k.openidm.shell.felixgogo;uses:="org.apache.felix.service.command,org.f
+ orgerock.openidm.shell,org.osgi.framework";version="3.0.0",org.forgeroc
+ k.openidm.shell.felixgogo.debug;uses:="org.apache.felix.service.command
+ ,org.forgerock.json.fluent,org.forgerock.json.resource,org.osgi.framewo
+ rk";version="3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.config.persistence;version="[3.0,3
+ .1)",org.forgerock.openidm.core;version="[3.0,3.1)",org.forgerock.openi
+ dm.crypto;version="[3.0,3.1)",org.forgerock.openidm.crypto.factory;vers
+ ion="[3.0,3.1)",org.forgerock.openidm.crypto.impl,org.forgerock.openidm
+ .shell,org.forgerock.json.crypto;version="[2.3,2.4)",org.forgerock.json
+ .fluent;version="[2.3,2.4)",org.forgerock.json.resource;version="[2.3,2
+ .4)",org.apache.felix.service.command;version="[0.10.0,1)";status=provi
+ sional;mandatory:=status,javax.crypto,javax.crypto.spec,javax.xml.trans
+ form,javax.xml.transform.sax,javax.xml.transform.stream,org.apache.comm
+ ons.lang3;version="[3.1,4)",org.apache.commons.lang3.math;version="[3.1
+ ,4)",org.apache.felix.service.threadio;version="[0.10,1)";status=provis
+ ional,org.codehaus.jackson.map;version="[1.9,2)";resolution:=optional,o
+ rg.osgi.framework;version="[1.6,2)",org.osgi.util.tracker;version="[1.5
+ ,2)",org.restlet,org.restlet.data,org.restlet.ext.jackson;resolution:=o
+ ptional,org.restlet.representation,org.restlet.resource,org.slf4j;versi
+ on="[1.7,2)",org.xml.sax,org.xml.sax.ext,org.xml.sax.helpers,sun.reflec
+ t.generics.reflectiveObjects
+Main-Class: org.forgerock.openidm.shell.impl.Main
+SCM-Revision: 0

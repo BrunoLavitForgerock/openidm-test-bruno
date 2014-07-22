@@ -1,0 +1,340 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.<a name="line.2"></a>
+<span class="sourceLineNo">003</span> *<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * Copyright © 2011-2013 ForgeRock AS. All rights reserved.<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * The contents of this file are subject to the terms<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * of the Common Development and Distribution License<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * (the License). You may not use this file except in<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * compliance with the License.<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * You can obtain a copy of the License at<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * http://forgerock.org/license/CDDLv1.0.html<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * See the License for the specific language governing<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * permission and limitations under the License.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> *<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * When distributing Covered Code, include this CDDL<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * Header Notice in each file and include the License file<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * at http://forgerock.org/license/CDDLv1.0.html<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * If applicable, add the following below the CDDL Header,<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * with the fields enclosed by brackets [] replaced by<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * your own identifying information:<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * "Portions Copyrighted [year] [name of copyright owner]"<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span>package org.forgerock.openidm.repo.orientdb.impl;<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.io.File;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.ArrayList;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.Map;<a name="line.28"></a>
+<span class="sourceLineNo">029</span><a name="line.29"></a>
+<span class="sourceLineNo">030</span>import org.forgerock.openidm.core.IdentityServer;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import org.slf4j.Logger;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import org.slf4j.LoggerFactory;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import org.forgerock.json.fluent.JsonValue;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import org.forgerock.openidm.repo.RepositoryService;<a name="line.34"></a>
+<span class="sourceLineNo">035</span><a name="line.35"></a>
+<span class="sourceLineNo">036</span>import com.orientechnologies.orient.server.OServer;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import com.orientechnologies.orient.server.OServerMain;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import com.orientechnologies.orient.server.config.OServerCommandConfiguration;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import com.orientechnologies.orient.server.config.OServerConfiguration;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import com.orientechnologies.orient.server.config.OServerEntryConfiguration;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import com.orientechnologies.orient.server.config.OServerHandlerConfiguration;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import com.orientechnologies.orient.server.config.OServerNetworkConfiguration;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import com.orientechnologies.orient.server.config.OServerNetworkListenerConfiguration;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import com.orientechnologies.orient.server.config.OServerNetworkProtocolConfiguration;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import com.orientechnologies.orient.server.config.OServerParameterConfiguration;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import com.orientechnologies.orient.server.config.OServerStorageConfiguration;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import com.orientechnologies.orient.server.config.OServerUserConfiguration;<a name="line.47"></a>
+<span class="sourceLineNo">048</span><a name="line.48"></a>
+<span class="sourceLineNo">049</span>/**<a name="line.49"></a>
+<span class="sourceLineNo">050</span> * Component for embedded OrientDB server<a name="line.50"></a>
+<span class="sourceLineNo">051</span> *<a name="line.51"></a>
+<span class="sourceLineNo">052</span> * @author aegloff<a name="line.52"></a>
+<span class="sourceLineNo">053</span> */<a name="line.53"></a>
+<span class="sourceLineNo">054</span>public class EmbeddedOServerService {<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    final static Logger logger = LoggerFactory.getLogger(EmbeddedOServerService.class);<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>    OServer orientDBServer;<a name="line.57"></a>
+<span class="sourceLineNo">058</span><a name="line.58"></a>
+<span class="sourceLineNo">059</span>    void activate(JsonValue config) throws Exception {<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        logger.trace("Activating Service with configuration {}", config);<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        try {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            JsonValue enabled = config.get("embeddedServer").get("enabled");<a name="line.62"></a>
+<span class="sourceLineNo">063</span><a name="line.63"></a>
+<span class="sourceLineNo">064</span>            // Create regardless of whether enabled to ensure proper shutdown handling (observed in RC9)<a name="line.64"></a>
+<span class="sourceLineNo">065</span>            orientDBServer = OServerMain.create();<a name="line.65"></a>
+<span class="sourceLineNo">066</span>            <a name="line.66"></a>
+<span class="sourceLineNo">067</span>            // enabled flag should be Boolean, but allow for (deprecated) String representation for now.<a name="line.67"></a>
+<span class="sourceLineNo">068</span>            if ((enabled.isBoolean() &amp;&amp; Boolean.TRUE.equals(enabled.asBoolean())<a name="line.68"></a>
+<span class="sourceLineNo">069</span>                    || enabled.isString() &amp;&amp; "true".equalsIgnoreCase(enabled.asString()))) {<a name="line.69"></a>
+<span class="sourceLineNo">070</span>                OServerConfiguration serverConfig = getOrientDBConfig(config);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>                orientDBServer.startup(serverConfig);<a name="line.71"></a>
+<span class="sourceLineNo">072</span>                orientDBServer.activate();<a name="line.72"></a>
+<span class="sourceLineNo">073</span>                logger.info("Embedded DB server started.");<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            }<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        } catch (Exception ex) {<a name="line.75"></a>
+<span class="sourceLineNo">076</span>            logger.warn("Could not start OrientDB embedded server, service disabled.", ex);<a name="line.76"></a>
+<span class="sourceLineNo">077</span>            throw ex;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>        }<a name="line.78"></a>
+<span class="sourceLineNo">079</span>    }<a name="line.79"></a>
+<span class="sourceLineNo">080</span><a name="line.80"></a>
+<span class="sourceLineNo">081</span>    void deactivate() {<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        if (orientDBServer != null) {<a name="line.82"></a>
+<span class="sourceLineNo">083</span>            orientDBServer.shutdown();<a name="line.83"></a>
+<span class="sourceLineNo">084</span>            logger.debug("Embedded DB server stopped.");<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        }<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    }<a name="line.86"></a>
+<span class="sourceLineNo">087</span><a name="line.87"></a>
+<span class="sourceLineNo">088</span>    // TODO: make configurable<a name="line.88"></a>
+<span class="sourceLineNo">089</span>    protected OServerConfiguration getOrientDBConfig(JsonValue config) {<a name="line.89"></a>
+<span class="sourceLineNo">090</span><a name="line.90"></a>
+<span class="sourceLineNo">091</span>        OServerConfiguration configuration = new OServerConfiguration();<a name="line.91"></a>
+<span class="sourceLineNo">092</span><a name="line.92"></a>
+<span class="sourceLineNo">093</span>        Boolean studioUiEnabled  = config.get("embeddedServer").get("studioUi")<a name="line.93"></a>
+<span class="sourceLineNo">094</span>                .get("enabled").defaultTo(Boolean.FALSE).asBoolean();<a name="line.94"></a>
+<span class="sourceLineNo">095</span>        <a name="line.95"></a>
+<span class="sourceLineNo">096</span>        Boolean clustered  = config.get("embeddedServer").get("clustered").defaultTo(Boolean.FALSE).asBoolean();<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        <a name="line.97"></a>
+<span class="sourceLineNo">098</span>        if (clustered) {<a name="line.98"></a>
+<span class="sourceLineNo">099</span>            configuration.handlers = new ArrayList&lt;OServerHandlerConfiguration&gt;();<a name="line.99"></a>
+<span class="sourceLineNo">100</span>            OServerHandlerConfiguration handler = new OServerHandlerConfiguration();<a name="line.100"></a>
+<span class="sourceLineNo">101</span>            handler.clazz = "com.orientechnologies.orient.server.handler.distributed.ODistributedServerManager";<a name="line.101"></a>
+<span class="sourceLineNo">102</span>            configuration.handlers.add(handler);<a name="line.102"></a>
+<span class="sourceLineNo">103</span>            <a name="line.103"></a>
+<span class="sourceLineNo">104</span>            String clusterName = config.get("embeddedServer").get("clusterName").defaultTo("openidm").asString();<a name="line.104"></a>
+<span class="sourceLineNo">105</span>            String multicastAddress = config.get("embeddedServer").get("clusterAddress").defaultTo("235.1.1.1").asString();<a name="line.105"></a>
+<span class="sourceLineNo">106</span>            String multicastPort = config.get("embeddedServer").get("clusterPort").defaultTo("2424").asString();<a name="line.106"></a>
+<span class="sourceLineNo">107</span>            String clusterSecurityKey = config.get("embeddedServer").get("clusterSecurityKey").defaultTo("hw3CgjSzqm8I/axu").asString();<a name="line.107"></a>
+<span class="sourceLineNo">108</span>            <a name="line.108"></a>
+<span class="sourceLineNo">109</span>            handler.parameters = new OServerParameterConfiguration[]{<a name="line.109"></a>
+<span class="sourceLineNo">110</span>                    new OServerParameterConfiguration("enabled", Boolean.toString(clustered)),<a name="line.110"></a>
+<span class="sourceLineNo">111</span>                    new OServerParameterConfiguration("name", clusterName),<a name="line.111"></a>
+<span class="sourceLineNo">112</span>                    new OServerParameterConfiguration("security.algorithm", "Blowfish"),<a name="line.112"></a>
+<span class="sourceLineNo">113</span>                    new OServerParameterConfiguration("network.multicast.address", multicastAddress),<a name="line.113"></a>
+<span class="sourceLineNo">114</span>                    new OServerParameterConfiguration("network.multicast.port", multicastPort),<a name="line.114"></a>
+<span class="sourceLineNo">115</span>                    new OServerParameterConfiguration("network.multicast.heartbeat", "10"),<a name="line.115"></a>
+<span class="sourceLineNo">116</span>                    new OServerParameterConfiguration("server.update.delay", "5000"),<a name="line.116"></a>
+<span class="sourceLineNo">117</span>                    new OServerParameterConfiguration("server.electedForLeadership", "true"),<a name="line.117"></a>
+<span class="sourceLineNo">118</span>                    new OServerParameterConfiguration("security.key", clusterSecurityKey),<a name="line.118"></a>
+<span class="sourceLineNo">119</span>            };<a name="line.119"></a>
+<span class="sourceLineNo">120</span>            logger.info("OrientDB clustering enabled on {}:{} with cluster name {}", new Object[] {multicastAddress, multicastPort, clusterName});<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        }<a name="line.121"></a>
+<span class="sourceLineNo">122</span><a name="line.122"></a>
+<span class="sourceLineNo">123</span>        JsonValue automaticBackup  = config.get("embeddedServer").get("automaticBackup");<a name="line.123"></a>
+<span class="sourceLineNo">124</span>        Boolean backupEnabled = automaticBackup.get("enabled").defaultTo(Boolean.FALSE).asBoolean();<a name="line.124"></a>
+<span class="sourceLineNo">125</span>        <a name="line.125"></a>
+<span class="sourceLineNo">126</span>        if (backupEnabled) {<a name="line.126"></a>
+<span class="sourceLineNo">127</span>            configuration.handlers = new ArrayList&lt;OServerHandlerConfiguration&gt;();<a name="line.127"></a>
+<span class="sourceLineNo">128</span>            OServerHandlerConfiguration handler = new OServerHandlerConfiguration();<a name="line.128"></a>
+<span class="sourceLineNo">129</span>            handler.clazz = "com.orientechnologies.orient.server.handler.OAutomaticBackup";<a name="line.129"></a>
+<span class="sourceLineNo">130</span>            configuration.handlers.add(handler);<a name="line.130"></a>
+<span class="sourceLineNo">131</span>            <a name="line.131"></a>
+<span class="sourceLineNo">132</span>            String targetDirectory = automaticBackup.get("targetDirectory").defaultTo("db/backup").asString();<a name="line.132"></a>
+<span class="sourceLineNo">133</span>            String targetFileName = automaticBackup.get("targetFile").defaultTo("${DBNAME}-${DATE:yyyyMMddHHmmss}.zip").asString();<a name="line.133"></a>
+<span class="sourceLineNo">134</span>            String firstTime = automaticBackup.get("firsttime").defaultTo("23:59:00").asString();<a name="line.134"></a>
+<span class="sourceLineNo">135</span>            String delay = automaticBackup.get("delay").defaultTo("1d").asString();<a name="line.135"></a>
+<span class="sourceLineNo">136</span>            String dbExclude = automaticBackup.get("dbExclude").defaultTo("temp").asString();<a name="line.136"></a>
+<span class="sourceLineNo">137</span>            String dbInclude = automaticBackup.get("dbInclude").defaultTo("openidm").asString();<a name="line.137"></a>
+<span class="sourceLineNo">138</span>            <a name="line.138"></a>
+<span class="sourceLineNo">139</span>            handler.parameters = new OServerParameterConfiguration[]{<a name="line.139"></a>
+<span class="sourceLineNo">140</span>                    new OServerParameterConfiguration("enabled", Boolean.toString(backupEnabled)),<a name="line.140"></a>
+<span class="sourceLineNo">141</span>                    new OServerParameterConfiguration("target.directory", targetDirectory),<a name="line.141"></a>
+<span class="sourceLineNo">142</span>                    new OServerParameterConfiguration("target.fileName", targetFileName),<a name="line.142"></a>
+<span class="sourceLineNo">143</span>                    new OServerParameterConfiguration("firsttime", firstTime),<a name="line.143"></a>
+<span class="sourceLineNo">144</span>                    new OServerParameterConfiguration("delay", delay),<a name="line.144"></a>
+<span class="sourceLineNo">145</span>                    new OServerParameterConfiguration("db.exclude", dbExclude),<a name="line.145"></a>
+<span class="sourceLineNo">146</span>                    new OServerParameterConfiguration("db.include", dbInclude)<a name="line.146"></a>
+<span class="sourceLineNo">147</span>            };<a name="line.147"></a>
+<span class="sourceLineNo">148</span>            logger.info("OrientDB automatic backups enabled every {} starting today at {}", new Object[] {delay, firstTime});<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        }<a name="line.149"></a>
+<span class="sourceLineNo">150</span><a name="line.150"></a>
+<span class="sourceLineNo">151</span>        configuration.network = new OServerNetworkConfiguration();<a name="line.151"></a>
+<span class="sourceLineNo">152</span>        configuration.network.protocols = new ArrayList&lt;OServerNetworkProtocolConfiguration&gt;();<a name="line.152"></a>
+<span class="sourceLineNo">153</span>        OServerNetworkProtocolConfiguration protocol1 = new OServerNetworkProtocolConfiguration();<a name="line.153"></a>
+<span class="sourceLineNo">154</span>        protocol1.name = "binary";<a name="line.154"></a>
+<span class="sourceLineNo">155</span>        protocol1.implementation = "com.orientechnologies.orient.server.network.protocol.binary.ONetworkProtocolBinary";<a name="line.155"></a>
+<span class="sourceLineNo">156</span>        configuration.network.protocols.add(protocol1);<a name="line.156"></a>
+<span class="sourceLineNo">157</span>        OServerNetworkProtocolConfiguration protocol2 = new OServerNetworkProtocolConfiguration();<a name="line.157"></a>
+<span class="sourceLineNo">158</span>        protocol2.name = "http";<a name="line.158"></a>
+<span class="sourceLineNo">159</span>        protocol2.implementation = "com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpDb";<a name="line.159"></a>
+<span class="sourceLineNo">160</span>        configuration.network.protocols.add(protocol2);<a name="line.160"></a>
+<span class="sourceLineNo">161</span>//        NOTE: No longer exists as of 1.1.0-SNAPSHOT evidently<a name="line.161"></a>
+<span class="sourceLineNo">162</span>//        OServerNetworkProtocolConfiguration protocol3 = new OServerNetworkProtocolConfiguration();<a name="line.162"></a>
+<span class="sourceLineNo">163</span>//        protocol3.name = "distributed";<a name="line.163"></a>
+<span class="sourceLineNo">164</span>//        protocol3.implementation = "com.orientechnologies.orient.server.network.protocol.distributed.ONetworkProtocolDistributed";<a name="line.164"></a>
+<span class="sourceLineNo">165</span>//        configuration.network.protocols.add(protocol3);<a name="line.165"></a>
+<span class="sourceLineNo">166</span><a name="line.166"></a>
+<span class="sourceLineNo">167</span>        configuration.network.listeners = new ArrayList&lt;OServerNetworkListenerConfiguration&gt;();<a name="line.167"></a>
+<span class="sourceLineNo">168</span>        OServerNetworkListenerConfiguration listener1 = new OServerNetworkListenerConfiguration();<a name="line.168"></a>
+<span class="sourceLineNo">169</span><a name="line.169"></a>
+<span class="sourceLineNo">170</span><a name="line.170"></a>
+<span class="sourceLineNo">171</span>        // Explicitly access the restructured config format, intent is to replace with a more general <a name="line.171"></a>
+<span class="sourceLineNo">172</span>        // default/override mechanism<a name="line.172"></a>
+<span class="sourceLineNo">173</span>        JsonValue binaryConfig = config.get("embeddedServer").get("overrideConfig")<a name="line.173"></a>
+<span class="sourceLineNo">174</span>                .get("network").get("listeners").get("binary");<a name="line.174"></a>
+<span class="sourceLineNo">175</span><a name="line.175"></a>
+<span class="sourceLineNo">176</span>        listener1.ipAddress = binaryConfig.get("ipAddress").defaultTo("0.0.0.0").asString();<a name="line.176"></a>
+<span class="sourceLineNo">177</span>        listener1.portRange = binaryConfig.get("portRange").defaultTo("2424-2424").asString();<a name="line.177"></a>
+<span class="sourceLineNo">178</span>        if (clustered) {<a name="line.178"></a>
+<span class="sourceLineNo">179</span>            listener1.protocol = "distributed";<a name="line.179"></a>
+<span class="sourceLineNo">180</span>        } else {<a name="line.180"></a>
+<span class="sourceLineNo">181</span>            listener1.protocol = "binary";<a name="line.181"></a>
+<span class="sourceLineNo">182</span>        }<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        configuration.network.listeners.add(listener1);<a name="line.183"></a>
+<span class="sourceLineNo">184</span>        OServerNetworkListenerConfiguration listener2 = new OServerNetworkListenerConfiguration();<a name="line.184"></a>
+<span class="sourceLineNo">185</span><a name="line.185"></a>
+<span class="sourceLineNo">186</span>        JsonValue httpConfig = config.get("embeddedServer").get("overrideConfig")<a name="line.186"></a>
+<span class="sourceLineNo">187</span>                .get("network").get("listeners").get("http");<a name="line.187"></a>
+<span class="sourceLineNo">188</span><a name="line.188"></a>
+<span class="sourceLineNo">189</span>        listener2.ipAddress = httpConfig.get("ipAddress").defaultTo("127.0.0.1").asString();<a name="line.189"></a>
+<span class="sourceLineNo">190</span>        listener2.portRange = httpConfig.get("portRange").defaultTo("2480-2480").asString();<a name="line.190"></a>
+<span class="sourceLineNo">191</span><a name="line.191"></a>
+<span class="sourceLineNo">192</span>        listener2.protocol = "http";<a name="line.192"></a>
+<span class="sourceLineNo">193</span><a name="line.193"></a>
+<span class="sourceLineNo">194</span>//        NOTE: no longer used in 1.3<a name="line.194"></a>
+<span class="sourceLineNo">195</span>//        OServerCommandConfiguration command1 = new OServerCommandConfiguration();<a name="line.195"></a>
+<span class="sourceLineNo">196</span>//        command1.pattern = "POST|*.action GET|*.action";<a name="line.196"></a>
+<span class="sourceLineNo">197</span>//        command1.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.post.OServerCommandPostAction";<a name="line.197"></a>
+<span class="sourceLineNo">198</span>//        command1.parameters = new OServerEntryConfiguration[0];<a name="line.198"></a>
+<span class="sourceLineNo">199</span><a name="line.199"></a>
+<span class="sourceLineNo">200</span>        // Access to the studio web app<a name="line.200"></a>
+<span class="sourceLineNo">201</span>        OServerCommandConfiguration command2 = new OServerCommandConfiguration();<a name="line.201"></a>
+<span class="sourceLineNo">202</span>        command2.pattern = "GET|www GET|studio/ GET| GET|*.htm GET|*.html GET|*.xml GET|*.jpeg GET|*.jpg GET|*.png GET|*.gif GET|*.js GET|*.css GET|*.swf GET|*.ico GET|*.txt GET|*.otf GET|*.pjs GET|*.svg";<a name="line.202"></a>
+<span class="sourceLineNo">203</span>        command2.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.get.OServerCommandGetStaticContent";<a name="line.203"></a>
+<span class="sourceLineNo">204</span>        command2.parameters = new OServerEntryConfiguration[2];<a name="line.204"></a>
+<span class="sourceLineNo">205</span>        command2.parameters[0] = new OServerEntryConfiguration("http.cache:*.htm *.html", "Cache-Control: no-cache, no-store, max-age=0, must-revalidate\r\nPragma: no-cache");<a name="line.205"></a>
+<span class="sourceLineNo">206</span>        command2.parameters[1] = new OServerEntryConfiguration("http.cache:default", "Cache-Control: max-age=120");<a name="line.206"></a>
+<span class="sourceLineNo">207</span><a name="line.207"></a>
+<span class="sourceLineNo">208</span>        listener2.commands = new OServerCommandConfiguration[]{<a name="line.208"></a>
+<span class="sourceLineNo">209</span>//                command1,<a name="line.209"></a>
+<span class="sourceLineNo">210</span>                command2<a name="line.210"></a>
+<span class="sourceLineNo">211</span>        };<a name="line.211"></a>
+<span class="sourceLineNo">212</span><a name="line.212"></a>
+<span class="sourceLineNo">213</span>        listener2.parameters = new OServerParameterConfiguration[1];<a name="line.213"></a>
+<span class="sourceLineNo">214</span>        // Connection custom parameters. If not specified the global configuration will be taken<a name="line.214"></a>
+<span class="sourceLineNo">215</span>        listener2.parameters[0] = new OServerParameterConfiguration("network.http.charset", "utf-8");<a name="line.215"></a>
+<span class="sourceLineNo">216</span><a name="line.216"></a>
+<span class="sourceLineNo">217</span>        if (studioUiEnabled) {<a name="line.217"></a>
+<span class="sourceLineNo">218</span>            configuration.network.listeners.add(listener2);<a name="line.218"></a>
+<span class="sourceLineNo">219</span>        }<a name="line.219"></a>
+<span class="sourceLineNo">220</span><a name="line.220"></a>
+<span class="sourceLineNo">221</span>        OServerStorageConfiguration storage1 = new OServerStorageConfiguration();<a name="line.221"></a>
+<span class="sourceLineNo">222</span>        storage1.name = "temp";<a name="line.222"></a>
+<span class="sourceLineNo">223</span>        storage1.path = "memory:temp";<a name="line.223"></a>
+<span class="sourceLineNo">224</span>        storage1.userName = "admin";<a name="line.224"></a>
+<span class="sourceLineNo">225</span>        storage1.userPassword = "admin";<a name="line.225"></a>
+<span class="sourceLineNo">226</span>        storage1.loadOnStartup = false;<a name="line.226"></a>
+<span class="sourceLineNo">227</span>        String user = config.get(OrientDBRepoService.CONFIG_USER).defaultTo("admin").asString();<a name="line.227"></a>
+<span class="sourceLineNo">228</span>        String pwd = config.get(OrientDBRepoService.CONFIG_PASSWORD).defaultTo("admin").asString();<a name="line.228"></a>
+<span class="sourceLineNo">229</span>        String dbURL = config.get(OrientDBRepoService.CONFIG_DB_URL).asString();<a name="line.229"></a>
+<span class="sourceLineNo">230</span>        if (dbURL == null || dbURL.isEmpty()) {<a name="line.230"></a>
+<span class="sourceLineNo">231</span>            dbURL = "plocal:" + IdentityServer.getFileForWorkingPath("db/openidm").getAbsolutePath();<a name="line.231"></a>
+<span class="sourceLineNo">232</span>        }<a name="line.232"></a>
+<span class="sourceLineNo">233</span>        File dbFolder = IdentityServer.getFileForWorkingPath(dbURL.split(":")[1]);<a name="line.233"></a>
+<span class="sourceLineNo">234</span><a name="line.234"></a>
+<span class="sourceLineNo">235</span>        OServerStorageConfiguration storage2 = new OServerStorageConfiguration();<a name="line.235"></a>
+<span class="sourceLineNo">236</span>        storage2.name = "openidm";<a name="line.236"></a>
+<span class="sourceLineNo">237</span>        storage2.path = dbURL;<a name="line.237"></a>
+<span class="sourceLineNo">238</span>        storage2.userName = user;<a name="line.238"></a>
+<span class="sourceLineNo">239</span>        storage2.userPassword = pwd;<a name="line.239"></a>
+<span class="sourceLineNo">240</span>        storage2.loadOnStartup = false;<a name="line.240"></a>
+<span class="sourceLineNo">241</span><a name="line.241"></a>
+<span class="sourceLineNo">242</span>        configuration.storages = new OServerStorageConfiguration[]{<a name="line.242"></a>
+<span class="sourceLineNo">243</span>                storage1,<a name="line.243"></a>
+<span class="sourceLineNo">244</span>                storage2<a name="line.244"></a>
+<span class="sourceLineNo">245</span>        };<a name="line.245"></a>
+<span class="sourceLineNo">246</span><a name="line.246"></a>
+<span class="sourceLineNo">247</span>        // Defaulted to the same as the regular user<a name="line.247"></a>
+<span class="sourceLineNo">248</span>        String rootPwd = config.get("embeddedServer").get("rootPwd").defaultTo(pwd).asString();<a name="line.248"></a>
+<span class="sourceLineNo">249</span>        configuration.users = new OServerUserConfiguration[]<a name="line.249"></a>
+<span class="sourceLineNo">250</span>        {<a name="line.250"></a>
+<span class="sourceLineNo">251</span>                new OServerUserConfiguration("root", rootPwd, "*"),<a name="line.251"></a>
+<span class="sourceLineNo">252</span>                new OServerUserConfiguration("guest", null, "server.listDatabases")<a name="line.252"></a>
+<span class="sourceLineNo">253</span>        };<a name="line.253"></a>
+<span class="sourceLineNo">254</span>        configuration.properties = new OServerEntryConfiguration[]{<a name="line.254"></a>
+<span class="sourceLineNo">255</span>                new OServerEntryConfiguration("server.cache.staticResources", "false"),<a name="line.255"></a>
+<span class="sourceLineNo">256</span>                new OServerEntryConfiguration("orientdb.www.path", "db/util/orientdb/studio"),<a name="line.256"></a>
+<span class="sourceLineNo">257</span>                new OServerEntryConfiguration("orient.home", dbFolder.getAbsolutePath())<a name="line.257"></a>
+<span class="sourceLineNo">258</span>                //new OServerEntryConfiguration("log.console.level", "info"),<a name="line.258"></a>
+<span class="sourceLineNo">259</span>                //new OServerEntryConfiguration("log.file.level", "fine")<a name="line.259"></a>
+<span class="sourceLineNo">260</span>        };<a name="line.260"></a>
+<span class="sourceLineNo">261</span>        // OrientDB currently logs a warning if this is not set, <a name="line.261"></a>
+<span class="sourceLineNo">262</span>        // although it should be taking the setting from the config above instead.<a name="line.262"></a>
+<span class="sourceLineNo">263</span>        System.setProperty("ORIENTDB_HOME", dbFolder.getAbsolutePath());<a name="line.263"></a>
+<span class="sourceLineNo">264</span><a name="line.264"></a>
+<span class="sourceLineNo">265</span>        return configuration;<a name="line.265"></a>
+<span class="sourceLineNo">266</span>    }<a name="line.266"></a>
+<span class="sourceLineNo">267</span><a name="line.267"></a>
+<span class="sourceLineNo">268</span>}<a name="line.268"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

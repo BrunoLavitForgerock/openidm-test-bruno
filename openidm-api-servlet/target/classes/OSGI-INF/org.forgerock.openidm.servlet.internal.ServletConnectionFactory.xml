@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.router" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.servlet.internal.ServletConnectionFactory"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.json.resource.ConnectionFactory"/>
+            <provide interface="java.io.Closeable"/>
+            <provide interface="java.lang.AutoCloseable"/>
+        </service>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="service.description" value="OpenIDM Common REST Servlet Connection Factory"/>
+        <property name="service.pid" value="org.forgerock.openidm.router"/>
+        <reference name="requestHandler" interface="org.forgerock.json.resource.RequestHandler" cardinality="1..1" policy="static" target="(org.forgerock.openidm.router=*)" bind="bindRequestHandler" unbind="unbindRequestHandler"/>
+        <reference name="scriptRegistry" interface="org.forgerock.script.ScriptRegistry" cardinality="1..1" policy="dynamic" bind="bindScriptRegistry" unbind="unbindScriptRegistry"/>
+    </scr:component>
+</components>

@@ -1,0 +1,532 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.<a name="line.2"></a>
+<span class="sourceLineNo">003</span> *<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * The contents of this file are subject to the terms<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * of the Common Development and Distribution License<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * (the License). You may not use this file except in<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * compliance with the License.<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * You can obtain a copy of the License at<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * http://forgerock.org/license/CDDLv1.0.html<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * See the License for the specific language governing<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * permission and limitations under the License.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> *<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * When distributing Covered Code, include this CDDL<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * Header Notice in each file and include the License file<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * at http://forgerock.org/license/CDDLv1.0.html<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * If applicable, add the following below the CDDL Header,<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * with the fields enclosed by brackets [] replaced by<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * your own identifying information:<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * "Portions Copyrighted [year] [name of copyright owner]"<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span>package org.forgerock.openidm.audit.impl;<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.io.File;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.io.FileReader;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.io.FileWriter;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.io.IOException;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import java.text.Collator;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import java.util.ArrayList;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import java.util.Collection;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import java.util.HashMap;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import java.util.Iterator;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import java.util.List;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import java.util.Map;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import java.util.TreeSet;<a name="line.37"></a>
+<span class="sourceLineNo">038</span><a name="line.38"></a>
+<span class="sourceLineNo">039</span>import org.forgerock.json.fluent.JsonValue;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import org.forgerock.json.resource.BadRequestException;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import org.forgerock.json.resource.InternalServerErrorException;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import org.forgerock.json.resource.NotFoundException;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import org.forgerock.json.resource.ResourceException;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import org.forgerock.json.resource.ServerContext;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import org.forgerock.openidm.config.enhanced.InvalidException;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import org.forgerock.openidm.core.IdentityServer;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import org.forgerock.openidm.core.ServerConstants;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import org.forgerock.openidm.smartevent.EventEntry;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>import org.forgerock.openidm.smartevent.Name;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>import org.forgerock.openidm.smartevent.Publisher;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>import org.osgi.framework.BundleContext;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>import org.slf4j.Logger;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>import org.slf4j.LoggerFactory;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>import org.supercsv.cellprocessor.Optional;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>import org.supercsv.cellprocessor.constraint.NotNull;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>import org.supercsv.cellprocessor.ift.CellProcessor;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>import org.supercsv.io.CsvMapReader;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>import org.supercsv.io.ICsvMapReader;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>import org.supercsv.prefs.CsvPreference;<a name="line.59"></a>
+<span class="sourceLineNo">060</span>import org.supercsv.util.CsvContext;<a name="line.60"></a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span>/**<a name="line.62"></a>
+<span class="sourceLineNo">063</span> * Comma delimited audit logger<a name="line.63"></a>
+<span class="sourceLineNo">064</span> *<a name="line.64"></a>
+<span class="sourceLineNo">065</span> * @author aegloff<a name="line.65"></a>
+<span class="sourceLineNo">066</span> */<a name="line.66"></a>
+<span class="sourceLineNo">067</span>public class CSVAuditLogger extends AbstractAuditLogger implements AuditLogger {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    final static Logger logger = LoggerFactory.getLogger(CSVAuditLogger.class);<a name="line.68"></a>
+<span class="sourceLineNo">069</span><a name="line.69"></a>
+<span class="sourceLineNo">070</span>    public final static String CONFIG_LOG_LOCATION = "location";<a name="line.70"></a>
+<span class="sourceLineNo">071</span>    public final static String CONFIG_LOG_RECORD_DELIM = "recordDelimiter";<a name="line.71"></a>
+<span class="sourceLineNo">072</span><a name="line.72"></a>
+<span class="sourceLineNo">073</span>    private static Object lock = new Object();<a name="line.73"></a>
+<span class="sourceLineNo">074</span><a name="line.74"></a>
+<span class="sourceLineNo">075</span>    /**<a name="line.75"></a>
+<span class="sourceLineNo">076</span>     * Event names for monitoring audit behavior<a name="line.76"></a>
+<span class="sourceLineNo">077</span>     */<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    public static final Name EVENT_AUDIT_CREATE = Name.get("openidm/internal/audit/csv/create");<a name="line.78"></a>
+<span class="sourceLineNo">079</span><a name="line.79"></a>
+<span class="sourceLineNo">080</span>    File auditLogDir;<a name="line.80"></a>
+<span class="sourceLineNo">081</span>    String recordDelim;<a name="line.81"></a>
+<span class="sourceLineNo">082</span>    final Map&lt;String, FileWriter&gt; fileWriters = new HashMap&lt;String, FileWriter&gt;();<a name="line.82"></a>
+<span class="sourceLineNo">083</span><a name="line.83"></a>
+<span class="sourceLineNo">084</span>    public void setConfig(Map config, BundleContext ctx) throws InvalidException {<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        String location = null;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        try {<a name="line.86"></a>
+<span class="sourceLineNo">087</span>            super.setConfig(config, ctx);<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            location = (String) config.get(CONFIG_LOG_LOCATION);<a name="line.88"></a>
+<span class="sourceLineNo">089</span>            auditLogDir = IdentityServer.getFileForWorkingPath(location);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>            logger.info("Audit logging to: {}", auditLogDir.getAbsolutePath());<a name="line.90"></a>
+<span class="sourceLineNo">091</span>            auditLogDir.mkdirs();<a name="line.91"></a>
+<span class="sourceLineNo">092</span>            recordDelim = (String) config.get(CONFIG_LOG_RECORD_DELIM);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>            if (recordDelim == null) {<a name="line.93"></a>
+<span class="sourceLineNo">094</span>                recordDelim = "";<a name="line.94"></a>
+<span class="sourceLineNo">095</span>            }<a name="line.95"></a>
+<span class="sourceLineNo">096</span>            recordDelim += ServerConstants.EOL;<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        } catch (Exception ex) {<a name="line.97"></a>
+<span class="sourceLineNo">098</span>            logger.error("ERROR - Configured CSV file location must be a directory and {} is invalid.", auditLogDir.getAbsolutePath(), ex);<a name="line.98"></a>
+<span class="sourceLineNo">099</span>            throw new InvalidException("Configured CSV file location must be a directory and '" + location<a name="line.99"></a>
+<span class="sourceLineNo">100</span>                    + "' is invalid " + ex.getMessage(), ex);<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        }<a name="line.101"></a>
+<span class="sourceLineNo">102</span>    }<a name="line.102"></a>
+<span class="sourceLineNo">103</span><a name="line.103"></a>
+<span class="sourceLineNo">104</span>    public void cleanup() {<a name="line.104"></a>
+<span class="sourceLineNo">105</span>        for (Map.Entry&lt;String, FileWriter&gt; entry : fileWriters.entrySet()) {<a name="line.105"></a>
+<span class="sourceLineNo">106</span>            try {<a name="line.106"></a>
+<span class="sourceLineNo">107</span>                FileWriter fileWriter = entry.getValue();<a name="line.107"></a>
+<span class="sourceLineNo">108</span>                if (fileWriter != null) {<a name="line.108"></a>
+<span class="sourceLineNo">109</span>                    fileWriter.close();<a name="line.109"></a>
+<span class="sourceLineNo">110</span>                }<a name="line.110"></a>
+<span class="sourceLineNo">111</span>            } catch (Exception ex) {<a name="line.111"></a>
+<span class="sourceLineNo">112</span>                logger.info("File writer close reported failure ", ex);<a name="line.112"></a>
+<span class="sourceLineNo">113</span>            }<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        }<a name="line.114"></a>
+<span class="sourceLineNo">115</span>    }<a name="line.115"></a>
+<span class="sourceLineNo">116</span><a name="line.116"></a>
+<span class="sourceLineNo">117</span>    /**<a name="line.117"></a>
+<span class="sourceLineNo">118</span>     * {@inheritDoc}<a name="line.118"></a>
+<span class="sourceLineNo">119</span>     */<a name="line.119"></a>
+<span class="sourceLineNo">120</span>    @Override<a name="line.120"></a>
+<span class="sourceLineNo">121</span>    public Map&lt;String, Object&gt; read(ServerContext context, String type, String id) throws ResourceException {<a name="line.121"></a>
+<span class="sourceLineNo">122</span>        try {<a name="line.122"></a>
+<span class="sourceLineNo">123</span>            Map&lt;String, Object&gt; result = new HashMap&lt;String, Object&gt;();<a name="line.123"></a>
+<span class="sourceLineNo">124</span>            List&lt;Map&lt;String, Object&gt;&gt; entriesList = new ArrayList&lt;Map&lt;String, Object&gt;&gt;();<a name="line.124"></a>
+<span class="sourceLineNo">125</span>            List&lt;Map&lt;String, Object&gt;&gt; entryList = getEntryList(type);<a name="line.125"></a>
+<span class="sourceLineNo">126</span>            if (entryList == null) {<a name="line.126"></a>
+<span class="sourceLineNo">127</span>                throw new NotFoundException(type + " audit log not found");<a name="line.127"></a>
+<span class="sourceLineNo">128</span>            }<a name="line.128"></a>
+<span class="sourceLineNo">129</span>            for (Map&lt;String, Object&gt; entry : entryList) {<a name="line.129"></a>
+<span class="sourceLineNo">130</span>                if (id == null) {<a name="line.130"></a>
+<span class="sourceLineNo">131</span>                    entriesList.add(AuditServiceImpl.formatLogEntry(entry, type));<a name="line.131"></a>
+<span class="sourceLineNo">132</span>                } else if (id.equals(entry.get("_id"))) {<a name="line.132"></a>
+<span class="sourceLineNo">133</span>                    return AuditServiceImpl.formatLogEntry(entry, type);<a name="line.133"></a>
+<span class="sourceLineNo">134</span>                }<a name="line.134"></a>
+<span class="sourceLineNo">135</span>            }<a name="line.135"></a>
+<span class="sourceLineNo">136</span>            if (id != null) {<a name="line.136"></a>
+<span class="sourceLineNo">137</span>                throw new NotFoundException("Audit log entry with id " + id + " not found");<a name="line.137"></a>
+<span class="sourceLineNo">138</span>            }<a name="line.138"></a>
+<span class="sourceLineNo">139</span>            result.put("entries", entriesList);<a name="line.139"></a>
+<span class="sourceLineNo">140</span>            return result;<a name="line.140"></a>
+<span class="sourceLineNo">141</span>        } catch (Exception e) {<a name="line.141"></a>
+<span class="sourceLineNo">142</span>            throw new BadRequestException(e);<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        }<a name="line.143"></a>
+<span class="sourceLineNo">144</span>    }<a name="line.144"></a>
+<span class="sourceLineNo">145</span><a name="line.145"></a>
+<span class="sourceLineNo">146</span>    /**<a name="line.146"></a>
+<span class="sourceLineNo">147</span>     * Parser the csv file corresponding the the specified type (recon, activity, etc) and returns a list<a name="line.147"></a>
+<span class="sourceLineNo">148</span>     * of all entries in it.<a name="line.148"></a>
+<span class="sourceLineNo">149</span>     *<a name="line.149"></a>
+<span class="sourceLineNo">150</span>     * @param type the audit log type<a name="line.150"></a>
+<span class="sourceLineNo">151</span>     * @return  A list of audit log entries<a name="line.151"></a>
+<span class="sourceLineNo">152</span>     * @throws Exception<a name="line.152"></a>
+<span class="sourceLineNo">153</span>     */<a name="line.153"></a>
+<span class="sourceLineNo">154</span>    private List&lt;Map&lt;String, Object&gt;&gt; getEntryList(String type) throws Exception {<a name="line.154"></a>
+<span class="sourceLineNo">155</span>        List&lt;Map&lt;String, Object&gt;&gt; entryList = new ArrayList&lt;Map&lt;String, Object&gt;&gt;();<a name="line.155"></a>
+<span class="sourceLineNo">156</span>        CellProcessor [] processors = null;<a name="line.156"></a>
+<span class="sourceLineNo">157</span>        if (AuditServiceImpl.TYPE_RECON.equals(type)) {<a name="line.157"></a>
+<span class="sourceLineNo">158</span>            processors = new CellProcessor[] {<a name="line.158"></a>
+<span class="sourceLineNo">159</span>                    new NotNull(), // _id<a name="line.159"></a>
+<span class="sourceLineNo">160</span>                    new Optional(), // action<a name="line.160"></a>
+<span class="sourceLineNo">161</span>                    new Optional(), // actionId<a name="line.161"></a>
+<span class="sourceLineNo">162</span>                    new Optional(), // ambiguousTargetObjectIds<a name="line.162"></a>
+<span class="sourceLineNo">163</span>                    new Optional(), // entryType<a name="line.163"></a>
+<span class="sourceLineNo">164</span>                    new Optional(), // exception<a name="line.164"></a>
+<span class="sourceLineNo">165</span>                    new Optional(), // mapping<a name="line.165"></a>
+<span class="sourceLineNo">166</span>                    new Optional(), // message<a name="line.166"></a>
+<span class="sourceLineNo">167</span>                    new Optional(new ParseJsonValue()), // messageDetail<a name="line.167"></a>
+<span class="sourceLineNo">168</span>                    new Optional(), // reconciling<a name="line.168"></a>
+<span class="sourceLineNo">169</span>                    new NotNull(), // reconId<a name="line.169"></a>
+<span class="sourceLineNo">170</span>                    new Optional(), // rootActionId<a name="line.170"></a>
+<span class="sourceLineNo">171</span>                    new Optional(), // situation<a name="line.171"></a>
+<span class="sourceLineNo">172</span>                    new Optional(), // sourceObjectId<a name="line.172"></a>
+<span class="sourceLineNo">173</span>                    new Optional(), // status<a name="line.173"></a>
+<span class="sourceLineNo">174</span>                    new Optional(), // targetObjectId<a name="line.174"></a>
+<span class="sourceLineNo">175</span>                    new NotNull() // timestamp<a name="line.175"></a>
+<span class="sourceLineNo">176</span>            };<a name="line.176"></a>
+<span class="sourceLineNo">177</span>        } else if (AuditServiceImpl.TYPE_ACTIVITY.equals(type)) {<a name="line.177"></a>
+<span class="sourceLineNo">178</span>            processors = new CellProcessor[] {<a name="line.178"></a>
+<span class="sourceLineNo">179</span>                    new NotNull(), // _id<a name="line.179"></a>
+<span class="sourceLineNo">180</span>                    new Optional(), // action<a name="line.180"></a>
+<span class="sourceLineNo">181</span>                    new Optional(), // activityId<a name="line.181"></a>
+<span class="sourceLineNo">182</span>                    new Optional(new ParseJsonValue()), // after<a name="line.182"></a>
+<span class="sourceLineNo">183</span>                    new Optional(new ParseJsonValue()), // before<a name="line.183"></a>
+<span class="sourceLineNo">184</span>                    new Optional(), // changedFields<a name="line.184"></a>
+<span class="sourceLineNo">185</span>                    new Optional(), // message<a name="line.185"></a>
+<span class="sourceLineNo">186</span>                    new Optional(), // objectId<a name="line.186"></a>
+<span class="sourceLineNo">187</span>                    new Optional(), // parentActionId<a name="line.187"></a>
+<span class="sourceLineNo">188</span>                    new Optional(), // passwordChanged<a name="line.188"></a>
+<span class="sourceLineNo">189</span>                    new Optional(), // requester<a name="line.189"></a>
+<span class="sourceLineNo">190</span>                    new Optional(), // rev<a name="line.190"></a>
+<span class="sourceLineNo">191</span>                    new Optional(), // rootActionId<a name="line.191"></a>
+<span class="sourceLineNo">192</span>                    new Optional(), // status<a name="line.192"></a>
+<span class="sourceLineNo">193</span>                    new NotNull() // timestamp<a name="line.193"></a>
+<span class="sourceLineNo">194</span>            };<a name="line.194"></a>
+<span class="sourceLineNo">195</span>        } else if (AuditServiceImpl.TYPE_ACCESS.equals(type)) {<a name="line.195"></a>
+<span class="sourceLineNo">196</span>            processors = new CellProcessor[] {<a name="line.196"></a>
+<span class="sourceLineNo">197</span>                    new NotNull(), // _id<a name="line.197"></a>
+<span class="sourceLineNo">198</span>                    new Optional(), // action<a name="line.198"></a>
+<span class="sourceLineNo">199</span>                    new Optional(), // ip<a name="line.199"></a>
+<span class="sourceLineNo">200</span>                    new Optional(), // principal<a name="line.200"></a>
+<span class="sourceLineNo">201</span>                    new Optional(new ParseJsonValue()), // roles<a name="line.201"></a>
+<span class="sourceLineNo">202</span>                    new Optional(), // status<a name="line.202"></a>
+<span class="sourceLineNo">203</span>                    new NotNull(), // timestamp<a name="line.203"></a>
+<span class="sourceLineNo">204</span>                    new Optional() // userid<a name="line.204"></a>
+<span class="sourceLineNo">205</span>            };<a name="line.205"></a>
+<span class="sourceLineNo">206</span>        } else {<a name="line.206"></a>
+<span class="sourceLineNo">207</span>            throw new InternalServerErrorException("Error parsing entries: unknown type " + type);<a name="line.207"></a>
+<span class="sourceLineNo">208</span>        }<a name="line.208"></a>
+<span class="sourceLineNo">209</span><a name="line.209"></a>
+<span class="sourceLineNo">210</span>        File auditFile = getAuditLogFile(type);<a name="line.210"></a>
+<span class="sourceLineNo">211</span>        if (auditFile.exists()) {<a name="line.211"></a>
+<span class="sourceLineNo">212</span>            ICsvMapReader reader = null;<a name="line.212"></a>
+<span class="sourceLineNo">213</span>            try {<a name="line.213"></a>
+<span class="sourceLineNo">214</span>                reader = new CsvMapReader(new FileReader(auditFile), new CsvPreference.Builder('"', ',', recordDelim).build());<a name="line.214"></a>
+<span class="sourceLineNo">215</span><a name="line.215"></a>
+<span class="sourceLineNo">216</span>                // the header elements are used to map the values to the bean (names must match)<a name="line.216"></a>
+<span class="sourceLineNo">217</span>                final String[] header = reader.getHeader(true);<a name="line.217"></a>
+<span class="sourceLineNo">218</span><a name="line.218"></a>
+<span class="sourceLineNo">219</span>                Map&lt;String, Object&gt; entryMap;<a name="line.219"></a>
+<span class="sourceLineNo">220</span>                while( (entryMap = reader.read(header, processors)) != null ) {<a name="line.220"></a>
+<span class="sourceLineNo">221</span>                        entryList.add(entryMap);<a name="line.221"></a>
+<span class="sourceLineNo">222</span>                }<a name="line.222"></a>
+<span class="sourceLineNo">223</span><a name="line.223"></a>
+<span class="sourceLineNo">224</span>            }<a name="line.224"></a>
+<span class="sourceLineNo">225</span>            finally {<a name="line.225"></a>
+<span class="sourceLineNo">226</span>                if( reader != null ) {<a name="line.226"></a>
+<span class="sourceLineNo">227</span>                    reader.close();<a name="line.227"></a>
+<span class="sourceLineNo">228</span>                }<a name="line.228"></a>
+<span class="sourceLineNo">229</span>            }<a name="line.229"></a>
+<span class="sourceLineNo">230</span>        }<a name="line.230"></a>
+<span class="sourceLineNo">231</span>        return entryList;<a name="line.231"></a>
+<span class="sourceLineNo">232</span>    }<a name="line.232"></a>
+<span class="sourceLineNo">233</span><a name="line.233"></a>
+<span class="sourceLineNo">234</span>    /**<a name="line.234"></a>
+<span class="sourceLineNo">235</span>     * {@inheritDoc}<a name="line.235"></a>
+<span class="sourceLineNo">236</span>     */<a name="line.236"></a>
+<span class="sourceLineNo">237</span>    @Override<a name="line.237"></a>
+<span class="sourceLineNo">238</span>    public Map&lt;String, Object&gt; query(ServerContext context, String type, Map&lt;String, String&gt; params) throws ResourceException {<a name="line.238"></a>
+<span class="sourceLineNo">239</span>        String queryId = params.get("_queryId");<a name="line.239"></a>
+<span class="sourceLineNo">240</span>        boolean formatted = true;<a name="line.240"></a>
+<span class="sourceLineNo">241</span>        try {<a name="line.241"></a>
+<span class="sourceLineNo">242</span>            if (params.get("formatted") != null &amp;&amp; !AuditServiceImpl.getBoolValue(params.get("formatted"))) {<a name="line.242"></a>
+<span class="sourceLineNo">243</span>                formatted = false;<a name="line.243"></a>
+<span class="sourceLineNo">244</span>            }<a name="line.244"></a>
+<span class="sourceLineNo">245</span><a name="line.245"></a>
+<span class="sourceLineNo">246</span>            List&lt;Map&lt;String, Object&gt;&gt; reconEntryList = getEntryList(type);<a name="line.246"></a>
+<span class="sourceLineNo">247</span>            if (reconEntryList == null) {<a name="line.247"></a>
+<span class="sourceLineNo">248</span>                throw new NotFoundException(type + " audit log not found");<a name="line.248"></a>
+<span class="sourceLineNo">249</span>            }<a name="line.249"></a>
+<span class="sourceLineNo">250</span><a name="line.250"></a>
+<span class="sourceLineNo">251</span>            String reconId = params.get("reconId");<a name="line.251"></a>
+<span class="sourceLineNo">252</span>            if (AuditServiceImpl.QUERY_BY_RECON_ID.equals(queryId) &amp;&amp; type.equals(AuditServiceImpl.TYPE_RECON)) {<a name="line.252"></a>
+<span class="sourceLineNo">253</span>                return AuditServiceImpl.getReconResults(reconEntryList, formatted);<a name="line.253"></a>
+<span class="sourceLineNo">254</span>            } else if (AuditServiceImpl.QUERY_BY_MAPPING.equals(queryId) &amp;&amp; type.equals(AuditServiceImpl.TYPE_RECON)) {<a name="line.254"></a>
+<span class="sourceLineNo">255</span>                return getReconQueryResults(reconEntryList, reconId, "mapping", params.get("mappingName"), formatted);<a name="line.255"></a>
+<span class="sourceLineNo">256</span>            } else if (AuditServiceImpl.QUERY_BY_RECON_ID_AND_SITUATION.equals(queryId) &amp;&amp; type.equals(AuditServiceImpl.TYPE_RECON)) {<a name="line.256"></a>
+<span class="sourceLineNo">257</span>                return getReconQueryResults(reconEntryList, reconId, "situation", params.get("situation"), formatted);<a name="line.257"></a>
+<span class="sourceLineNo">258</span>            } else if (AuditServiceImpl.QUERY_BY_RECON_ID_AND_TYPE.equals(queryId) &amp;&amp; type.equals(AuditServiceImpl.TYPE_RECON)) {<a name="line.258"></a>
+<span class="sourceLineNo">259</span>                return getReconQueryResults(reconEntryList, reconId, "entryType", params.get("entryType"), formatted);<a name="line.259"></a>
+<span class="sourceLineNo">260</span>            } else if (AuditServiceImpl.QUERY_BY_ACTIVITY_PARENT_ACTION.equals(queryId) &amp;&amp; type.equals(AuditServiceImpl.TYPE_ACTIVITY)) {<a name="line.260"></a>
+<span class="sourceLineNo">261</span>                String actionId = params.get("parentActionId");<a name="line.261"></a>
+<span class="sourceLineNo">262</span>                List&lt;Map&lt;String, Object&gt;&gt; rawEntryList = new ArrayList&lt;Map&lt;String, Object&gt;&gt;();<a name="line.262"></a>
+<span class="sourceLineNo">263</span>                for (Map&lt;String, Object&gt; entry : reconEntryList) {<a name="line.263"></a>
+<span class="sourceLineNo">264</span>                    if (entry.get("parentActionId").equals(actionId)) {<a name="line.264"></a>
+<span class="sourceLineNo">265</span>                        rawEntryList.add(entry);<a name="line.265"></a>
+<span class="sourceLineNo">266</span>                    }<a name="line.266"></a>
+<span class="sourceLineNo">267</span>                }<a name="line.267"></a>
+<span class="sourceLineNo">268</span>                return AuditServiceImpl.getActivityResults(rawEntryList, formatted);<a name="line.268"></a>
+<span class="sourceLineNo">269</span>            } else {<a name="line.269"></a>
+<span class="sourceLineNo">270</span>                throw new BadRequestException("Unsupported queryId " +  queryId + " on type " + type);<a name="line.270"></a>
+<span class="sourceLineNo">271</span>            }<a name="line.271"></a>
+<span class="sourceLineNo">272</span>        } catch (Exception e) {<a name="line.272"></a>
+<span class="sourceLineNo">273</span>            e.printStackTrace();<a name="line.273"></a>
+<span class="sourceLineNo">274</span>            throw new BadRequestException(e);<a name="line.274"></a>
+<span class="sourceLineNo">275</span>        }<a name="line.275"></a>
+<span class="sourceLineNo">276</span>    }<a name="line.276"></a>
+<span class="sourceLineNo">277</span><a name="line.277"></a>
+<span class="sourceLineNo">278</span>    private Map&lt;String, Object&gt; getReconQueryResults(List&lt;Map&lt;String, Object&gt;&gt; list, String reconId, String param, String paramValue, boolean formatted) {<a name="line.278"></a>
+<span class="sourceLineNo">279</span>        List&lt;Map&lt;String, Object&gt;&gt; rawEntryList = new ArrayList&lt;Map&lt;String, Object&gt;&gt;();<a name="line.279"></a>
+<span class="sourceLineNo">280</span>        for (Map&lt;String, Object&gt; entry : list) {<a name="line.280"></a>
+<span class="sourceLineNo">281</span>            if ((reconId == null || (entry.get("reconId").equals(reconId))) &amp;&amp; (param == null || paramValue.equals(entry.get(param)))) {<a name="line.281"></a>
+<span class="sourceLineNo">282</span>                rawEntryList.add(entry);<a name="line.282"></a>
+<span class="sourceLineNo">283</span>            }<a name="line.283"></a>
+<span class="sourceLineNo">284</span>        }<a name="line.284"></a>
+<span class="sourceLineNo">285</span>        return AuditServiceImpl.getReconResults(rawEntryList, formatted);<a name="line.285"></a>
+<span class="sourceLineNo">286</span>    }<a name="line.286"></a>
+<span class="sourceLineNo">287</span><a name="line.287"></a>
+<span class="sourceLineNo">288</span>    /**<a name="line.288"></a>
+<span class="sourceLineNo">289</span>     * {@inheritDoc}<a name="line.289"></a>
+<span class="sourceLineNo">290</span>     */<a name="line.290"></a>
+<span class="sourceLineNo">291</span>    @Override<a name="line.291"></a>
+<span class="sourceLineNo">292</span>    public void create(ServerContext context, String type, Map&lt;String, Object&gt; obj) throws ResourceException {<a name="line.292"></a>
+<span class="sourceLineNo">293</span>        EventEntry measure = Publisher.start(EVENT_AUDIT_CREATE, obj, null);<a name="line.293"></a>
+<span class="sourceLineNo">294</span>        // Synchronize writes so that simultaneous writes don't corrupt the file<a name="line.294"></a>
+<span class="sourceLineNo">295</span>        synchronized (lock) {<a name="line.295"></a>
+<span class="sourceLineNo">296</span>            try {<a name="line.296"></a>
+<span class="sourceLineNo">297</span>                AuditServiceImpl.preformatLogEntry(type, obj);<a name="line.297"></a>
+<span class="sourceLineNo">298</span>                createImpl(type, obj);<a name="line.298"></a>
+<span class="sourceLineNo">299</span>            } finally {<a name="line.299"></a>
+<span class="sourceLineNo">300</span>                measure.end();<a name="line.300"></a>
+<span class="sourceLineNo">301</span>            }<a name="line.301"></a>
+<span class="sourceLineNo">302</span>        }<a name="line.302"></a>
+<span class="sourceLineNo">303</span>    }<a name="line.303"></a>
+<span class="sourceLineNo">304</span><a name="line.304"></a>
+<span class="sourceLineNo">305</span><a name="line.305"></a>
+<span class="sourceLineNo">306</span>    private void createImpl(String type, Map&lt;String, Object&gt; obj) throws ResourceException {<a name="line.306"></a>
+<span class="sourceLineNo">307</span><a name="line.307"></a>
+<span class="sourceLineNo">308</span>        // Re-try once in case the writer stream became closed for some reason<a name="line.308"></a>
+<span class="sourceLineNo">309</span>        boolean retry = false;<a name="line.309"></a>
+<span class="sourceLineNo">310</span>        int retryCount = 0;<a name="line.310"></a>
+<span class="sourceLineNo">311</span>        do {<a name="line.311"></a>
+<span class="sourceLineNo">312</span>            retry = false;<a name="line.312"></a>
+<span class="sourceLineNo">313</span>            FileWriter fileWriter = null;<a name="line.313"></a>
+<span class="sourceLineNo">314</span>            // TODO: optimize buffered, cached writing<a name="line.314"></a>
+<span class="sourceLineNo">315</span>            try {<a name="line.315"></a>
+<span class="sourceLineNo">316</span>                // TODO: Optimize ordering etc.<a name="line.316"></a>
+<span class="sourceLineNo">317</span>                Collection&lt;String&gt; fieldOrder =<a name="line.317"></a>
+<span class="sourceLineNo">318</span>                        new TreeSet&lt;String&gt;(Collator.getInstance());<a name="line.318"></a>
+<span class="sourceLineNo">319</span>                fieldOrder.addAll(obj.keySet());<a name="line.319"></a>
+<span class="sourceLineNo">320</span><a name="line.320"></a>
+<span class="sourceLineNo">321</span>                File auditFile = getAuditLogFile(type);<a name="line.321"></a>
+<span class="sourceLineNo">322</span>                // Create header if creating a new file<a name="line.322"></a>
+<span class="sourceLineNo">323</span>                if (!auditFile.exists()) {<a name="line.323"></a>
+<span class="sourceLineNo">324</span>                    synchronized (this) {<a name="line.324"></a>
+<span class="sourceLineNo">325</span>                        FileWriter existingFileWriter = getWriter(type, auditFile, false);<a name="line.325"></a>
+<span class="sourceLineNo">326</span>                        File auditTmpFile = new File(auditLogDir, type + ".tmp");<a name="line.326"></a>
+<span class="sourceLineNo">327</span>                        // This is atomic, so only one caller will succeed with created<a name="line.327"></a>
+<span class="sourceLineNo">328</span>                        boolean created = auditTmpFile.createNewFile();<a name="line.328"></a>
+<span class="sourceLineNo">329</span>                        if (created) {<a name="line.329"></a>
+<span class="sourceLineNo">330</span>                            FileWriter tmpFileWriter = new FileWriter(auditTmpFile, true);<a name="line.330"></a>
+<span class="sourceLineNo">331</span>                            writeHeaders(fieldOrder, tmpFileWriter);<a name="line.331"></a>
+<span class="sourceLineNo">332</span>                            tmpFileWriter.close();<a name="line.332"></a>
+<span class="sourceLineNo">333</span>                            auditTmpFile.renameTo(auditFile);<a name="line.333"></a>
+<span class="sourceLineNo">334</span>                            resetWriter(type, existingFileWriter);<a name="line.334"></a>
+<span class="sourceLineNo">335</span>                        }<a name="line.335"></a>
+<span class="sourceLineNo">336</span>                    }<a name="line.336"></a>
+<span class="sourceLineNo">337</span>                }<a name="line.337"></a>
+<span class="sourceLineNo">338</span>                fileWriter = getWriter(type, auditFile, true);<a name="line.338"></a>
+<span class="sourceLineNo">339</span>                writeEntry(fileWriter, type, auditFile, obj, fieldOrder);<a name="line.339"></a>
+<span class="sourceLineNo">340</span>            } catch (IOException ex) {<a name="line.340"></a>
+<span class="sourceLineNo">341</span>                if (retryCount == 0) {<a name="line.341"></a>
+<span class="sourceLineNo">342</span>                    retry = true;<a name="line.342"></a>
+<span class="sourceLineNo">343</span>                    logger.debug("IOException during entry write, reset writer and re-try {}", ex.getMessage());<a name="line.343"></a>
+<span class="sourceLineNo">344</span>                    synchronized (this) {<a name="line.344"></a>
+<span class="sourceLineNo">345</span>                        resetWriter(type, fileWriter);<a name="line.345"></a>
+<span class="sourceLineNo">346</span>                    }<a name="line.346"></a>
+<span class="sourceLineNo">347</span>                } else {<a name="line.347"></a>
+<span class="sourceLineNo">348</span>                    throw new BadRequestException(ex);<a name="line.348"></a>
+<span class="sourceLineNo">349</span>                }<a name="line.349"></a>
+<span class="sourceLineNo">350</span>            }<a name="line.350"></a>
+<span class="sourceLineNo">351</span>            ++retryCount;<a name="line.351"></a>
+<span class="sourceLineNo">352</span>        } while (retry);<a name="line.352"></a>
+<span class="sourceLineNo">353</span>    }<a name="line.353"></a>
+<span class="sourceLineNo">354</span><a name="line.354"></a>
+<span class="sourceLineNo">355</span>    private File getAuditLogFile(String type) {<a name="line.355"></a>
+<span class="sourceLineNo">356</span>        return new File(auditLogDir, type + ".csv");<a name="line.356"></a>
+<span class="sourceLineNo">357</span>    }<a name="line.357"></a>
+<span class="sourceLineNo">358</span><a name="line.358"></a>
+<span class="sourceLineNo">359</span>    private void writeEntry(FileWriter fileWriter, String type, File auditFile, Map&lt;String, Object&gt; obj, Collection&lt;String&gt; fieldOrder)<a name="line.359"></a>
+<span class="sourceLineNo">360</span>            throws IOException{<a name="line.360"></a>
+<span class="sourceLineNo">361</span><a name="line.361"></a>
+<span class="sourceLineNo">362</span>        String key = null;<a name="line.362"></a>
+<span class="sourceLineNo">363</span>        Iterator&lt;String&gt; iter = fieldOrder.iterator();<a name="line.363"></a>
+<span class="sourceLineNo">364</span>        while (iter.hasNext()) {<a name="line.364"></a>
+<span class="sourceLineNo">365</span>            key = iter.next();<a name="line.365"></a>
+<span class="sourceLineNo">366</span>            Object value = obj.get(key);<a name="line.366"></a>
+<span class="sourceLineNo">367</span>            fileWriter.append("\"");<a name="line.367"></a>
+<span class="sourceLineNo">368</span>            if (value != null) {<a name="line.368"></a>
+<span class="sourceLineNo">369</span>                if (value instanceof Map) {<a name="line.369"></a>
+<span class="sourceLineNo">370</span>                    value = new JsonValue((Map)value).toString();<a name="line.370"></a>
+<span class="sourceLineNo">371</span>                }<a name="line.371"></a>
+<span class="sourceLineNo">372</span>                String rawStr = value.toString();<a name="line.372"></a>
+<span class="sourceLineNo">373</span>                // Escape quotes with double quotes<a name="line.373"></a>
+<span class="sourceLineNo">374</span>                String escapedStr = rawStr.replaceAll("\"", "\"\"");<a name="line.374"></a>
+<span class="sourceLineNo">375</span>                fileWriter.append(escapedStr);<a name="line.375"></a>
+<span class="sourceLineNo">376</span>            }<a name="line.376"></a>
+<span class="sourceLineNo">377</span>            fileWriter.append("\"");<a name="line.377"></a>
+<span class="sourceLineNo">378</span>            if (iter.hasNext()) {<a name="line.378"></a>
+<span class="sourceLineNo">379</span>                fileWriter.append(",");<a name="line.379"></a>
+<span class="sourceLineNo">380</span>            }<a name="line.380"></a>
+<span class="sourceLineNo">381</span>        }<a name="line.381"></a>
+<span class="sourceLineNo">382</span>        fileWriter.append(recordDelim);<a name="line.382"></a>
+<span class="sourceLineNo">383</span>        fileWriter.flush();<a name="line.383"></a>
+<span class="sourceLineNo">384</span>    }<a name="line.384"></a>
+<span class="sourceLineNo">385</span><a name="line.385"></a>
+<span class="sourceLineNo">386</span>    private void writeHeaders(Collection&lt;String&gt; fieldOrder, FileWriter fileWriter)<a name="line.386"></a>
+<span class="sourceLineNo">387</span>            throws IOException {<a name="line.387"></a>
+<span class="sourceLineNo">388</span>        Iterator iter = fieldOrder.iterator();<a name="line.388"></a>
+<span class="sourceLineNo">389</span>        while (iter.hasNext()) {<a name="line.389"></a>
+<span class="sourceLineNo">390</span>            String key = (String) iter.next();<a name="line.390"></a>
+<span class="sourceLineNo">391</span>            fileWriter.append("\"");<a name="line.391"></a>
+<span class="sourceLineNo">392</span>            String escapedStr = key.replaceAll("\"", "\"\"");<a name="line.392"></a>
+<span class="sourceLineNo">393</span>            fileWriter.append(escapedStr);<a name="line.393"></a>
+<span class="sourceLineNo">394</span>            fileWriter.append("\"");<a name="line.394"></a>
+<span class="sourceLineNo">395</span>            if (iter.hasNext()) {<a name="line.395"></a>
+<span class="sourceLineNo">396</span>                fileWriter.append(",");<a name="line.396"></a>
+<span class="sourceLineNo">397</span>            }<a name="line.397"></a>
+<span class="sourceLineNo">398</span>        }<a name="line.398"></a>
+<span class="sourceLineNo">399</span>        fileWriter.append(recordDelim);<a name="line.399"></a>
+<span class="sourceLineNo">400</span>    }<a name="line.400"></a>
+<span class="sourceLineNo">401</span><a name="line.401"></a>
+<span class="sourceLineNo">402</span>    private FileWriter getWriter(String type, File auditFile, boolean createIfMissing) throws IOException {<a name="line.402"></a>
+<span class="sourceLineNo">403</span>        // TODO: optimize synchronization strategy<a name="line.403"></a>
+<span class="sourceLineNo">404</span>        synchronized (fileWriters) {<a name="line.404"></a>
+<span class="sourceLineNo">405</span>            FileWriter existingWriter = fileWriters.get(type);<a name="line.405"></a>
+<span class="sourceLineNo">406</span>            if (existingWriter == null &amp;&amp; createIfMissing) {<a name="line.406"></a>
+<span class="sourceLineNo">407</span>                existingWriter = new FileWriter(auditFile, true);<a name="line.407"></a>
+<span class="sourceLineNo">408</span>                fileWriters.put(type, existingWriter);<a name="line.408"></a>
+<span class="sourceLineNo">409</span>            }<a name="line.409"></a>
+<span class="sourceLineNo">410</span>            return existingWriter;<a name="line.410"></a>
+<span class="sourceLineNo">411</span>        }<a name="line.411"></a>
+<span class="sourceLineNo">412</span>    }<a name="line.412"></a>
+<span class="sourceLineNo">413</span><a name="line.413"></a>
+<span class="sourceLineNo">414</span>    // This should only be called if it is known that<a name="line.414"></a>
+<span class="sourceLineNo">415</span>    // the writer is invalid for use or no thread has obtained it / is using it<a name="line.415"></a>
+<span class="sourceLineNo">416</span>    // In other words, it does not synchronize on the use of the writer<a name="line.416"></a>
+<span class="sourceLineNo">417</span>    // If the writerToReset doesn't exist in the fileWriters (anymore) then<a name="line.417"></a>
+<span class="sourceLineNo">418</span>    // another thread already reset it, and no action is taken<a name="line.418"></a>
+<span class="sourceLineNo">419</span>    private void resetWriter(String type, FileWriter writerToReset) {<a name="line.419"></a>
+<span class="sourceLineNo">420</span>        FileWriter existingWriter = null;<a name="line.420"></a>
+<span class="sourceLineNo">421</span>        // TODO: optimize synchronization strategy<a name="line.421"></a>
+<span class="sourceLineNo">422</span>        synchronized (fileWriters) {<a name="line.422"></a>
+<span class="sourceLineNo">423</span>            existingWriter = fileWriters.get(type);<a name="line.423"></a>
+<span class="sourceLineNo">424</span>            if (existingWriter != null &amp;&amp; writerToReset != null &amp;&amp; existingWriter == writerToReset) {<a name="line.424"></a>
+<span class="sourceLineNo">425</span>                fileWriters.remove(type);<a name="line.425"></a>
+<span class="sourceLineNo">426</span>                // attempt clean-up close<a name="line.426"></a>
+<span class="sourceLineNo">427</span>                try {<a name="line.427"></a>
+<span class="sourceLineNo">428</span>                    existingWriter.close();<a name="line.428"></a>
+<span class="sourceLineNo">429</span>                } catch (Exception ex) {<a name="line.429"></a>
+<span class="sourceLineNo">430</span>                    // Debug level as the writer is expected to potentially be invalid<a name="line.430"></a>
+<span class="sourceLineNo">431</span>                    logger.debug("File writer close in resetWriter reported failure ", ex);<a name="line.431"></a>
+<span class="sourceLineNo">432</span>                }<a name="line.432"></a>
+<span class="sourceLineNo">433</span>            }<a name="line.433"></a>
+<span class="sourceLineNo">434</span>        }<a name="line.434"></a>
+<span class="sourceLineNo">435</span>    }<a name="line.435"></a>
+<span class="sourceLineNo">436</span><a name="line.436"></a>
+<span class="sourceLineNo">437</span>    /**<a name="line.437"></a>
+<span class="sourceLineNo">438</span>     * CellProcessor for parsing JsonValue objects from CSV file.<a name="line.438"></a>
+<span class="sourceLineNo">439</span>     */<a name="line.439"></a>
+<span class="sourceLineNo">440</span>    public class ParseJsonValue implements CellProcessor {<a name="line.440"></a>
+<span class="sourceLineNo">441</span><a name="line.441"></a>
+<span class="sourceLineNo">442</span>        @Override<a name="line.442"></a>
+<span class="sourceLineNo">443</span>        public Object execute(Object value, CsvContext context) {<a name="line.443"></a>
+<span class="sourceLineNo">444</span>            JsonValue jv = null;<a name="line.444"></a>
+<span class="sourceLineNo">445</span>            // Check if value is JSON object<a name="line.445"></a>
+<span class="sourceLineNo">446</span>            if (((String)value).startsWith("{") &amp;&amp; ((String)value).endsWith("}")) {<a name="line.446"></a>
+<span class="sourceLineNo">447</span>                try {<a name="line.447"></a>
+<span class="sourceLineNo">448</span>                    jv = AuditServiceImpl.parseJsonString(((String)value));<a name="line.448"></a>
+<span class="sourceLineNo">449</span>                } catch (Exception e) {<a name="line.449"></a>
+<span class="sourceLineNo">450</span>                    logger.debug("Error parsing JSON string: " + e.getMessage());<a name="line.450"></a>
+<span class="sourceLineNo">451</span>                }<a name="line.451"></a>
+<span class="sourceLineNo">452</span>            }<a name="line.452"></a>
+<span class="sourceLineNo">453</span>            if (jv == null) {<a name="line.453"></a>
+<span class="sourceLineNo">454</span>                return value;<a name="line.454"></a>
+<span class="sourceLineNo">455</span>            }<a name="line.455"></a>
+<span class="sourceLineNo">456</span>            return jv.asMap();<a name="line.456"></a>
+<span class="sourceLineNo">457</span>        }<a name="line.457"></a>
+<span class="sourceLineNo">458</span><a name="line.458"></a>
+<span class="sourceLineNo">459</span>    }<a name="line.459"></a>
+<span class="sourceLineNo">460</span>}<a name="line.460"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

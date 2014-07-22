@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-Description: This bundle is in experimental stage
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM SmartEvent Bundle
+Bundle-SymbolicName: org.forgerock.openidm.smartevent
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.smartevent.core;uses:="com.lmax.di
+ sruptor,com.lmax.disruptor.dsl,org.forgerock.openidm.smartevent";versio
+ n="3.0.0",org.forgerock.openidm.smartevent;version="3.0.0"
+Implementation-Build: 0
+Import-Package: com.lmax.disruptor;version="[3.0,4)",com.lmax.disruptor.
+ dsl;version="[3.0,4)",javax.management,org.slf4j;version="[1.7,2)"
+SCM-Revision: 0

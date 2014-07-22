@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.http.context" configuration-policy="ignore" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.http.ContextRegistrator"/>
+        <property name="service.pid" value="org.forgerock.openidm.http.context"/>
+        <reference name="httpService" interface="org.ops4j.pax.web.service.WebContainer" cardinality="1..1" policy="static" bind="bindHttpService" unbind="unbindHttpService"/>
+    </scr:component>
+</components>

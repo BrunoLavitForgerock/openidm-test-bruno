@@ -1,0 +1,298 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package org.forgerock.openidm.cluster;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span>import java.util.HashMap;<a name="line.3"></a>
+<span class="sourceLineNo">004</span>import java.util.Map;<a name="line.4"></a>
+<span class="sourceLineNo">005</span><a name="line.5"></a>
+<span class="sourceLineNo">006</span>public class InstanceState {<a name="line.6"></a>
+<span class="sourceLineNo">007</span>    <a name="line.7"></a>
+<span class="sourceLineNo">008</span>    public final static int STATE_RUNNING = 1;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>    public final static int STATE_PROCESSING_DOWN = 2;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>    public final static int STATE_DOWN = 3;<a name="line.10"></a>
+<span class="sourceLineNo">011</span><a name="line.11"></a>
+<span class="sourceLineNo">012</span>    public final static String PROP_INSTANCE_ID                 = "instanceId";<a name="line.12"></a>
+<span class="sourceLineNo">013</span>    public final static String PROP_RECOVERING_INSTANCE_ID      = "recoveringInstanceId";<a name="line.13"></a>
+<span class="sourceLineNo">014</span>    public final static String PROP_STATE                       = "state";<a name="line.14"></a>
+<span class="sourceLineNo">015</span>    public final static String PROP_TIMESTAMP_LEASE             = "timestamp";<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    public final static String PROP_TIMESTAMP_STARTUP           = "startup";<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    public final static String PROP_TIMESTAMP_SHUTDOWN          = "shutdown";<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    public final static String PROP_TIMESTAMP_DETECTED_DOWN     = "detectedDown";<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    public final static String PROP_TIMESTAMP_RECOVERY          = "recoveringTimestamp";<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    public final static String PROP_TIMESTAMP_RECOVERY_STARTED  = "recoveryStarted";<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    public final static String PROP_TIMESTAMP_RECOVERY_FINISHED = "recoveryFinished";<a name="line.21"></a>
+<span class="sourceLineNo">022</span>    public final static String PROP_RECOVERY_ATTEMPTS           = "recoveryAttempts";<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    public final static String PROP_REV                         = "_rev";<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    public final static String PROP_ID                          = "_id";<a name="line.24"></a>
+<span class="sourceLineNo">025</span>    <a name="line.25"></a>
+<span class="sourceLineNo">026</span>    private String instanceId;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    private int state;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>    private int recoveryAttempts;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    private long startup;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    private long shutdown;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    private long timestamp;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    private long detectedDown;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>    private long recoveryStarted;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    private long recoveryFinished;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    private long recoveringTimestamp;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>    private String recoveringInstanceId;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>    private String rev;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>    private String id;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>    <a name="line.39"></a>
+<span class="sourceLineNo">040</span>    public InstanceState(String instanceId, Map&lt;String, Object&gt; map) {<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        this.instanceId = instanceId;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>        this.recoveringInstanceId = (String)map.get(PROP_RECOVERING_INSTANCE_ID);<a name="line.42"></a>
+<span class="sourceLineNo">043</span>        this.state = ((map.get(PROP_STATE) == null) ? STATE_RUNNING : (Integer)map.get(PROP_STATE));<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        this.timestamp = ((map.get(PROP_TIMESTAMP_LEASE) == null) ? System.currentTimeMillis() : <a name="line.44"></a>
+<span class="sourceLineNo">045</span>            Long.parseLong((String)map.get(PROP_TIMESTAMP_LEASE)));<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        this.startup = ((map.get(PROP_TIMESTAMP_STARTUP) == null) ? System.currentTimeMillis() : <a name="line.46"></a>
+<span class="sourceLineNo">047</span>            Long.parseLong((String)map.get(PROP_TIMESTAMP_STARTUP)));<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        this.shutdown = ((map.get(PROP_TIMESTAMP_SHUTDOWN) == null) ? 0L : <a name="line.48"></a>
+<span class="sourceLineNo">049</span>            Long.parseLong((String)map.get(PROP_TIMESTAMP_SHUTDOWN)));<a name="line.49"></a>
+<span class="sourceLineNo">050</span>        this.detectedDown = ((map.get(PROP_TIMESTAMP_DETECTED_DOWN) == null) ? 0L : <a name="line.50"></a>
+<span class="sourceLineNo">051</span>            Long.parseLong((String)map.get(PROP_TIMESTAMP_DETECTED_DOWN)));<a name="line.51"></a>
+<span class="sourceLineNo">052</span>        this.recoveringTimestamp = ((map.get(PROP_TIMESTAMP_RECOVERY) == null) ? 0L : <a name="line.52"></a>
+<span class="sourceLineNo">053</span>            Long.parseLong((String)map.get(PROP_TIMESTAMP_RECOVERY)));<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        this.recoveryStarted = ((map.get(PROP_TIMESTAMP_RECOVERY_STARTED) == null) ? 0L : <a name="line.54"></a>
+<span class="sourceLineNo">055</span>            Long.parseLong((String)map.get(PROP_TIMESTAMP_RECOVERY_STARTED)));<a name="line.55"></a>
+<span class="sourceLineNo">056</span>        this.recoveryFinished = ((map.get(PROP_TIMESTAMP_RECOVERY_FINISHED) == null) ? 0L : <a name="line.56"></a>
+<span class="sourceLineNo">057</span>            Long.parseLong((String)map.get(PROP_TIMESTAMP_RECOVERY_FINISHED)));<a name="line.57"></a>
+<span class="sourceLineNo">058</span>        this.recoveryAttempts = ((map.get(PROP_RECOVERY_ATTEMPTS) == null) ? 0 : <a name="line.58"></a>
+<span class="sourceLineNo">059</span>            (Integer)map.get(PROP_RECOVERY_ATTEMPTS));<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        this.rev = (String)map.get(PROP_REV);<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        this.id = (String)map.get(PROP_ID);<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    }<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    <a name="line.63"></a>
+<span class="sourceLineNo">064</span>    public InstanceState(String instanceId) {<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        this.instanceId = instanceId;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        this.state = STATE_RUNNING;<a name="line.66"></a>
+<span class="sourceLineNo">067</span>        this.timestamp = System.currentTimeMillis();<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        this.startup = System.currentTimeMillis();<a name="line.68"></a>
+<span class="sourceLineNo">069</span>        this.shutdown = 0L;<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        this.recoveringTimestamp = 0L;<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        this.recoveringInstanceId = null;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        this.recoveryStarted = 0L;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        this.recoveryFinished = 0L;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        this.detectedDown = 0L;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        this.recoveryAttempts = 0;<a name="line.75"></a>
+<span class="sourceLineNo">076</span>    }<a name="line.76"></a>
+<span class="sourceLineNo">077</span><a name="line.77"></a>
+<span class="sourceLineNo">078</span>    public Map&lt;String, Object&gt; toMap() {<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        map.put(PROP_INSTANCE_ID, getInstanceId());<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        map.put(PROP_STATE, getState());<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        map.put(PROP_TIMESTAMP_LEASE, pad(new Long(getTimestamp())));<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        map.put(PROP_TIMESTAMP_STARTUP, pad(new Long(getStartup())));<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        map.put(PROP_TIMESTAMP_SHUTDOWN, pad(new Long(getShutdown())));<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        map.put(PROP_TIMESTAMP_DETECTED_DOWN, pad(new Long(getDetectedDown())));<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        map.put(PROP_RECOVERING_INSTANCE_ID, getRecoveringInstanceId());<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        map.put(PROP_TIMESTAMP_RECOVERY, pad(new Long(getRecoveringTimestamp())));<a name="line.87"></a>
+<span class="sourceLineNo">088</span>        map.put(PROP_TIMESTAMP_RECOVERY_STARTED, pad(getRecoveryStarted()));<a name="line.88"></a>
+<span class="sourceLineNo">089</span>        map.put(PROP_TIMESTAMP_RECOVERY_FINISHED, pad(getRecoveryFinished()));<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        map.put(PROP_RECOVERY_ATTEMPTS, getRecoveryAttempts());<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        map.put(PROP_REV, getRevision());<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        map.put(PROP_ID, id);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        return map;<a name="line.93"></a>
+<span class="sourceLineNo">094</span>    }<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    <a name="line.95"></a>
+<span class="sourceLineNo">096</span>    public boolean hasFailed(long timeout) {<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        if (System.currentTimeMillis() - timestamp &gt; timeout) {<a name="line.97"></a>
+<span class="sourceLineNo">098</span>            return true;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        }<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        return false;<a name="line.100"></a>
+<span class="sourceLineNo">101</span>    }<a name="line.101"></a>
+<span class="sourceLineNo">102</span>    <a name="line.102"></a>
+<span class="sourceLineNo">103</span>    public boolean hasRecoveringFailed(long timout) {<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        if (state == STATE_PROCESSING_DOWN &amp;&amp; <a name="line.104"></a>
+<span class="sourceLineNo">105</span>                (System.currentTimeMillis() - recoveringTimestamp &gt; timout)) {<a name="line.105"></a>
+<span class="sourceLineNo">106</span>            return true;<a name="line.106"></a>
+<span class="sourceLineNo">107</span>        }<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        return false;<a name="line.108"></a>
+<span class="sourceLineNo">109</span>    }<a name="line.109"></a>
+<span class="sourceLineNo">110</span>    <a name="line.110"></a>
+<span class="sourceLineNo">111</span>    public boolean hasShutdown() {<a name="line.111"></a>
+<span class="sourceLineNo">112</span>        if (shutdown == 0L) {<a name="line.112"></a>
+<span class="sourceLineNo">113</span>            return false;<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        }<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        return true;<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    }<a name="line.116"></a>
+<span class="sourceLineNo">117</span><a name="line.117"></a>
+<span class="sourceLineNo">118</span>    public void updateStartup() {<a name="line.118"></a>
+<span class="sourceLineNo">119</span>        this.startup = System.currentTimeMillis();<a name="line.119"></a>
+<span class="sourceLineNo">120</span>    }<a name="line.120"></a>
+<span class="sourceLineNo">121</span><a name="line.121"></a>
+<span class="sourceLineNo">122</span>    public void updateShutdown() {<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        this.shutdown = System.currentTimeMillis();<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    }<a name="line.124"></a>
+<span class="sourceLineNo">125</span><a name="line.125"></a>
+<span class="sourceLineNo">126</span>    public void updateTimestamp() {<a name="line.126"></a>
+<span class="sourceLineNo">127</span>        timestamp = System.currentTimeMillis();<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    }<a name="line.128"></a>
+<span class="sourceLineNo">129</span>    <a name="line.129"></a>
+<span class="sourceLineNo">130</span>    public void updateRecoveringTimestamp() {<a name="line.130"></a>
+<span class="sourceLineNo">131</span>        recoveringTimestamp = System.currentTimeMillis();<a name="line.131"></a>
+<span class="sourceLineNo">132</span>    }<a name="line.132"></a>
+<span class="sourceLineNo">133</span>    <a name="line.133"></a>
+<span class="sourceLineNo">134</span>    public void updateDetectedDown() {<a name="line.134"></a>
+<span class="sourceLineNo">135</span>        detectedDown = System.currentTimeMillis();<a name="line.135"></a>
+<span class="sourceLineNo">136</span>    }<a name="line.136"></a>
+<span class="sourceLineNo">137</span><a name="line.137"></a>
+<span class="sourceLineNo">138</span>    public String getInstanceId() {<a name="line.138"></a>
+<span class="sourceLineNo">139</span>        return instanceId;<a name="line.139"></a>
+<span class="sourceLineNo">140</span>    }<a name="line.140"></a>
+<span class="sourceLineNo">141</span>    <a name="line.141"></a>
+<span class="sourceLineNo">142</span>    public int getState() {<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        return state;<a name="line.143"></a>
+<span class="sourceLineNo">144</span>    }<a name="line.144"></a>
+<span class="sourceLineNo">145</span><a name="line.145"></a>
+<span class="sourceLineNo">146</span>    public long getTimestamp() {<a name="line.146"></a>
+<span class="sourceLineNo">147</span>        return timestamp;<a name="line.147"></a>
+<span class="sourceLineNo">148</span>    }<a name="line.148"></a>
+<span class="sourceLineNo">149</span><a name="line.149"></a>
+<span class="sourceLineNo">150</span>    public long getStartup() {<a name="line.150"></a>
+<span class="sourceLineNo">151</span>        return startup;<a name="line.151"></a>
+<span class="sourceLineNo">152</span>    }<a name="line.152"></a>
+<span class="sourceLineNo">153</span><a name="line.153"></a>
+<span class="sourceLineNo">154</span>    public long getShutdown() {<a name="line.154"></a>
+<span class="sourceLineNo">155</span>        return shutdown;<a name="line.155"></a>
+<span class="sourceLineNo">156</span>    }<a name="line.156"></a>
+<span class="sourceLineNo">157</span>    <a name="line.157"></a>
+<span class="sourceLineNo">158</span>    public long getDetectedDown() {<a name="line.158"></a>
+<span class="sourceLineNo">159</span>        return detectedDown;<a name="line.159"></a>
+<span class="sourceLineNo">160</span>    }<a name="line.160"></a>
+<span class="sourceLineNo">161</span><a name="line.161"></a>
+<span class="sourceLineNo">162</span>    public long getRecoveringTimestamp() {<a name="line.162"></a>
+<span class="sourceLineNo">163</span>        return recoveringTimestamp;<a name="line.163"></a>
+<span class="sourceLineNo">164</span>    }<a name="line.164"></a>
+<span class="sourceLineNo">165</span><a name="line.165"></a>
+<span class="sourceLineNo">166</span>    public String getRecoveringInstanceId() {<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        return recoveringInstanceId;<a name="line.167"></a>
+<span class="sourceLineNo">168</span>    }<a name="line.168"></a>
+<span class="sourceLineNo">169</span><a name="line.169"></a>
+<span class="sourceLineNo">170</span>    public int getRecoveryAttempts() {<a name="line.170"></a>
+<span class="sourceLineNo">171</span>        return recoveryAttempts;<a name="line.171"></a>
+<span class="sourceLineNo">172</span>    }<a name="line.172"></a>
+<span class="sourceLineNo">173</span>    <a name="line.173"></a>
+<span class="sourceLineNo">174</span>    public long getUptime() {<a name="line.174"></a>
+<span class="sourceLineNo">175</span>        return System.currentTimeMillis() - startup;<a name="line.175"></a>
+<span class="sourceLineNo">176</span>    }<a name="line.176"></a>
+<span class="sourceLineNo">177</span>    <a name="line.177"></a>
+<span class="sourceLineNo">178</span>    public String getRevision() {<a name="line.178"></a>
+<span class="sourceLineNo">179</span>        return rev;<a name="line.179"></a>
+<span class="sourceLineNo">180</span>    }<a name="line.180"></a>
+<span class="sourceLineNo">181</span>    <a name="line.181"></a>
+<span class="sourceLineNo">182</span>    public void clearShutdown() {<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        shutdown = 0L;<a name="line.183"></a>
+<span class="sourceLineNo">184</span>    }<a name="line.184"></a>
+<span class="sourceLineNo">185</span>    <a name="line.185"></a>
+<span class="sourceLineNo">186</span>    public void clearDetectedDown() {<a name="line.186"></a>
+<span class="sourceLineNo">187</span>        detectedDown = 0L;<a name="line.187"></a>
+<span class="sourceLineNo">188</span>    }<a name="line.188"></a>
+<span class="sourceLineNo">189</span>    <a name="line.189"></a>
+<span class="sourceLineNo">190</span>    public void clearRecoveryAttempts() {<a name="line.190"></a>
+<span class="sourceLineNo">191</span>        recoveryAttempts = 0;<a name="line.191"></a>
+<span class="sourceLineNo">192</span>    }<a name="line.192"></a>
+<span class="sourceLineNo">193</span><a name="line.193"></a>
+<span class="sourceLineNo">194</span>    public void setState(int state) {<a name="line.194"></a>
+<span class="sourceLineNo">195</span>        this.state = state;<a name="line.195"></a>
+<span class="sourceLineNo">196</span>    }<a name="line.196"></a>
+<span class="sourceLineNo">197</span><a name="line.197"></a>
+<span class="sourceLineNo">198</span>    public void setInstanceId(String instanceId) {<a name="line.198"></a>
+<span class="sourceLineNo">199</span>        this.instanceId = instanceId;<a name="line.199"></a>
+<span class="sourceLineNo">200</span>    }<a name="line.200"></a>
+<span class="sourceLineNo">201</span><a name="line.201"></a>
+<span class="sourceLineNo">202</span>    public void setRecoveringInstanceId(String recoveringInstanceId) {<a name="line.202"></a>
+<span class="sourceLineNo">203</span>        this.recoveringInstanceId = recoveringInstanceId;<a name="line.203"></a>
+<span class="sourceLineNo">204</span>    }<a name="line.204"></a>
+<span class="sourceLineNo">205</span><a name="line.205"></a>
+<span class="sourceLineNo">206</span>    public long getRecoveryStarted() {<a name="line.206"></a>
+<span class="sourceLineNo">207</span>        return recoveryStarted;<a name="line.207"></a>
+<span class="sourceLineNo">208</span>    }<a name="line.208"></a>
+<span class="sourceLineNo">209</span><a name="line.209"></a>
+<span class="sourceLineNo">210</span>    public void startRecovery() {<a name="line.210"></a>
+<span class="sourceLineNo">211</span>        recoveryStarted = System.currentTimeMillis();<a name="line.211"></a>
+<span class="sourceLineNo">212</span>        recoveryAttempts++;<a name="line.212"></a>
+<span class="sourceLineNo">213</span>    }<a name="line.213"></a>
+<span class="sourceLineNo">214</span><a name="line.214"></a>
+<span class="sourceLineNo">215</span>    public long getRecoveryFinished() {<a name="line.215"></a>
+<span class="sourceLineNo">216</span>        return recoveryFinished;<a name="line.216"></a>
+<span class="sourceLineNo">217</span>    }<a name="line.217"></a>
+<span class="sourceLineNo">218</span><a name="line.218"></a>
+<span class="sourceLineNo">219</span>    public void finishRecovery() {<a name="line.219"></a>
+<span class="sourceLineNo">220</span>        this.recoveryFinished = System.currentTimeMillis();<a name="line.220"></a>
+<span class="sourceLineNo">221</span>    }<a name="line.221"></a>
+<span class="sourceLineNo">222</span>    <a name="line.222"></a>
+<span class="sourceLineNo">223</span>    public static String pad(long l) {<a name="line.223"></a>
+<span class="sourceLineNo">224</span>        return String.format("%019d", l);<a name="line.224"></a>
+<span class="sourceLineNo">225</span>    }<a name="line.225"></a>
+<span class="sourceLineNo">226</span>}<a name="line.226"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

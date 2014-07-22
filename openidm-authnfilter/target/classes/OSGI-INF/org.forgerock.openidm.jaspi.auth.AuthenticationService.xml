@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.authentication" configuration-policy="require" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.jaspi.auth.AuthenticationService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.openidm.jaspi.config.AuthenticationConfig"/>
+            <provide interface="org.forgerock.json.resource.SingletonResourceProvider"/>
+        </service>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="service.description" value="OpenIDM Authentication Service"/>
+        <property name="openidm.router.prefix" value="/authentication"/>
+        <property name="service.pid" value="org.forgerock.openidm.authentication"/>
+        <reference name="cryptoService" interface="org.forgerock.openidm.crypto.CryptoService" cardinality="1..1" policy="dynamic" bind="bindCryptoService" unbind="unbindCryptoService"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+    </scr:component>
+</components>

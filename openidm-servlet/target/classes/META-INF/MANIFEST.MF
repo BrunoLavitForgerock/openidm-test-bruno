@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-Description: Bundle containing a servlet which allows exposing we
+ b content provided by optional bundles using OSGI.
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Web Servlet
+Bundle-SymbolicName: org.forgerock.openidm.servlet
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Implementation-Build: 0
+Import-Package: javax.servlet;version="[3.0,4)",javax.servlet.http;versi
+ on="[3.0,4)",org.forgerock.json.fluent;version="[2.3,3)",org.forgerock.
+ openidm.config.enhanced;version="[3.0,4)",org.forgerock.openidm.core;ve
+ rsion="[3.0,4)",org.ops4j.pax.web.service;version="[3.0,4)",org.osgi.fr
+ amework;version="[1.7,2)",org.osgi.service.component;version="[1.1,2)",
+ org.osgi.service.http;version="[1.2,2)",org.slf4j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.ui.internal.service.Re
+ sourceServlet.xml

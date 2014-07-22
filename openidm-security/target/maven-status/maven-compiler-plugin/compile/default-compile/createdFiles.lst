@@ -1,0 +1,9 @@
+org/forgerock/openidm/security/impl/EntryResourceProvider.class
+org/forgerock/openidm/security/SecurityManager.class
+org/forgerock/openidm/security/impl/JcaKeyStoreHandler.class
+org/forgerock/openidm/security/KeyStoreManager.class
+org/forgerock/openidm/security/KeyStoreHandler.class
+org/forgerock/openidm/security/impl/SecurityResourceProvider.class
+org/forgerock/openidm/security/impl/KeystoreResourceProvider.class
+org/forgerock/openidm/security/impl/PrivateKeyResourceProvider.class
+org/forgerock/openidm/security/impl/CertificateResourceProvider.class

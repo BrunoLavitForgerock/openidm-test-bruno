@@ -1,0 +1,5 @@
+org.forgerock.openidm.workflow.activiti
+org.forgerock.openidm.workflow.activiti.impl
+org.forgerock.openidm.workflow.activiti.impl.mixin
+org.forgerock.openidm.workflow.activiti.impl.session
+org.forgerock.openidm.workflow.activiti.metadata

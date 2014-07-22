@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * The contents of this file are subject to the terms of the Common Development and<a name="line.2"></a>
+<span class="sourceLineNo">003</span> * Distribution License (the License). You may not use this file except in compliance with the<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * License.<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * specific language governing permission and limitations under the License.<a name="line.7"></a>
+<span class="sourceLineNo">008</span> *<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * When distributing Covered Software, include this CDDL Header Notice in each file and include<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * Header, with the fields enclosed by brackets [] replaced by your own identifying<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * information: "Portions Copyrighted [year] [name of copyright owner]".<a name="line.12"></a>
+<span class="sourceLineNo">013</span> *<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * Copyright © 2011 ForgeRock AS. All rights reserved.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> */<a name="line.15"></a>
+<span class="sourceLineNo">016</span><a name="line.16"></a>
+<span class="sourceLineNo">017</span>package org.forgerock.openidm.metadata.impl;<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>import java.io.InputStream;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import java.net.URL;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>import java.util.Collection;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import java.util.Enumeration;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import java.util.Map;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import java.util.concurrent.ConcurrentSkipListMap;<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>import org.codehaus.jackson.map.ObjectMapper;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import org.forgerock.openidm.metadata.MetaDataProvider;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import org.forgerock.openidm.metadata.MetaDataProviderCallback;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import org.forgerock.openidm.osgi.ServiceTrackerListener;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import org.forgerock.openidm.osgi.ServiceTrackerNotifier;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import org.osgi.framework.Bundle;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import org.osgi.framework.BundleContext;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import org.osgi.framework.Constants;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import org.osgi.framework.ServiceReference;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import org.osgi.util.tracker.ServiceTracker;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import org.slf4j.Logger;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import org.slf4j.LoggerFactory;<a name="line.37"></a>
+<span class="sourceLineNo">038</span><a name="line.38"></a>
+<span class="sourceLineNo">039</span>/**<a name="line.39"></a>
+<span class="sourceLineNo">040</span> * Keep track of meta data providers, either declared in bundle meta-data, or <a name="line.40"></a>
+<span class="sourceLineNo">041</span> * registered as services<a name="line.41"></a>
+<span class="sourceLineNo">042</span> * <a name="line.42"></a>
+<span class="sourceLineNo">043</span> * @author aegloff<a name="line.43"></a>
+<span class="sourceLineNo">044</span> * @author ckienle<a name="line.44"></a>
+<span class="sourceLineNo">045</span> *<a name="line.45"></a>
+<span class="sourceLineNo">046</span> */<a name="line.46"></a>
+<span class="sourceLineNo">047</span>public class ProviderTracker implements ServiceTrackerListener {<a name="line.47"></a>
+<span class="sourceLineNo">048</span>    final static Logger logger = LoggerFactory.getLogger(ProviderTracker.class);<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span>    static ServiceTracker providerTracker;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>    ProviderListener providerListener;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>    BundleContext context;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>    ObjectMapper mapper = new ObjectMapper();<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>    // Map from origin identifiers to MetaDataProvider<a name="line.55"></a>
+<span class="sourceLineNo">056</span>    // Long type key are bundle identifiers<a name="line.56"></a>
+<span class="sourceLineNo">057</span>    // String keys are service pids<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    // This map MUST be thread safe to avoid the java.util.ConcurrentModificationException<a name="line.58"></a>
+<span class="sourceLineNo">059</span>    Map&lt;String, MetaDataProvider&gt; providers = new ConcurrentSkipListMap&lt;String, MetaDataProvider&gt;();<a name="line.59"></a>
+<span class="sourceLineNo">060</span><a name="line.60"></a>
+<span class="sourceLineNo">061</span>    /**<a name="line.61"></a>
+<span class="sourceLineNo">062</span>     * Constructor<a name="line.62"></a>
+<span class="sourceLineNo">063</span>     * @param context a bundle context to access OSGi<a name="line.63"></a>
+<span class="sourceLineNo">064</span>     * @param listener the listener to notify when a provider change was detecte<a name="line.64"></a>
+<span class="sourceLineNo">065</span>     * @param notifyDuringInit whether to notify the listener during the ProviderTracker construction. <a name="line.65"></a>
+<span class="sourceLineNo">066</span>     * Setting it to false allows to query the providers acquired during init with getProviders, and to process additional <a name="line.66"></a>
+<span class="sourceLineNo">067</span>     * providers via the listener.<a name="line.67"></a>
+<span class="sourceLineNo">068</span>     */<a name="line.68"></a>
+<span class="sourceLineNo">069</span>    public ProviderTracker(BundleContext context, ProviderListener listener, boolean notifyDuringInit) {<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        this.context = context;<a name="line.70"></a>
+<span class="sourceLineNo">071</span>        providerListener = listener;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        initBundleProviders(context, notifyDuringInit);<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        providerTracker = initServiceTracker(context);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        // TODO: add bundle listeners to track new installs and remove uninstalls<a name="line.74"></a>
+<span class="sourceLineNo">075</span>    }<a name="line.75"></a>
+<span class="sourceLineNo">076</span><a name="line.76"></a>
+<span class="sourceLineNo">077</span>    private void initBundleProviders(BundleContext context, boolean notifyDuringInit) { <a name="line.77"></a>
+<span class="sourceLineNo">078</span>        Bundle[] bundles = context.getBundles();<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        for (Bundle bundle : bundles) {<a name="line.79"></a>
+<span class="sourceLineNo">080</span>            if (logger.isTraceEnabled()) {<a name="line.80"></a>
+<span class="sourceLineNo">081</span>                logger.trace("Scanning bundle {} for metadata file", bundle.getBundleId());<a name="line.81"></a>
+<span class="sourceLineNo">082</span>            }<a name="line.82"></a>
+<span class="sourceLineNo">083</span>            Enumeration&lt;URL&gt; entries = bundle.findEntries("org/forgerock/metadata", "bundle.json", true);<a name="line.83"></a>
+<span class="sourceLineNo">084</span>            try { <a name="line.84"></a>
+<span class="sourceLineNo">085</span>                if (entries != null &amp;&amp; entries.hasMoreElements()) {<a name="line.85"></a>
+<span class="sourceLineNo">086</span>                    URL entryUrl = entries.nextElement();<a name="line.86"></a>
+<span class="sourceLineNo">087</span>                    logger.trace("Found metadata file, load and parse {}", entryUrl);<a name="line.87"></a>
+<span class="sourceLineNo">088</span>                    InputStream in = entryUrl.openStream();<a name="line.88"></a>
+<span class="sourceLineNo">089</span>                    Map metaConfig = mapper.readValue(in, Map.class);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>                    in.close();<a name="line.90"></a>
+<span class="sourceLineNo">091</span>                    String providerClazzName = (String) metaConfig.get("metaDataProvider");<a name="line.91"></a>
+<span class="sourceLineNo">092</span>                    logger.trace("Loading declared MetaDataProvider {}", providerClazzName);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>                    if (providerClazzName == null) {<a name="line.93"></a>
+<span class="sourceLineNo">094</span>                        logger.trace("No MetaDataProvider class declared in meta data file {} for {}", entryUrl, bundle.getSymbolicName());<a name="line.94"></a>
+<span class="sourceLineNo">095</span>                    } else {<a name="line.95"></a>
+<span class="sourceLineNo">096</span>                        logger.trace("Loading declared MetaDataProvider {}", providerClazzName);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>                        Class providerClazz = bundle.loadClass(providerClazzName);<a name="line.97"></a>
+<span class="sourceLineNo">098</span>                        MetaDataProvider provider = (MetaDataProvider) providerClazz.newInstance();<a name="line.98"></a>
+<span class="sourceLineNo">099</span>                        String id = Long.valueOf(bundle.getBundleId()).toString();<a name="line.99"></a>
+<span class="sourceLineNo">100</span>                        // Instantiate and set the provider callback<a name="line.100"></a>
+<span class="sourceLineNo">101</span>                        provider.setCallback(new ProviderTrackerCallback(provider, id));<a name="line.101"></a>
+<span class="sourceLineNo">102</span>                        // Add the provider to the listener<a name="line.102"></a>
+<span class="sourceLineNo">103</span>                        addProvider(id, provider, notifyDuringInit);<a name="line.103"></a>
+<span class="sourceLineNo">104</span>                        logger.debug("Registered MetaDataProvider {} for {}", providerClazzName, bundle.getSymbolicName());<a name="line.104"></a>
+<span class="sourceLineNo">105</span>                    }<a name="line.105"></a>
+<span class="sourceLineNo">106</span>                }<a name="line.106"></a>
+<span class="sourceLineNo">107</span>            } catch (Exception ex) {<a name="line.107"></a>
+<span class="sourceLineNo">108</span>                logger.warn("Failed to obtain meta-data on handling configuration for {}", bundle.getSymbolicName(), ex);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>            }<a name="line.109"></a>
+<span class="sourceLineNo">110</span>        }<a name="line.110"></a>
+<span class="sourceLineNo">111</span>    }<a name="line.111"></a>
+<span class="sourceLineNo">112</span><a name="line.112"></a>
+<span class="sourceLineNo">113</span>    private void addProvider(String originId, MetaDataProvider provider, boolean notify) {<a name="line.113"></a>
+<span class="sourceLineNo">114</span>        providers.put(originId, provider);<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        if (providerListener != null &amp;&amp; notify) {<a name="line.115"></a>
+<span class="sourceLineNo">116</span>            logger.debug("Notifying listener of added MetaDataProvider {}", originId);<a name="line.116"></a>
+<span class="sourceLineNo">117</span>            providerListener.addedProvider(originId, provider);<a name="line.117"></a>
+<span class="sourceLineNo">118</span>        }<a name="line.118"></a>
+<span class="sourceLineNo">119</span>    }<a name="line.119"></a>
+<span class="sourceLineNo">120</span><a name="line.120"></a>
+<span class="sourceLineNo">121</span>    private ServiceTracker initServiceTracker(BundleContext context) {<a name="line.121"></a>
+<span class="sourceLineNo">122</span>        ServiceTracker tracker = new ServiceTrackerNotifier(context, MetaDataProvider.class.getName(), null, this);<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        tracker.open();<a name="line.123"></a>
+<span class="sourceLineNo">124</span>        return tracker;<a name="line.124"></a>
+<span class="sourceLineNo">125</span>    }<a name="line.125"></a>
+<span class="sourceLineNo">126</span><a name="line.126"></a>
+<span class="sourceLineNo">127</span>    public void addedService(ServiceReference reference, Object service) {<a name="line.127"></a>
+<span class="sourceLineNo">128</span>        String pid = (String) reference.getProperty(Constants.SERVICE_PID);<a name="line.128"></a>
+<span class="sourceLineNo">129</span>        MetaDataProvider provider = (MetaDataProvider) service;<a name="line.129"></a>
+<span class="sourceLineNo">130</span>        // Instantiate and set the provider callback<a name="line.130"></a>
+<span class="sourceLineNo">131</span>        provider.setCallback(new ProviderTrackerCallback(provider, pid));<a name="line.131"></a>
+<span class="sourceLineNo">132</span>        // Add the provider to the listener<a name="line.132"></a>
+<span class="sourceLineNo">133</span>        addProvider(pid, provider, true);<a name="line.133"></a>
+<span class="sourceLineNo">134</span>    }<a name="line.134"></a>
+<span class="sourceLineNo">135</span><a name="line.135"></a>
+<span class="sourceLineNo">136</span>    public void removedService(ServiceReference reference, Object service) {<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        String pid = (String) reference.getProperty(Constants.SERVICE_PID);<a name="line.137"></a>
+<span class="sourceLineNo">138</span>        providers.remove(pid);<a name="line.138"></a>
+<span class="sourceLineNo">139</span>    }<a name="line.139"></a>
+<span class="sourceLineNo">140</span><a name="line.140"></a>
+<span class="sourceLineNo">141</span>    public void modifiedService(ServiceReference reference, Object service) {<a name="line.141"></a>
+<span class="sourceLineNo">142</span>        String pid = (String) reference.getProperty(Constants.SERVICE_PID);<a name="line.142"></a>
+<span class="sourceLineNo">143</span>        modifiedProvider(pid, (MetaDataProvider) service, true);<a name="line.143"></a>
+<span class="sourceLineNo">144</span>    }<a name="line.144"></a>
+<span class="sourceLineNo">145</span>    <a name="line.145"></a>
+<span class="sourceLineNo">146</span>    public void modifiedProvider(String pid, MetaDataProvider provider, boolean notify) {<a name="line.146"></a>
+<span class="sourceLineNo">147</span>        addProvider(pid, provider, notify);<a name="line.147"></a>
+<span class="sourceLineNo">148</span>    }<a name="line.148"></a>
+<span class="sourceLineNo">149</span><a name="line.149"></a>
+<span class="sourceLineNo">150</span>    /**<a name="line.150"></a>
+<span class="sourceLineNo">151</span>     * Get the current registered providers<a name="line.151"></a>
+<span class="sourceLineNo">152</span>     * Providers can be backed by an OSGi services, <a name="line.152"></a>
+<span class="sourceLineNo">153</span>     * or created from a bundle factory<a name="line.153"></a>
+<span class="sourceLineNo">154</span>     * @return meta data providers<a name="line.154"></a>
+<span class="sourceLineNo">155</span>     */<a name="line.155"></a>
+<span class="sourceLineNo">156</span>    public Collection&lt;MetaDataProvider&gt; getProviders() {<a name="line.156"></a>
+<span class="sourceLineNo">157</span>        //The returned value MUST be thread safe!<a name="line.157"></a>
+<span class="sourceLineNo">158</span>        return providers.values();<a name="line.158"></a>
+<span class="sourceLineNo">159</span>    }<a name="line.159"></a>
+<span class="sourceLineNo">160</span><a name="line.160"></a>
+<span class="sourceLineNo">161</span>    /**<a name="line.161"></a>
+<span class="sourceLineNo">162</span>     * A MetaDataProviderCallback implementation that is used to notify the ProvicerListener<a name="line.162"></a>
+<span class="sourceLineNo">163</span>     * when a MetaDataProvider calls refresh()<a name="line.163"></a>
+<span class="sourceLineNo">164</span>     */<a name="line.164"></a>
+<span class="sourceLineNo">165</span>    private class ProviderTrackerCallback implements MetaDataProviderCallback {<a name="line.165"></a>
+<span class="sourceLineNo">166</span><a name="line.166"></a>
+<span class="sourceLineNo">167</span>        private MetaDataProvider provider = null;<a name="line.167"></a>
+<span class="sourceLineNo">168</span>        private String originId = null;<a name="line.168"></a>
+<span class="sourceLineNo">169</span><a name="line.169"></a>
+<span class="sourceLineNo">170</span>        /**<a name="line.170"></a>
+<span class="sourceLineNo">171</span>         * Constructor<a name="line.171"></a>
+<span class="sourceLineNo">172</span>         * @param provider the MetaDataProvider instance<a name="line.172"></a>
+<span class="sourceLineNo">173</span>         * @param originId the MetaDataProvider id<a name="line.173"></a>
+<span class="sourceLineNo">174</span>         */<a name="line.174"></a>
+<span class="sourceLineNo">175</span>        public ProviderTrackerCallback(MetaDataProvider provider, String originId) {<a name="line.175"></a>
+<span class="sourceLineNo">176</span>            this.provider = provider;<a name="line.176"></a>
+<span class="sourceLineNo">177</span>            this.originId = originId;<a name="line.177"></a>
+<span class="sourceLineNo">178</span>        }<a name="line.178"></a>
+<span class="sourceLineNo">179</span><a name="line.179"></a>
+<span class="sourceLineNo">180</span>        @Override<a name="line.180"></a>
+<span class="sourceLineNo">181</span>        public void refresh() {<a name="line.181"></a>
+<span class="sourceLineNo">182</span>            modifiedProvider(originId, provider, true);<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        }<a name="line.183"></a>
+<span class="sourceLineNo">184</span><a name="line.184"></a>
+<span class="sourceLineNo">185</span>    }<a name="line.185"></a>
+<span class="sourceLineNo">186</span>}<a name="line.186"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

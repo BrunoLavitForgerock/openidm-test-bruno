@@ -1,0 +1,3 @@
+org/forgerock/openidm/util/ResourceUtilTest.class
+org/forgerock/openidm/util/FileUtilTest.class
+org/forgerock/openidm/osgi/OsgiNameTest.class

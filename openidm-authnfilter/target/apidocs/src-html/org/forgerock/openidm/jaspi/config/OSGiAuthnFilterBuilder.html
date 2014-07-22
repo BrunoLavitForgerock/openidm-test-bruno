@@ -1,0 +1,392 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * The contents of this file are subject to the terms of the Common Development and<a name="line.2"></a>
+<span class="sourceLineNo">003</span> * Distribution License (the License). You may not use this file except in compliance with the<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * License.<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * specific language governing permission and limitations under the License.<a name="line.7"></a>
+<span class="sourceLineNo">008</span> *<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * When distributing Covered Software, include this CDDL Header Notice in each file and include<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * Header, with the fields enclosed by brackets [] replaced by your own identifying<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * information: "Portions Copyrighted [year] [name of copyright owner]".<a name="line.12"></a>
+<span class="sourceLineNo">013</span> *<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * Copyright 2013-2014 ForgeRock AS.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> */<a name="line.15"></a>
+<span class="sourceLineNo">016</span><a name="line.16"></a>
+<span class="sourceLineNo">017</span>package org.forgerock.openidm.jaspi.config;<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>import org.apache.felix.scr.annotations.Activate;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import org.apache.felix.scr.annotations.Component;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>import org.apache.felix.scr.annotations.ConfigurationPolicy;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import org.apache.felix.scr.annotations.Deactivate;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import org.apache.felix.scr.annotations.Properties;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import org.apache.felix.scr.annotations.Property;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import org.apache.felix.scr.annotations.Reference;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import org.apache.felix.scr.annotations.Service;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import org.apache.felix.scr.annotations.ReferenceCardinality;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import org.apache.felix.scr.annotations.ReferencePolicy;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import org.forgerock.jaspi.JaspiRuntimeFilter;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import static org.forgerock.jaspi.runtime.context.config.ModuleConfigurationFactory.SERVER_AUTH_CONTEXT_KEY;<a name="line.30"></a>
+<span class="sourceLineNo">031</span><a name="line.31"></a>
+<span class="sourceLineNo">032</span>import org.forgerock.json.fluent.JsonValue;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import org.forgerock.json.resource.ConnectionFactory;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import org.forgerock.openidm.core.ServerConstants;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import org.forgerock.openidm.crypto.CryptoService;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import org.forgerock.openidm.servletregistration.RegisteredFilter;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import static org.forgerock.openidm.servletregistration.RegisteredFilter.FILTER_ORDER;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import org.forgerock.openidm.servletregistration.ServletRegistration;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_CLASS;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_CLASS_PATH_URLS;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_URL_PATTERNS;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_INIT_PARAMETERS;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SYSTEM_PROPERTIES;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SCRIPT_EXTENSIONS;<a name="line.45"></a>
+<span class="sourceLineNo">046</span><a name="line.46"></a>
+<span class="sourceLineNo">047</span>import org.forgerock.openidm.router.RouteService;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import org.forgerock.script.ScriptRegistry;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>import org.osgi.framework.Constants;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>import org.osgi.service.component.ComponentContext;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>import org.osgi.util.tracker.ServiceTracker;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>import org.slf4j.Logger;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>import org.slf4j.LoggerFactory;<a name="line.53"></a>
+<span class="sourceLineNo">054</span><a name="line.54"></a>
+<span class="sourceLineNo">055</span>import java.util.ArrayList;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>import java.util.HashMap;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>import java.util.List;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>import java.util.Map;<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>/**<a name="line.60"></a>
+<span class="sourceLineNo">061</span> * Configures the authentication chains based on configuration obtained through OSGi.<a name="line.61"></a>
+<span class="sourceLineNo">062</span> *<a name="line.62"></a>
+<span class="sourceLineNo">063</span> * Example:<a name="line.63"></a>
+<span class="sourceLineNo">064</span> *<a name="line.64"></a>
+<span class="sourceLineNo">065</span> * &lt;pre&gt;<a name="line.65"></a>
+<span class="sourceLineNo">066</span> *     &lt;code&gt;<a name="line.66"></a>
+<span class="sourceLineNo">067</span> * {<a name="line.67"></a>
+<span class="sourceLineNo">068</span> *     "serverAuthConfig" : {<a name="line.68"></a>
+<span class="sourceLineNo">069</span> *         "scriptExtensions" : {<a name="line.69"></a>
+<span class="sourceLineNo">070</span> *             "augmentSecurityContext" : {<a name="line.70"></a>
+<span class="sourceLineNo">071</span> *                 "type" : "text/javascript",<a name="line.71"></a>
+<span class="sourceLineNo">072</span> *                 "file" : "auth/authnPopulateContext.js"<a name="line.72"></a>
+<span class="sourceLineNo">073</span> *             }<a name="line.73"></a>
+<span class="sourceLineNo">074</span> *         },<a name="line.74"></a>
+<span class="sourceLineNo">075</span> *         "sessionModule" : {<a name="line.75"></a>
+<span class="sourceLineNo">076</span> *             "name" : "JWT_SESSION",<a name="line.76"></a>
+<span class="sourceLineNo">077</span> *                 "properties" : {<a name="line.77"></a>
+<span class="sourceLineNo">078</span> *                     "someSetting" : "some-value"<a name="line.78"></a>
+<span class="sourceLineNo">079</span> *                 }<a name="line.79"></a>
+<span class="sourceLineNo">080</span> *         },<a name="line.80"></a>
+<span class="sourceLineNo">081</span> *         "authModules" : [<a name="line.81"></a>
+<span class="sourceLineNo">082</span> *             {<a name="line.82"></a>
+<span class="sourceLineNo">083</span> *                 "name" : "IWA",<a name="line.83"></a>
+<span class="sourceLineNo">084</span> *                 "properties" : {<a name="line.84"></a>
+<span class="sourceLineNo">085</span> *                     "someSetting" : "some-value"<a name="line.85"></a>
+<span class="sourceLineNo">086</span> *                 }<a name="line.86"></a>
+<span class="sourceLineNo">087</span> *             },<a name="line.87"></a>
+<span class="sourceLineNo">088</span> *             {<a name="line.88"></a>
+<span class="sourceLineNo">089</span> *                 "name" : "PASSTHROUGH",<a name="line.89"></a>
+<span class="sourceLineNo">090</span> *                 "properties" : {<a name="line.90"></a>
+<span class="sourceLineNo">091</span> *                     "someSetting" : "some-value"<a name="line.91"></a>
+<span class="sourceLineNo">092</span> *                 }<a name="line.92"></a>
+<span class="sourceLineNo">093</span> *             }<a name="line.93"></a>
+<span class="sourceLineNo">094</span> *         ]<a name="line.94"></a>
+<span class="sourceLineNo">095</span> *     }<a name="line.95"></a>
+<span class="sourceLineNo">096</span> * }<a name="line.96"></a>
+<span class="sourceLineNo">097</span> *     &lt;/code&gt;<a name="line.97"></a>
+<span class="sourceLineNo">098</span> * &lt;/pre&gt;<a name="line.98"></a>
+<span class="sourceLineNo">099</span> *<a name="line.99"></a>
+<span class="sourceLineNo">100</span> * Also,<a name="line.100"></a>
+<span class="sourceLineNo">101</span> * &lt;pre&gt;<a name="line.101"></a>
+<span class="sourceLineNo">102</span> *     &lt;code&gt;<a name="line.102"></a>
+<span class="sourceLineNo">103</span> *         OSGiAuthnFilterBuilder.getInstance()<a name="line.103"></a>
+<span class="sourceLineNo">104</span> *     &lt;/code&gt;<a name="line.104"></a>
+<span class="sourceLineNo">105</span> * &lt;/pre&gt;<a name="line.105"></a>
+<span class="sourceLineNo">106</span> * may be used to inject the OSGi dependencies into other modules as an OSGiAuthnFilterHelper.<a name="line.106"></a>
+<span class="sourceLineNo">107</span> *<a name="line.107"></a>
+<span class="sourceLineNo">108</span> * @author Jonathan Scudder<a name="line.108"></a>
+<span class="sourceLineNo">109</span> * @author Phill Cunnington<a name="line.109"></a>
+<span class="sourceLineNo">110</span> * @author brmiller<a name="line.110"></a>
+<span class="sourceLineNo">111</span> * @author ckienle<a name="line.111"></a>
+<span class="sourceLineNo">112</span> */<a name="line.112"></a>
+<span class="sourceLineNo">113</span>@Component(name = OSGiAuthnFilterBuilder.PID, immediate = true, policy = ConfigurationPolicy.IGNORE)<a name="line.113"></a>
+<span class="sourceLineNo">114</span>@Properties({<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Commons Authentication Filter Configuration")<a name="line.116"></a>
+<span class="sourceLineNo">117</span>})<a name="line.117"></a>
+<span class="sourceLineNo">118</span>public class OSGiAuthnFilterBuilder implements OSGiAuthnFilterHelper {<a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119"></a>
+<span class="sourceLineNo">120</span>    /** The PID for this component. */<a name="line.120"></a>
+<span class="sourceLineNo">121</span>    public static final String PID = "org.forgerock.openidm.authnfilterbuilder";<a name="line.121"></a>
+<span class="sourceLineNo">122</span><a name="line.122"></a>
+<span class="sourceLineNo">123</span>    // config tokens<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    private static final String CONFIG_ADDITIONAL_URL_PATTERNS = "additionalUrlPatterns";<a name="line.124"></a>
+<span class="sourceLineNo">125</span><a name="line.125"></a>
+<span class="sourceLineNo">126</span>    private static final int DEFAULT_FILTER_ORDER = 100;<a name="line.126"></a>
+<span class="sourceLineNo">127</span><a name="line.127"></a>
+<span class="sourceLineNo">128</span>    private Logger logger = LoggerFactory.getLogger(this.getClass());<a name="line.128"></a>
+<span class="sourceLineNo">129</span><a name="line.129"></a>
+<span class="sourceLineNo">130</span>    private static OSGiAuthnFilterBuilder instance;<a name="line.130"></a>
+<span class="sourceLineNo">131</span><a name="line.131"></a>
+<span class="sourceLineNo">132</span>    // ----- Declarative Service Implementation<a name="line.132"></a>
+<span class="sourceLineNo">133</span><a name="line.133"></a>
+<span class="sourceLineNo">134</span>    @Reference(<a name="line.134"></a>
+<span class="sourceLineNo">135</span>            name = "AuthenticationConfig",<a name="line.135"></a>
+<span class="sourceLineNo">136</span>            referenceInterface = AuthenticationConfig.class,<a name="line.136"></a>
+<span class="sourceLineNo">137</span>            policy = ReferencePolicy.STATIC,<a name="line.137"></a>
+<span class="sourceLineNo">138</span>            cardinality = ReferenceCardinality.MANDATORY_UNARY,<a name="line.138"></a>
+<span class="sourceLineNo">139</span>            bind = "bindAuthenticationConfig",<a name="line.139"></a>
+<span class="sourceLineNo">140</span>            unbind = "unBindAuthenticationConfig"<a name="line.140"></a>
+<span class="sourceLineNo">141</span>    )<a name="line.141"></a>
+<span class="sourceLineNo">142</span>    private JsonValue config;<a name="line.142"></a>
+<span class="sourceLineNo">143</span>    private void bindAuthenticationConfig(AuthenticationConfig authenticationConfig) {<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        config = authenticationConfig.getConfig();<a name="line.144"></a>
+<span class="sourceLineNo">145</span>    }<a name="line.145"></a>
+<span class="sourceLineNo">146</span>    private void unBindAuthenticationConfig(AuthenticationConfig authenticationConfig) {<a name="line.146"></a>
+<span class="sourceLineNo">147</span>        config = null;<a name="line.147"></a>
+<span class="sourceLineNo">148</span>    }<a name="line.148"></a>
+<span class="sourceLineNo">149</span><a name="line.149"></a>
+<span class="sourceLineNo">150</span>    @Reference(target = "("+ServerConstants.ROUTER_PREFIX+"=/repo/*)")<a name="line.150"></a>
+<span class="sourceLineNo">151</span>    RouteService repositoryRoute;<a name="line.151"></a>
+<span class="sourceLineNo">152</span><a name="line.152"></a>
+<span class="sourceLineNo">153</span>    @Reference(policy = ReferencePolicy.DYNAMIC)<a name="line.153"></a>
+<span class="sourceLineNo">154</span>    CryptoService cryptoService;<a name="line.154"></a>
+<span class="sourceLineNo">155</span><a name="line.155"></a>
+<span class="sourceLineNo">156</span>    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")<a name="line.156"></a>
+<span class="sourceLineNo">157</span>    ConnectionFactory connectionFactory;<a name="line.157"></a>
+<span class="sourceLineNo">158</span><a name="line.158"></a>
+<span class="sourceLineNo">159</span>    /** Script Registry service. */<a name="line.159"></a>
+<span class="sourceLineNo">160</span>    @Reference(policy = ReferencePolicy.DYNAMIC)<a name="line.160"></a>
+<span class="sourceLineNo">161</span>    protected ScriptRegistry scriptRegistry;<a name="line.161"></a>
+<span class="sourceLineNo">162</span><a name="line.162"></a>
+<span class="sourceLineNo">163</span>    @Reference(<a name="line.163"></a>
+<span class="sourceLineNo">164</span>            name = "ref_ServletFilterRegistration",<a name="line.164"></a>
+<span class="sourceLineNo">165</span>            referenceInterface = ServletRegistration.class,<a name="line.165"></a>
+<span class="sourceLineNo">166</span>            policy = ReferencePolicy.STATIC,<a name="line.166"></a>
+<span class="sourceLineNo">167</span>            cardinality = ReferenceCardinality.MANDATORY_UNARY<a name="line.167"></a>
+<span class="sourceLineNo">168</span>    )<a name="line.168"></a>
+<span class="sourceLineNo">169</span>    ServletRegistration servletFilterRegistration;<a name="line.169"></a>
+<span class="sourceLineNo">170</span><a name="line.170"></a>
+<span class="sourceLineNo">171</span>    private RegisteredFilter filter;<a name="line.171"></a>
+<span class="sourceLineNo">172</span><a name="line.172"></a>
+<span class="sourceLineNo">173</span>    /**<a name="line.173"></a>
+<span class="sourceLineNo">174</span>     * Configures the commons Authentication Filter with the configuration in the authentication.json file.<a name="line.174"></a>
+<span class="sourceLineNo">175</span>     *<a name="line.175"></a>
+<span class="sourceLineNo">176</span>     * @param context The ComponentContext.<a name="line.176"></a>
+<span class="sourceLineNo">177</span>     */<a name="line.177"></a>
+<span class="sourceLineNo">178</span>    @Activate<a name="line.178"></a>
+<span class="sourceLineNo">179</span>    protected void activate(ComponentContext context) throws Exception {<a name="line.179"></a>
+<span class="sourceLineNo">180</span>        instance = this;<a name="line.180"></a>
+<span class="sourceLineNo">181</span>        JsonValue scriptExtensions = config.get(SERVLET_FILTER_SCRIPT_EXTENSIONS);<a name="line.181"></a>
+<span class="sourceLineNo">182</span>        List&lt;String&gt; additionalUrlPatterns = getAdditionalUrlPatterns(config);<a name="line.182"></a>
+<span class="sourceLineNo">183</span>        configureAuthenticationFilter(config);<a name="line.183"></a>
+<span class="sourceLineNo">184</span><a name="line.184"></a>
+<span class="sourceLineNo">185</span>        registerAuthnFilter(scriptExtensions, additionalUrlPatterns);<a name="line.185"></a>
+<span class="sourceLineNo">186</span>    }<a name="line.186"></a>
+<span class="sourceLineNo">187</span><a name="line.187"></a>
+<span class="sourceLineNo">188</span>    /**<a name="line.188"></a>
+<span class="sourceLineNo">189</span>     * Gets the additional url parameters value out of the authentication.json configuration.<a name="line.189"></a>
+<span class="sourceLineNo">190</span>     *<a name="line.190"></a>
+<span class="sourceLineNo">191</span>     * @param config The authentication json configuration.<a name="line.191"></a>
+<span class="sourceLineNo">192</span>     * @return The additional url parameters, if any.<a name="line.192"></a>
+<span class="sourceLineNo">193</span>     */<a name="line.193"></a>
+<span class="sourceLineNo">194</span>    private List&lt;String&gt; getAdditionalUrlPatterns(final JsonValue config) {<a name="line.194"></a>
+<span class="sourceLineNo">195</span>        List&lt;String&gt; additionalUrlPatterns = config<a name="line.195"></a>
+<span class="sourceLineNo">196</span>                .get(SERVER_AUTH_CONTEXT_KEY)<a name="line.196"></a>
+<span class="sourceLineNo">197</span>                .get(CONFIG_ADDITIONAL_URL_PATTERNS)<a name="line.197"></a>
+<span class="sourceLineNo">198</span>                .defaultTo(new ArrayList&lt;String&gt;(0))<a name="line.198"></a>
+<span class="sourceLineNo">199</span>                .asList(String.class);<a name="line.199"></a>
+<span class="sourceLineNo">200</span>        config.get(SERVER_AUTH_CONTEXT_KEY).remove(CONFIG_ADDITIONAL_URL_PATTERNS);<a name="line.200"></a>
+<span class="sourceLineNo">201</span>        return additionalUrlPatterns;<a name="line.201"></a>
+<span class="sourceLineNo">202</span>    }<a name="line.202"></a>
+<span class="sourceLineNo">203</span><a name="line.203"></a>
+<span class="sourceLineNo">204</span>    /**<a name="line.204"></a>
+<span class="sourceLineNo">205</span>     * Configures the commons Authentication Filter with the given configuration.<a name="line.205"></a>
+<span class="sourceLineNo">206</span>     *<a name="line.206"></a>
+<span class="sourceLineNo">207</span>     * @param jsonConfig The authentication configuration.<a name="line.207"></a>
+<span class="sourceLineNo">208</span>     */<a name="line.208"></a>
+<span class="sourceLineNo">209</span>    private void configureAuthenticationFilter(JsonValue jsonConfig) throws Exception {<a name="line.209"></a>
+<span class="sourceLineNo">210</span><a name="line.210"></a>
+<span class="sourceLineNo">211</span>        if (jsonConfig == null) {<a name="line.211"></a>
+<span class="sourceLineNo">212</span>            // No configurations found<a name="line.212"></a>
+<span class="sourceLineNo">213</span>            logger.warn("Could not find any configurations for the AuthnFilter, filter will not function");<a name="line.213"></a>
+<span class="sourceLineNo">214</span>            return;<a name="line.214"></a>
+<span class="sourceLineNo">215</span>        }<a name="line.215"></a>
+<span class="sourceLineNo">216</span>        JaspiRuntimeConfigurationFactory.INSTANCE.setModuleConfiguration(jsonConfig, this);<a name="line.216"></a>
+<span class="sourceLineNo">217</span>    }<a name="line.217"></a>
+<span class="sourceLineNo">218</span><a name="line.218"></a>
+<span class="sourceLineNo">219</span>    /**<a name="line.219"></a>
+<span class="sourceLineNo">220</span>     * Registers the Authentication Filter in OSGi.<a name="line.220"></a>
+<span class="sourceLineNo">221</span>     *<a name="line.221"></a>
+<span class="sourceLineNo">222</span>     * @param scriptExtensions A map of script extensions to register for the filter, namely,<a name="line.222"></a>
+<span class="sourceLineNo">223</span>     *                         the location of the authn augment context script.<a name="line.223"></a>
+<span class="sourceLineNo">224</span>     * @param additionalUrlPatterns additional url patterns to which to apply the filter<a name="line.224"></a>
+<span class="sourceLineNo">225</span>     * @throws Exception If a problem occurs whilst registering the filter.<a name="line.225"></a>
+<span class="sourceLineNo">226</span>     */<a name="line.226"></a>
+<span class="sourceLineNo">227</span>    private void registerAuthnFilter(JsonValue scriptExtensions, List&lt;String&gt; additionalUrlPatterns)<a name="line.227"></a>
+<span class="sourceLineNo">228</span>            throws Exception {<a name="line.228"></a>
+<span class="sourceLineNo">229</span><a name="line.229"></a>
+<span class="sourceLineNo">230</span>        Map&lt;String, String&gt; initParams = new HashMap&lt;String, String&gt;();<a name="line.230"></a>
+<span class="sourceLineNo">231</span>        initParams.put("module-configuration-factory-class", JaspiRuntimeConfigurationFactory.class.getName());<a name="line.231"></a>
+<span class="sourceLineNo">232</span>        initParams.put("logging-configurator-class", JaspiRuntimeConfigurationFactory.class.getName());<a name="line.232"></a>
+<span class="sourceLineNo">233</span><a name="line.233"></a>
+<span class="sourceLineNo">234</span>        List&lt;String&gt; urlPatterns = new ArrayList&lt;String&gt;();<a name="line.234"></a>
+<span class="sourceLineNo">235</span>        urlPatterns.add("/openidm/*");<a name="line.235"></a>
+<span class="sourceLineNo">236</span>        urlPatterns.addAll(additionalUrlPatterns);<a name="line.236"></a>
+<span class="sourceLineNo">237</span><a name="line.237"></a>
+<span class="sourceLineNo">238</span>        Map&lt;String, Object&gt; filterConfig = new HashMap&lt;String, Object&gt;();<a name="line.238"></a>
+<span class="sourceLineNo">239</span>        filterConfig.put(SERVLET_FILTER_CLASS_PATH_URLS, new ArrayList&lt;String&gt;());<a name="line.239"></a>
+<span class="sourceLineNo">240</span>        filterConfig.put(SERVLET_FILTER_SYSTEM_PROPERTIES, new HashMap&lt;String, Object&gt;());<a name="line.240"></a>
+<span class="sourceLineNo">241</span>        filterConfig.put(SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES, new HashMap&lt;String, Object&gt;());<a name="line.241"></a>
+<span class="sourceLineNo">242</span>        filterConfig.put(SERVLET_FILTER_INIT_PARAMETERS, initParams);<a name="line.242"></a>
+<span class="sourceLineNo">243</span>        filterConfig.put(SERVLET_FILTER_URL_PATTERNS, urlPatterns);<a name="line.243"></a>
+<span class="sourceLineNo">244</span>        filterConfig.put(SERVLET_FILTER_CLASS, JaspiRuntimeFilter.class.getCanonicalName());<a name="line.244"></a>
+<span class="sourceLineNo">245</span>        filterConfig.put(FILTER_ORDER, DEFAULT_FILTER_ORDER);<a name="line.245"></a>
+<span class="sourceLineNo">246</span>        if (!scriptExtensions.isNull() &amp;&amp; scriptExtensions.isMap()) {<a name="line.246"></a>
+<span class="sourceLineNo">247</span>            filterConfig.put(SERVLET_FILTER_SCRIPT_EXTENSIONS, scriptExtensions.asMap());<a name="line.247"></a>
+<span class="sourceLineNo">248</span>        }<a name="line.248"></a>
+<span class="sourceLineNo">249</span><a name="line.249"></a>
+<span class="sourceLineNo">250</span>        JsonValue filterConfigJson = new JsonValue(filterConfig);<a name="line.250"></a>
+<span class="sourceLineNo">251</span><a name="line.251"></a>
+<span class="sourceLineNo">252</span>        filter = servletFilterRegistration.registerFilter(filterConfigJson);<a name="line.252"></a>
+<span class="sourceLineNo">253</span>    }<a name="line.253"></a>
+<span class="sourceLineNo">254</span><a name="line.254"></a>
+<span class="sourceLineNo">255</span>    /**<a name="line.255"></a>
+<span class="sourceLineNo">256</span>     * Unregisters the authentication filter.<a name="line.256"></a>
+<span class="sourceLineNo">257</span>     *<a name="line.257"></a>
+<span class="sourceLineNo">258</span>     * @param context The ComponentContext.<a name="line.258"></a>
+<span class="sourceLineNo">259</span>     */<a name="line.259"></a>
+<span class="sourceLineNo">260</span>    @Deactivate<a name="line.260"></a>
+<span class="sourceLineNo">261</span>    protected synchronized void deactivate(ComponentContext context) {<a name="line.261"></a>
+<span class="sourceLineNo">262</span>        if (filter != null) {<a name="line.262"></a>
+<span class="sourceLineNo">263</span>            try {<a name="line.263"></a>
+<span class="sourceLineNo">264</span>                servletFilterRegistration.unregisterFilter(filter);<a name="line.264"></a>
+<span class="sourceLineNo">265</span>                JaspiRuntimeConfigurationFactory.INSTANCE.clear();<a name="line.265"></a>
+<span class="sourceLineNo">266</span>                logger.info("Unregistered authentication filter.");<a name="line.266"></a>
+<span class="sourceLineNo">267</span>            } catch (Exception ex) {<a name="line.267"></a>
+<span class="sourceLineNo">268</span>                logger.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);<a name="line.268"></a>
+<span class="sourceLineNo">269</span>            }<a name="line.269"></a>
+<span class="sourceLineNo">270</span>        }<a name="line.270"></a>
+<span class="sourceLineNo">271</span>        instance = null;<a name="line.271"></a>
+<span class="sourceLineNo">272</span>    }<a name="line.272"></a>
+<span class="sourceLineNo">273</span><a name="line.273"></a>
+<span class="sourceLineNo">274</span>    /**<a name="line.274"></a>
+<span class="sourceLineNo">275</span>     * Get this instance of the OSGiAuthnFilterHelper.<a name="line.275"></a>
+<span class="sourceLineNo">276</span>     *<a name="line.276"></a>
+<span class="sourceLineNo">277</span>     * @return the instance of the OSGiAuthnFilterHelper.<a name="line.277"></a>
+<span class="sourceLineNo">278</span>     */<a name="line.278"></a>
+<span class="sourceLineNo">279</span>    public static OSGiAuthnFilterHelper getInstance() {<a name="line.279"></a>
+<span class="sourceLineNo">280</span>        return instance;<a name="line.280"></a>
+<span class="sourceLineNo">281</span>    }<a name="line.281"></a>
+<span class="sourceLineNo">282</span><a name="line.282"></a>
+<span class="sourceLineNo">283</span>    // ----- OSGiAuthnFilterHelper Implementation<a name="line.283"></a>
+<span class="sourceLineNo">284</span><a name="line.284"></a>
+<span class="sourceLineNo">285</span>    /**<a name="line.285"></a>
+<span class="sourceLineNo">286</span>     * Returns the Router instance.<a name="line.286"></a>
+<span class="sourceLineNo">287</span>     *<a name="line.287"></a>
+<span class="sourceLineNo">288</span>     * @return The Router instance.<a name="line.288"></a>
+<span class="sourceLineNo">289</span>     */<a name="line.289"></a>
+<span class="sourceLineNo">290</span>    public RouteService getRouter() {<a name="line.290"></a>
+<span class="sourceLineNo">291</span>        return repositoryRoute;<a name="line.291"></a>
+<span class="sourceLineNo">292</span>    }<a name="line.292"></a>
+<span class="sourceLineNo">293</span><a name="line.293"></a>
+<span class="sourceLineNo">294</span>    /**<a name="line.294"></a>
+<span class="sourceLineNo">295</span>     * Returns the Crypto Service instance.<a name="line.295"></a>
+<span class="sourceLineNo">296</span>     *<a name="line.296"></a>
+<span class="sourceLineNo">297</span>     * @return The Crypto Service instance.<a name="line.297"></a>
+<span class="sourceLineNo">298</span>     */<a name="line.298"></a>
+<span class="sourceLineNo">299</span>    public CryptoService getCryptoService() {<a name="line.299"></a>
+<span class="sourceLineNo">300</span>        return cryptoService;<a name="line.300"></a>
+<span class="sourceLineNo">301</span>    }<a name="line.301"></a>
+<span class="sourceLineNo">302</span><a name="line.302"></a>
+<span class="sourceLineNo">303</span>    /**<a name="line.303"></a>
+<span class="sourceLineNo">304</span>     * Returns the ScriptRegistry instance<a name="line.304"></a>
+<span class="sourceLineNo">305</span>     *<a name="line.305"></a>
+<span class="sourceLineNo">306</span>     * @return the ScriptRegistry instance<a name="line.306"></a>
+<span class="sourceLineNo">307</span>     */<a name="line.307"></a>
+<span class="sourceLineNo">308</span>    public ScriptRegistry getScriptRegistry() {<a name="line.308"></a>
+<span class="sourceLineNo">309</span>        return scriptRegistry;<a name="line.309"></a>
+<span class="sourceLineNo">310</span>    }<a name="line.310"></a>
+<span class="sourceLineNo">311</span><a name="line.311"></a>
+<span class="sourceLineNo">312</span>    /**<a name="line.312"></a>
+<span class="sourceLineNo">313</span>     * Returns the ConnectionFactory instance<a name="line.313"></a>
+<span class="sourceLineNo">314</span>     *<a name="line.314"></a>
+<span class="sourceLineNo">315</span>     * @return The ConnectionFactory instance<a name="line.315"></a>
+<span class="sourceLineNo">316</span>     */<a name="line.316"></a>
+<span class="sourceLineNo">317</span>    public ConnectionFactory getConnectionFactory() {<a name="line.317"></a>
+<span class="sourceLineNo">318</span>        return connectionFactory;<a name="line.318"></a>
+<span class="sourceLineNo">319</span>    }<a name="line.319"></a>
+<span class="sourceLineNo">320</span>}<a name="line.320"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

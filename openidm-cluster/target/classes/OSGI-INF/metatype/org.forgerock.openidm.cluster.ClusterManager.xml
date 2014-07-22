@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
+    <OCD id="org.forgerock.openidm.cluster" name="%org.forgerock.openidm.cluster.name" description="OpenIDM Policy Service">
+        <AD id="openidm.router.prefix" type="String" default="/cluster*" name="%openidm.router.prefix.name" description="%openidm.router.prefix.description"/>
+    </OCD>
+    <Designate pid="org.forgerock.openidm.cluster">
+        <Object ocdref="org.forgerock.openidm.cluster"/>
+    </Designate>
+</metatype:MetaData>

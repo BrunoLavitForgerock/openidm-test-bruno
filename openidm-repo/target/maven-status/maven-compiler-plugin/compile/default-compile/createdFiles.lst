@@ -1,0 +1,4 @@
+org/forgerock/openidm/repo/util/TokenHandler.class
+org/forgerock/openidm/repo/RepositoryService.class
+org/forgerock/openidm/repo/RepoBootService.class
+org/forgerock/openidm/repo/QueryConstants.class

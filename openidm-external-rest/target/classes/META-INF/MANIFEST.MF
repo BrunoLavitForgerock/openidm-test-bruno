@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-Description: This bundle allows to make individual REST calls via
+  /external/rest
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM External REST Bundle
+Bundle-SymbolicName: org.forgerock.openidm.external-rest
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.external.rest;uses:="org.forgerock
+ .json.fluent,org.forgerock.json.resource,org.restlet.resource";version=
+ "3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.util;version="[3.0,3.1)",org.forge
+ rock.json.fluent;version="[2.3,2.4)",org.forgerock.json.resource;versio
+ n="[2.3,2.4)",org.apache.commons.lang3;version="[3.1,4)",org.osgi.servi
+ ce.component;version="[1.1,2)",org.restlet,org.restlet.data,org.restlet
+ .engine.header,org.restlet.engine.util,org.restlet.representation,org.r
+ estlet.resource,org.restlet.util,org.slf4j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.external.rest.RestServ
+ ice.xml

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.workflow" configuration-policy="require" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.workflow.activiti.impl.ActivitiServiceImpl"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.json.resource.RequestHandler"/>
+        </service>
+        <property name="service.description" value="Workflow Service"/>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="openidm.router.prefix" value="/workflow*"/>
+        <property name="service.pid" value="org.forgerock.openidm.workflow"/>
+        <reference name="JavaDelegateServiceReference" interface="org.activiti.engine.delegate.JavaDelegate" cardinality="0..n" policy="dynamic" bind="bindService" unbind="unbindService"/>
+        <reference name="ScriptRegistryService" interface="org.forgerock.script.ScriptRegistry" cardinality="0..1" policy="dynamic" target="(service.pid=org.forgerock.openidm.script)" bind="bindScriptRegistry" unbind="unbindScriptRegistry"/>
+        <reference name="processEngine" interface="org.activiti.engine.ProcessEngine" cardinality="0..1" policy="static" target="(!openidm.activiti.engine=true)" bind="bindProcessEngine" unbind="unbindProcessEngine"/>
+        <reference name="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" cardinality="0..1" policy="static" bind="bindConfigAdmin" unbind="unbindConfigAdmin"/>
+        <reference name="transactionManager" interface="javax.transaction.TransactionManager" cardinality="1..1" policy="static" bind="bindTransactionManager" unbind="unbindTransactionManager"/>
+        <reference name="dataSource" interface="javax.sql.DataSource" cardinality="0..1" policy="static" target="(osgi.jndi.service.name=jdbc/openidm)" bind="bindDataSource" unbind="unbindDataSource"/>
+        <reference name="persistenceConfig" interface="org.forgerock.json.resource.PersistenceConfig" cardinality="0..1" policy="dynamic" bind="bindPersistenceConfig" unbind="unbindPersistenceConfig"/>
+        <reference name="repositoryRoute" interface="org.forgerock.openidm.router.RouteService" cardinality="1..1" policy="static" target="(openidm.router.prefix=/managed)" bind="bindRouteService" unbind="unbindRouteService"/>
+        <reference name="cryptoService" interface="org.forgerock.openidm.crypto.CryptoService" cardinality="1..1" policy="dynamic" bind="bindCryptoService" unbind="unbindCryptoService"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+    </scr:component>
+</components>

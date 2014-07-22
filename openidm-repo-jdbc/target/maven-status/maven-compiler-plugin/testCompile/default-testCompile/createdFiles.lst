@@ -1,0 +1,3 @@
+org/forgerock/openidm/repo/jdbc/internal/JDBCRepoServiceTest.class
+org/forgerock/openidm/repo/jdbc/impl/GenericTableConfigTest.class
+org/forgerock/openidm/repo/jdbc/internal/DBUnitUtils.class

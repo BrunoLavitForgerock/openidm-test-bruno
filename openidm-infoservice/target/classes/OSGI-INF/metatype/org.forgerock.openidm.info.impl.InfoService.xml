@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?><metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
+    <OCD id="org.forgerock.openidm.info" name="%org.forgerock.openidm.info.name" description="OpenIDM Info Service"/>
+    <Designate pid="org.forgerock.openidm.info">
+        <Object ocdref="org.forgerock.openidm.info"/>
+    </Designate>
+</metatype:MetaData>

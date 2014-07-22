@@ -1,0 +1,4 @@
+org/forgerock/openidm/jaspi/modules/IDMJaspiModuleWrapperTest.class
+org/forgerock/openidm/jaspi/modules/DelegatedAuthModuleTest.class
+org/forgerock/openidm/jaspi/config/JaspiRuntimeConfigurationFactoryTest.class
+org/forgerock/openidm/jaspi/config/JaspiRuntimeConfigurationFactoryTest$TestJaspiAuditLogger.class

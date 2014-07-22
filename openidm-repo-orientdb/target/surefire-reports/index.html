@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+  <title>TestNG reports</title>
+
+    <link type="text/css" href="testng-reports.css" rel="stylesheet" />  
+    <script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="testng-reports.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type='text/javascript'>
+      google.load('visualization', '1', {packages:['table']});
+      google.setOnLoadCallback(drawTable);
+      var suiteTableInitFunctions = new Array();
+      var suiteTableData = new Array();
+    </script>
+    <!--
+      <script type="text/javascript" src="jquery-ui/js/jquery-ui-1.8.16.custom.min.js"></script>
+     -->
+  </head>
+
+  <body>
+    <div class="top-banner-root">
+      <span class="top-banner-title-font">Test results</span>
+      <br/>
+      <span class="top-banner-font-1">1 suite</span>
+    </div> <!-- top-banner-root -->
+    <div class="navigator-root">
+      <div class="navigator-suite-header">
+        <span>All suites</span>
+        <a href="#" class="collapse-all-link" title="Collapse/expand all the suites">
+          <img class="collapse-all-icon" src="collapseall.gif">
+          </img> <!-- collapse-all-icon -->
+        </a> <!-- collapse-all-link -->
+      </div> <!-- navigator-suite-header -->
+      <div class="suite">
+        <div class="rounded-window">
+          <div class="suite-header light-rounded-window-top">
+            <a href="#" class="navigator-link" panel-name="suite-Command_line_suite">
+              <span class="suite-name border-passed">Command line suite</span>
+            </a> <!-- navigator-link -->
+          </div> <!-- suite-header light-rounded-window-top -->
+          <div class="navigator-suite-content">
+            <div class="suite-section-title">
+              <span>Info</span>
+            </div> <!-- suite-section-title -->
+            <div class="suite-section-content">
+              <ul>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="test-xml-Command_line_suite">
+                    <span>[unset file name]</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="testlist-Command_line_suite">
+                    <span class="test-stats">1 test</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="group-Command_line_suite">
+                    <span>0 groups</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="times-Command_line_suite">
+                    <span>Times</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="reporter-Command_line_suite">
+                    <span>Reporter output</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="ignored-methods-Command_line_suite">
+                    <span>Ignored methods</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="chronological-Command_line_suite">
+                    <span>Chronological view</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+              </ul>
+            </div> <!-- suite-section-content -->
+            <div class="result-section">
+              <div class="suite-section-title">
+                <span>Results</span>
+              </div> <!-- suite-section-title -->
+              <div class="suite-section-content">
+                <ul>
+                  <li>
+                    <span class="method-stats">28 methods,   28 passed</span>
+                  </li>
+                  <li>
+                    <span class="method-list-title passed">Passed methods</span>
+                    <span class="show-or-hide-methods passed">
+                      <a href="#" panel-name="suite-Command_line_suite" class="hide-methods passed suite-Command_line_suite"> (hide)</a> <!-- hide-methods passed suite-Command_line_suite -->
+                      <a href="#" panel-name="suite-Command_line_suite" class="show-methods passed suite-Command_line_suite"> (show)</a> <!-- show-methods passed suite-Command_line_suite -->
+                    </span>
+                    <div class="method-list-content passed suite-Command_line_suite">
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="deepNestingMixedODocAndMapToMap">deepNestingMixedODocAndMapToMap</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="deepNestingToMap">deepNestingToMap</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="deepNestingWithSetToMap">deepNestingWithSetToMap</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="docToMapNullTest">docToMapNullTest</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="embeddedDocToMap">embeddedDocToMap</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="embeddedListToMap">embeddedListToMap</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="flatDocToMap">flatDocToMap</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.query.QueryInfoTest" hash-for-method="fullQueryInfo">fullQueryInfo</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DBHelperTest" hash-for-method="initPoolTest">initPoolTest</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest" hash-for-method="initTokenHandler">initTokenHandler</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="listToEmbeddedList">listToEmbeddedList</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="mapToDocInvalidRevision">mapToDocInvalidRevision</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="mapToDocNullTest">mapToDocNullTest</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="mapToDocToMap">mapToDocToMap</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="mapToExistingEmbeddedDoc">mapToExistingEmbeddedDoc</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="mapToExistingFlatDoc">mapToExistingFlatDoc</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="mapToNewDocExistingRevision">mapToNewDocExistingRevision</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="mapToNewEmbeddedDoc">mapToNewEmbeddedDoc</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="mapToNewFlatDoc">mapToNewFlatDoc</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="parseInvalidRevision">parseInvalidRevision</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest" hash-for-method="parseValidRevision">parseValidRevision</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.query.QueryInfoTest" hash-for-method="partialQueryInfo">partialQueryInfo</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest" hash-for-method="replaceTokenWithDotNotationAbsolute">replaceTokenWithDotNotationAbsolute</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest" hash-for-method="replaceTokenWithDotNotationRelative">replaceTokenWithDotNotationRelative</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest" hash-for-method="replaceTokensWithOrientToken">replaceTokensWithOrientToken</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest" hash-for-method="replaceTokensWithValues">replaceTokensWithValues</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.DBHelperTest" hash-for-method="updateDbCredentialsTest">updateDbCredentialsTest</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Command_line_suite" title="org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest" hash-for-method="valueReplaceMissingToken">valueReplaceMissingToken</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                    </div> <!-- method-list-content passed suite-Command_line_suite -->
+                  </li>
+                </ul>
+              </div> <!-- suite-section-content -->
+            </div> <!-- result-section -->
+          </div> <!-- navigator-suite-content -->
+        </div> <!-- rounded-window -->
+      </div> <!-- suite -->
+    </div> <!-- navigator-root -->
+    <div class="wrapper">
+      <div class="main-panel-root">
+        <div panel-name="suite-Command_line_suite" class="panel Command_line_suite">
+          <div class="suite-Command_line_suite-class-passed">
+            <div class="main-panel-header rounded-window-top">
+              <img src="passed.png"/>
+              <span class="class-name">org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest</span>
+            </div> <!-- main-panel-header rounded-window-top -->
+            <div class="main-panel-content rounded-window-bottom">
+              <div class="method">
+                <div class="method-content">
+                  <a name="deepNestingMixedODocAndMapToMap">
+                  </a> <!-- deepNestingMixedODocAndMapToMap -->
+                  <span class="method-name">deepNestingMixedODocAndMapToMap</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="deepNestingToMap">
+                  </a> <!-- deepNestingToMap -->
+                  <span class="method-name">deepNestingToMap</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="deepNestingWithSetToMap">
+                  </a> <!-- deepNestingWithSetToMap -->
+                  <span class="method-name">deepNestingWithSetToMap</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="docToMapNullTest">
+                  </a> <!-- docToMapNullTest -->
+                  <span class="method-name">docToMapNullTest</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="embeddedDocToMap">
+                  </a> <!-- embeddedDocToMap -->
+                  <span class="method-name">embeddedDocToMap</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="embeddedListToMap">
+                  </a> <!-- embeddedListToMap -->
+                  <span class="method-name">embeddedListToMap</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="flatDocToMap">
+                  </a> <!-- flatDocToMap -->
+                  <span class="method-name">flatDocToMap</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="listToEmbeddedList">
+                  </a> <!-- listToEmbeddedList -->
+                  <span class="method-name">listToEmbeddedList</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="mapToDocInvalidRevision">
+                  </a> <!-- mapToDocInvalidRevision -->
+                  <span class="method-name">mapToDocInvalidRevision</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="mapToDocNullTest">
+                  </a> <!-- mapToDocNullTest -->
+                  <span class="method-name">mapToDocNullTest</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="mapToDocToMap">
+                  </a> <!-- mapToDocToMap -->
+                  <span class="method-name">mapToDocToMap</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="mapToExistingEmbeddedDoc">
+                  </a> <!-- mapToExistingEmbeddedDoc -->
+                  <span class="method-name">mapToExistingEmbeddedDoc</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="mapToExistingFlatDoc">
+                  </a> <!-- mapToExistingFlatDoc -->
+                  <span class="method-name">mapToExistingFlatDoc</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="mapToNewDocExistingRevision">
+                  </a> <!-- mapToNewDocExistingRevision -->
+                  <span class="method-name">mapToNewDocExistingRevision</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="mapToNewEmbeddedDoc">
+                  </a> <!-- mapToNewEmbeddedDoc -->
+                  <span class="method-name">mapToNewEmbeddedDoc</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="mapToNewFlatDoc">
+                  </a> <!-- mapToNewFlatDoc -->
+                  <span class="method-name">mapToNewFlatDoc</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="parseInvalidRevision">
+                  </a> <!-- parseInvalidRevision -->
+                  <span class="method-name">parseInvalidRevision</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="parseValidRevision">
+                  </a> <!-- parseValidRevision -->
+                  <span class="method-name">parseValidRevision</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+            </div> <!-- main-panel-content rounded-window-bottom -->
+          </div> <!-- suite-Command_line_suite-class-passed -->
+          <div class="suite-Command_line_suite-class-passed">
+            <div class="main-panel-header rounded-window-top">
+              <img src="passed.png"/>
+              <span class="class-name">org.forgerock.openidm.repo.orientdb.impl.query.QueryInfoTest</span>
+            </div> <!-- main-panel-header rounded-window-top -->
+            <div class="main-panel-content rounded-window-bottom">
+              <div class="method">
+                <div class="method-content">
+                  <a name="fullQueryInfo">
+                  </a> <!-- fullQueryInfo -->
+                  <span class="method-name">fullQueryInfo</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="partialQueryInfo">
+                  </a> <!-- partialQueryInfo -->
+                  <span class="method-name">partialQueryInfo</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+            </div> <!-- main-panel-content rounded-window-bottom -->
+          </div> <!-- suite-Command_line_suite-class-passed -->
+          <div class="suite-Command_line_suite-class-passed">
+            <div class="main-panel-header rounded-window-top">
+              <img src="passed.png"/>
+              <span class="class-name">org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest</span>
+            </div> <!-- main-panel-header rounded-window-top -->
+            <div class="main-panel-content rounded-window-bottom">
+              <div class="method">
+                <div class="method-content">
+                  <a name="initTokenHandler">
+                  </a> <!-- initTokenHandler -->
+                  <span class="method-name">initTokenHandler</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="replaceTokenWithDotNotationAbsolute">
+                  </a> <!-- replaceTokenWithDotNotationAbsolute -->
+                  <span class="method-name">replaceTokenWithDotNotationAbsolute</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="replaceTokenWithDotNotationRelative">
+                  </a> <!-- replaceTokenWithDotNotationRelative -->
+                  <span class="method-name">replaceTokenWithDotNotationRelative</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="replaceTokensWithOrientToken">
+                  </a> <!-- replaceTokensWithOrientToken -->
+                  <span class="method-name">replaceTokensWithOrientToken</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="replaceTokensWithValues">
+                  </a> <!-- replaceTokensWithValues -->
+                  <span class="method-name">replaceTokensWithValues</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="valueReplaceMissingToken">
+                  </a> <!-- valueReplaceMissingToken -->
+                  <span class="method-name">valueReplaceMissingToken</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+            </div> <!-- main-panel-content rounded-window-bottom -->
+          </div> <!-- suite-Command_line_suite-class-passed -->
+          <div class="suite-Command_line_suite-class-passed">
+            <div class="main-panel-header rounded-window-top">
+              <img src="passed.png"/>
+              <span class="class-name">org.forgerock.openidm.repo.orientdb.impl.DBHelperTest</span>
+            </div> <!-- main-panel-header rounded-window-top -->
+            <div class="main-panel-content rounded-window-bottom">
+              <div class="method">
+                <div class="method-content">
+                  <a name="initPoolTest">
+                  </a> <!-- initPoolTest -->
+                  <span class="method-name">initPoolTest</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="updateDbCredentialsTest">
+                  </a> <!-- updateDbCredentialsTest -->
+                  <span class="method-name">updateDbCredentialsTest</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+            </div> <!-- main-panel-content rounded-window-bottom -->
+          </div> <!-- suite-Command_line_suite-class-passed -->
+        </div> <!-- panel Command_line_suite -->
+        <div panel-name="test-xml-Command_line_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE suite SYSTEM &quot;http://testng.org/testng-1.0.dtd&quot;&gt;
+&lt;suite verbose=&quot;0&quot; name=&quot;Command line suite&quot;&gt;
+  &lt;test name=&quot;Command line test&quot; preserve-order=&quot;false&quot;&gt;
+    &lt;classes&gt;
+      &lt;class name=&quot;org.forgerock.openidm.repo.orientdb.impl.DBHelperTest&quot;/&gt;
+      &lt;class name=&quot;org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest&quot;/&gt;
+      &lt;class name=&quot;org.forgerock.openidm.repo.orientdb.impl.EmbeddedOServerServiceTest&quot;/&gt;
+      &lt;class name=&quot;org.forgerock.openidm.repo.orientdb.impl.query.QueryInfoTest&quot;/&gt;
+      &lt;class name=&quot;org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest&quot;/&gt;
+    &lt;/classes&gt;
+  &lt;/test&gt; &lt;!-- Command line test --&gt;
+&lt;/suite&gt; &lt;!-- Command line suite --&gt;
+            </pre>
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="testlist-Command_line_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Tests for Command line suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <ul>
+              <li>
+                <span class="test-name">Command line test (5 classes)</span>
+              </li>
+            </ul>
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="group-Command_line_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Groups for Command line suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="times-Command_line_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Times for Command line suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <div class="times-div">
+              <script type="text/javascript">
+suiteTableInitFunctions.push('tableData_Command_line_suite');
+function tableData_Command_line_suite() {
+var data = new google.visualization.DataTable();
+data.addColumn('number', 'Number');
+data.addColumn('string', 'Method');
+data.addColumn('string', 'Class');
+data.addColumn('number', 'Time (ms)');
+data.addRows(28);
+data.setCell(0, 0, 0)
+data.setCell(0, 1, 'initPoolTest')
+data.setCell(0, 2, 'org.forgerock.openidm.repo.orientdb.impl.DBHelperTest')
+data.setCell(0, 3, 851);
+data.setCell(1, 0, 1)
+data.setCell(1, 1, 'updateDbCredentialsTest')
+data.setCell(1, 2, 'org.forgerock.openidm.repo.orientdb.impl.DBHelperTest')
+data.setCell(1, 3, 277);
+data.setCell(2, 0, 2)
+data.setCell(2, 1, 'mapToExistingEmbeddedDoc')
+data.setCell(2, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(2, 3, 21);
+data.setCell(3, 0, 3)
+data.setCell(3, 1, 'mapToDocInvalidRevision')
+data.setCell(3, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(3, 3, 3);
+data.setCell(4, 0, 4)
+data.setCell(4, 1, 'deepNestingToMap')
+data.setCell(4, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(4, 3, 3);
+data.setCell(5, 0, 5)
+data.setCell(5, 1, 'listToEmbeddedList')
+data.setCell(5, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(5, 3, 1);
+data.setCell(6, 0, 6)
+data.setCell(6, 1, 'embeddedListToMap')
+data.setCell(6, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(6, 3, 1);
+data.setCell(7, 0, 7)
+data.setCell(7, 1, 'mapToNewEmbeddedDoc')
+data.setCell(7, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(7, 3, 1);
+data.setCell(8, 0, 8)
+data.setCell(8, 1, 'fullQueryInfo')
+data.setCell(8, 2, 'org.forgerock.openidm.repo.orientdb.impl.query.QueryInfoTest')
+data.setCell(8, 3, 1);
+data.setCell(9, 0, 9)
+data.setCell(9, 1, 'embeddedDocToMap')
+data.setCell(9, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(9, 3, 1);
+data.setCell(10, 0, 10)
+data.setCell(10, 1, 'deepNestingWithSetToMap')
+data.setCell(10, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(10, 3, 1);
+data.setCell(11, 0, 11)
+data.setCell(11, 1, 'mapToDocToMap')
+data.setCell(11, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(11, 3, 1);
+data.setCell(12, 0, 12)
+data.setCell(12, 1, 'initTokenHandler')
+data.setCell(12, 2, 'org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest')
+data.setCell(12, 3, 1);
+data.setCell(13, 0, 13)
+data.setCell(13, 1, 'replaceTokensWithOrientToken')
+data.setCell(13, 2, 'org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest')
+data.setCell(13, 3, 0);
+data.setCell(14, 0, 14)
+data.setCell(14, 1, 'replaceTokensWithValues')
+data.setCell(14, 2, 'org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest')
+data.setCell(14, 3, 0);
+data.setCell(15, 0, 15)
+data.setCell(15, 1, 'deepNestingMixedODocAndMapToMap')
+data.setCell(15, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(15, 3, 0);
+data.setCell(16, 0, 16)
+data.setCell(16, 1, 'parseValidRevision')
+data.setCell(16, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(16, 3, 0);
+data.setCell(17, 0, 17)
+data.setCell(17, 1, 'valueReplaceMissingToken')
+data.setCell(17, 2, 'org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest')
+data.setCell(17, 3, 0);
+data.setCell(18, 0, 18)
+data.setCell(18, 1, 'mapToDocNullTest')
+data.setCell(18, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(18, 3, 0);
+data.setCell(19, 0, 19)
+data.setCell(19, 1, 'mapToNewFlatDoc')
+data.setCell(19, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(19, 3, 0);
+data.setCell(20, 0, 20)
+data.setCell(20, 1, 'docToMapNullTest')
+data.setCell(20, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(20, 3, 0);
+data.setCell(21, 0, 21)
+data.setCell(21, 1, 'mapToNewDocExistingRevision')
+data.setCell(21, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(21, 3, 0);
+data.setCell(22, 0, 22)
+data.setCell(22, 1, 'mapToExistingFlatDoc')
+data.setCell(22, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(22, 3, 0);
+data.setCell(23, 0, 23)
+data.setCell(23, 1, 'partialQueryInfo')
+data.setCell(23, 2, 'org.forgerock.openidm.repo.orientdb.impl.query.QueryInfoTest')
+data.setCell(23, 3, 0);
+data.setCell(24, 0, 24)
+data.setCell(24, 1, 'replaceTokenWithDotNotationRelative')
+data.setCell(24, 2, 'org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest')
+data.setCell(24, 3, 0);
+data.setCell(25, 0, 25)
+data.setCell(25, 1, 'replaceTokenWithDotNotationAbsolute')
+data.setCell(25, 2, 'org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest')
+data.setCell(25, 3, 0);
+data.setCell(26, 0, 26)
+data.setCell(26, 1, 'parseInvalidRevision')
+data.setCell(26, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(26, 3, 0);
+data.setCell(27, 0, 27)
+data.setCell(27, 1, 'flatDocToMap')
+data.setCell(27, 2, 'org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest')
+data.setCell(27, 3, 0);
+window.suiteTableData['Command_line_suite']= { tableData: data, tableDiv: 'times-div-Command_line_suite'}
+return data;
+}
+              </script>
+              <span class="suite-total-time">Total running time: 1 seconds</span>
+              <div id="times-div-Command_line_suite">
+              </div> <!-- times-div-Command_line_suite -->
+            </div> <!-- times-div -->
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="reporter-Command_line_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Reporter output for Command line suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="ignored-methods-Command_line_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">0 ignored methods</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="chronological-Command_line_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Methods in chronological order</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.forgerock.openidm.repo.orientdb.impl.DBHelperTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">initPoolTest</span>
+                <span class="method-start">0 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">updateDbCredentialsTest</span>
+                <span class="method-start">852 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">initTokenHandler</span>
+                <span class="method-start">1129 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.forgerock.openidm.repo.orientdb.impl.DocumentUtilTest</div> <!-- chronological-class-name -->
+              <div class="configuration-class before">
+                <span class="method-name">init</span>
+                <span class="method-start">1130 ms</span>
+              </div> <!-- configuration-class before -->
+              <div class="test-method">
+                <span class="method-name">mapToExistingEmbeddedDoc</span>
+                <span class="method-start">1306 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">deepNestingToMap</span>
+                <span class="method-start">1327 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">deepNestingWithSetToMap</span>
+                <span class="method-start">1330 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">docToMapNullTest</span>
+                <span class="method-start">1331 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">mapToDocToMap</span>
+                <span class="method-start">1331 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">embeddedDocToMap</span>
+                <span class="method-start">1332 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">mapToDocInvalidRevision</span>
+                <span class="method-start">1333 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">flatDocToMap</span>
+                <span class="method-start">1336 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">deepNestingMixedODocAndMapToMap</span>
+                <span class="method-start">1337 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">parseInvalidRevision</span>
+                <span class="method-start">1337 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">embeddedListToMap</span>
+                <span class="method-start">1338 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">mapToNewEmbeddedDoc</span>
+                <span class="method-start">1339 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">mapToNewFlatDoc</span>
+                <span class="method-start">1340 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">parseValidRevision</span>
+                <span class="method-start">1340 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">listToEmbeddedList</span>
+                <span class="method-start">1341 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">mapToDocNullTest</span>
+                <span class="method-start">1341 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">mapToExistingFlatDoc</span>
+                <span class="method-start">1342 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-class after">
+                <span class="method-name">cleanup</span>
+                <span class="method-start">1343 ms</span>
+              </div> <!-- configuration-class after -->
+              <div class="test-method">
+                <span class="method-name">mapToNewDocExistingRevision</span>
+                <span class="method-start">1343 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.forgerock.openidm.repo.orientdb.impl.query.QueryInfoTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">fullQueryInfo</span>
+                <span class="method-start">1357 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">partialQueryInfo</span>
+                <span class="method-start">1358 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">replaceTokenWithDotNotationAbsolute</span>
+                <span class="method-start">1359 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">replaceTokenWithDotNotationRelative</span>
+                <span class="method-start">1360 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">replaceTokensWithOrientToken</span>
+                <span class="method-start">1361 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">replaceTokensWithValues</span>
+                <span class="method-start">1361 ms</span>
+              </div> <!-- test-method -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.forgerock.openidm.repo.orientdb.impl.EmbeddedOServerServiceTest</div> <!-- chronological-class-name -->
+              <div class="configuration-test after">
+                <span class="method-name">automaticBackupHandlerConfigTest</span>
+                <span class="method-start">1362 ms</span>
+              </div> <!-- configuration-test after -->
+            </div> <!-- chronological-class -->
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.forgerock.openidm.repo.orientdb.impl.query.TokenHandlerTest</div> <!-- chronological-class-name -->
+              <div class="test-method">
+                <span class="method-name">valueReplaceMissingToken</span>
+                <span class="method-start">1362 ms</span>
+              </div> <!-- test-method -->
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+      </div> <!-- main-panel-root -->
+    </div> <!-- wrapper -->
+  </body>
+</html>

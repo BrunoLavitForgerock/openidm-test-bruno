@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.cluster" configuration-policy="require" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.cluster.ClusterManager"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.json.resource.RequestHandler"/>
+            <provide interface="org.forgerock.openidm.cluster.ClusterManagementService"/>
+        </service>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="service.description" value="Cluster Management Service"/>
+        <property name="openidm.router.prefix" value="/cluster*"/>
+        <property name="service.pid" value="org.forgerock.openidm.cluster"/>
+        <reference name="repoService" interface="org.forgerock.openidm.repo.RepositoryService" cardinality="1..1" policy="static" bind="bindRepoService" unbind="unbindRepoService"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+    </scr:component>
+</components>

@@ -1,0 +1,44 @@
+Manifest-Version: 1.0
+Bundle-Activator: org.forgerock.openidm.repo.orientdb.impl.Activator
+Bundle-Description: This bundle implements the OrientDB based repository
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Repository Bundle - OrientDB
+Bundle-SymbolicName: org.forgerock.openidm.repo-orientdb
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Embed-Dependency: persistence-api;scope=provided
+Export-Package: org.forgerock.openidm.repo.orientdb.metadata;version="3.
+ 0.0";uses:="org.forgerock.json.fluent,org.forgerock.openidm.metadata"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.config.enhanced;version="[3.0,3.1)
+ ",org.forgerock.openidm.config.persistence;version="[3.0,3.1)",org.forg
+ erock.openidm.core;version="[3.0,3.1)",org.forgerock.openidm.metadata;v
+ ersion="[3.0,3.1)",org.forgerock.openidm.repo;version="[3.0,3.1)",org.f
+ orgerock.openidm.smartevent;version="[3.0,3.1)",org.forgerock.json.flue
+ nt;version="[2.3,2.4)",org.forgerock.json.resource;version="[2.3,2.4)",
+ com.orientechnologies.common.exception;version="[1.6,2)",com.orientechn
+ ologies.orient.core.command;version="[1.6,2)",com.orientechnologies.ori
+ ent.core.config;version="[1.6,2)",com.orientechnologies.orient.core.db;
+ version="[1.6,2)",com.orientechnologies.orient.core.db.document;version
+ ="[1.6,2)",com.orientechnologies.orient.core.exception;version="[1.6,2)
+ ",com.orientechnologies.orient.core.id;version="[1.6,2)",com.orientechn
+ ologies.orient.core.index;version="[1.6,2)",com.orientechnologies.orien
+ t.core.iterator;version="[1.6,2)",com.orientechnologies.orient.core.met
+ adata;version="[1.6,2)",com.orientechnologies.orient.core.metadata.sche
+ ma;version="[1.6,2)",com.orientechnologies.orient.core.metadata.securit
+ y;version="[1.6,2)",com.orientechnologies.orient.core.query;version="[1
+ .6,2)",com.orientechnologies.orient.core.record;version="[1.6,2)",com.o
+ rientechnologies.orient.core.record.impl;version="[1.6,2)",com.orientec
+ hnologies.orient.core.sql.query;version="[1.6,2)",com.orientechnologies
+ .orient.core.storage;version="[1.6,2)",com.orientechnologies.orient.cor
+ e.type;version="[1.6,2)",com.orientechnologies.orient.server;version="[
+ 1.6,2)",com.orientechnologies.orient.server.config;version="[1.6,2)",or
+ g.apache.commons.lang3;version="[3.1,4)",org.osgi.framework;version="[1
+ .6,2)",org.osgi.service.component;version="[1.1,2)",org.slf4j;version="
+ [1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.repo.orientdb.impl.Ori
+ entDBRepoService.xml

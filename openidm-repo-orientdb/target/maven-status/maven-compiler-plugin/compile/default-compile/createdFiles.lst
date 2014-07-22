@@ -1,0 +1,11 @@
+org/forgerock/openidm/repo/orientdb/impl/query/TokenHandler.class
+org/forgerock/openidm/repo/orientdb/impl/query/PredefinedQueries.class
+org/forgerock/openidm/repo/orientdb/impl/EmbeddedOServerService.class
+org/forgerock/openidm/repo/orientdb/impl/DocumentUtil.class
+org/forgerock/openidm/repo/orientdb/impl/Activator.class
+org/forgerock/openidm/repo/orientdb/impl/query/PrepareNotSupported.class
+org/forgerock/openidm/repo/orientdb/impl/DBHelper.class
+org/forgerock/openidm/repo/orientdb/metadata/ConfigMeta.class
+org/forgerock/openidm/repo/orientdb/impl/query/QueryInfo.class
+org/forgerock/openidm/repo/orientdb/impl/query/Queries.class
+org/forgerock/openidm/repo/orientdb/impl/OrientDBRepoService.class

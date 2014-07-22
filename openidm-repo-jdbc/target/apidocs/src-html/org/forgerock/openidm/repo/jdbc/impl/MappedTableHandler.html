@@ -1,0 +1,724 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.<a name="line.2"></a>
+<span class="sourceLineNo">003</span> *<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * The contents of this file are subject to the terms<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * of the Common Development and Distribution License<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * (the License). You may not use this file except in<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * compliance with the License.<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * You can obtain a copy of the License at<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * http://forgerock.org/license/CDDLv1.0.html<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * See the License for the specific language governing<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * permission and limitations under the License.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> *<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * When distributing Covered Code, include this CDDL<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * Header Notice in each file and include the License file<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * at http://forgerock.org/license/CDDLv1.0.html<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * If applicable, add the following below the CDDL Header,<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * with the fields enclosed by brackets [] replaced by<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * your own identifying information:<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * "Portions Copyrighted [year] [name of copyright owner]"<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>package org.forgerock.openidm.repo.jdbc.impl;<a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.io.IOException;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.sql.Connection;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.sql.PreparedStatement;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import java.sql.ResultSet;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import java.sql.SQLException;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import java.sql.Statement;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import java.util.ArrayList;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import java.util.LinkedHashMap;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import java.util.List;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import java.util.Map;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import java.util.Set;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import java.util.TreeSet;<a name="line.38"></a>
+<span class="sourceLineNo">039</span><a name="line.39"></a>
+<span class="sourceLineNo">040</span>import org.codehaus.jackson.map.ObjectMapper;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import org.forgerock.json.fluent.JsonPointer;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import org.forgerock.json.fluent.JsonValue;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import org.forgerock.json.resource.InternalServerErrorException;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import org.forgerock.json.resource.NotFoundException;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import org.forgerock.json.resource.PreconditionFailedException;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import org.forgerock.json.resource.Resource;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import org.forgerock.json.resource.ResourceException;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import org.forgerock.openidm.config.enhanced.InvalidException;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>import org.forgerock.openidm.crypto.CryptoService;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>import org.forgerock.openidm.repo.jdbc.ErrorType;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>import org.forgerock.openidm.repo.jdbc.TableHandler;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>import org.forgerock.openidm.util.Accessor;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>import org.forgerock.openidm.util.JsonUtil;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>import org.slf4j.Logger;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>import org.slf4j.LoggerFactory;<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>/**<a name="line.60"></a>
+<span class="sourceLineNo">061</span> * Handling of tables in a generic (not object specific) layout<a name="line.61"></a>
+<span class="sourceLineNo">062</span> *<a name="line.62"></a>
+<span class="sourceLineNo">063</span> * @author aegloff<a name="line.63"></a>
+<span class="sourceLineNo">064</span> * @author brmiller<a name="line.64"></a>
+<span class="sourceLineNo">065</span> */<a name="line.65"></a>
+<span class="sourceLineNo">066</span>public class MappedTableHandler implements TableHandler {<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    final static Logger logger = LoggerFactory.getLogger(MappedTableHandler.class);<a name="line.67"></a>
+<span class="sourceLineNo">068</span><a name="line.68"></a>
+<span class="sourceLineNo">069</span>    SQLExceptionHandler sqlExceptionHandler;<a name="line.69"></a>
+<span class="sourceLineNo">070</span><a name="line.70"></a>
+<span class="sourceLineNo">071</span>    final String tableName;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>    String dbSchemaName;<a name="line.72"></a>
+<span class="sourceLineNo">073</span><a name="line.73"></a>
+<span class="sourceLineNo">074</span>    final LinkedHashMap&lt;String, String&gt; rawMappingConfig;<a name="line.74"></a>
+<span class="sourceLineNo">075</span>    Mapping explicitMapping;<a name="line.75"></a>
+<span class="sourceLineNo">076</span><a name="line.76"></a>
+<span class="sourceLineNo">077</span>    // The json pointer (used as names) of the properties to replace the ?<a name="line.77"></a>
+<span class="sourceLineNo">078</span>    // tokens in the prepared statement,<a name="line.78"></a>
+<span class="sourceLineNo">079</span>    // in the order they need populating in create and update queries<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    List&lt;JsonPointer&gt; tokenReplacementPropPointers = new ArrayList&lt;JsonPointer&gt;();<a name="line.80"></a>
+<span class="sourceLineNo">081</span><a name="line.81"></a>
+<span class="sourceLineNo">082</span>    ObjectMapper mapper = new ObjectMapper();<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    final TableQueries queries;<a name="line.83"></a>
+<span class="sourceLineNo">084</span><a name="line.84"></a>
+<span class="sourceLineNo">085</span>    String readQueryStr;<a name="line.85"></a>
+<span class="sourceLineNo">086</span>    String readForUpdateQueryStr;<a name="line.86"></a>
+<span class="sourceLineNo">087</span>    String createQueryStr;<a name="line.87"></a>
+<span class="sourceLineNo">088</span>    String updateQueryStr;<a name="line.88"></a>
+<span class="sourceLineNo">089</span>    String deleteQueryStr;<a name="line.89"></a>
+<span class="sourceLineNo">090</span><a name="line.90"></a>
+<span class="sourceLineNo">091</span>    public MappedTableHandler(String tableName, Map mapping, String dbSchemaName,<a name="line.91"></a>
+<span class="sourceLineNo">092</span>            JsonValue queriesConfig, SQLExceptionHandler sqlExceptionHandler,<a name="line.92"></a>
+<span class="sourceLineNo">093</span>            Accessor&lt;CryptoService&gt; cryptoServiceAccessor) throws InternalServerErrorException {<a name="line.93"></a>
+<span class="sourceLineNo">094</span><a name="line.94"></a>
+<span class="sourceLineNo">095</span>        // TODO Replace this with a "guarantee" somewhere when/if the provision<a name="line.95"></a>
+<span class="sourceLineNo">096</span>        // of this<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        // accessor becomes more automatic<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        if (cryptoServiceAccessor == null)<a name="line.98"></a>
+<span class="sourceLineNo">099</span>            throw new InternalServerErrorException("No CryptoServiceAccessor found!");<a name="line.99"></a>
+<span class="sourceLineNo">100</span><a name="line.100"></a>
+<span class="sourceLineNo">101</span>        this.tableName = tableName;<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        this.dbSchemaName = dbSchemaName;<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        // Maintain a stable ordering<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        this.rawMappingConfig = new LinkedHashMap&lt;String, String&gt;();<a name="line.104"></a>
+<span class="sourceLineNo">105</span>        this.rawMappingConfig.putAll(mapping);<a name="line.105"></a>
+<span class="sourceLineNo">106</span><a name="line.106"></a>
+<span class="sourceLineNo">107</span>        explicitMapping =<a name="line.107"></a>
+<span class="sourceLineNo">108</span>                new Mapping(tableName, new JsonValue(rawMappingConfig), cryptoServiceAccessor);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>        logger.debug("Explicit mapping: {}", explicitMapping);<a name="line.109"></a>
+<span class="sourceLineNo">110</span><a name="line.110"></a>
+<span class="sourceLineNo">111</span>        if (sqlExceptionHandler == null) {<a name="line.111"></a>
+<span class="sourceLineNo">112</span>            this.sqlExceptionHandler = new DefaultSQLExceptionHandler();<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        } else {<a name="line.113"></a>
+<span class="sourceLineNo">114</span>            this.sqlExceptionHandler = sqlExceptionHandler;<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        }<a name="line.115"></a>
+<span class="sourceLineNo">116</span><a name="line.116"></a>
+<span class="sourceLineNo">117</span>        queries = new TableQueries(new ExplicitQueryResultMapper(explicitMapping));<a name="line.117"></a>
+<span class="sourceLineNo">118</span>        queries.setConfiguredQueries(tableName, dbSchemaName, queriesConfig, null);<a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119"></a>
+<span class="sourceLineNo">120</span>        String mainTable = dbSchemaName == null ? tableName : dbSchemaName + "." + tableName;<a name="line.120"></a>
+<span class="sourceLineNo">121</span><a name="line.121"></a>
+<span class="sourceLineNo">122</span>        StringBuffer colNames = new StringBuffer();<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        StringBuffer tokenNames = new StringBuffer();<a name="line.123"></a>
+<span class="sourceLineNo">124</span>        StringBuffer prepTokens = new StringBuffer();<a name="line.124"></a>
+<span class="sourceLineNo">125</span>        StringBuffer updateAssign = new StringBuffer();<a name="line.125"></a>
+<span class="sourceLineNo">126</span>        boolean isFirst = true;<a name="line.126"></a>
+<span class="sourceLineNo">127</span><a name="line.127"></a>
+<span class="sourceLineNo">128</span>        for (ColumnMapping colMapping : explicitMapping.columnMappings) {<a name="line.128"></a>
+<span class="sourceLineNo">129</span>            if (!isFirst) {<a name="line.129"></a>
+<span class="sourceLineNo">130</span>                colNames.append(", ");<a name="line.130"></a>
+<span class="sourceLineNo">131</span>                tokenNames.append(",");<a name="line.131"></a>
+<span class="sourceLineNo">132</span>                prepTokens.append(",");<a name="line.132"></a>
+<span class="sourceLineNo">133</span>                updateAssign.append(", ");<a name="line.133"></a>
+<span class="sourceLineNo">134</span>            }<a name="line.134"></a>
+<span class="sourceLineNo">135</span>            colNames.append(colMapping.dbColName);<a name="line.135"></a>
+<span class="sourceLineNo">136</span>            tokenNames.append("${").append(colMapping.objectColName).append("}");<a name="line.136"></a>
+<span class="sourceLineNo">137</span>            prepTokens.append("?");<a name="line.137"></a>
+<span class="sourceLineNo">138</span>            tokenReplacementPropPointers.add(colMapping.objectColPointer);<a name="line.138"></a>
+<span class="sourceLineNo">139</span>            // updateAssign.append(colMapping.dbColName).append(" = ${").append(colMapping.objectColName).append("}");<a name="line.139"></a>
+<span class="sourceLineNo">140</span>            updateAssign.append(colMapping.dbColName).append(" = ?");<a name="line.140"></a>
+<span class="sourceLineNo">141</span>            isFirst = false;<a name="line.141"></a>
+<span class="sourceLineNo">142</span>        }<a name="line.142"></a>
+<span class="sourceLineNo">143</span><a name="line.143"></a>
+<span class="sourceLineNo">144</span>        readQueryStr = "SELECT * FROM " + mainTable + " WHERE objectid = ?";<a name="line.144"></a>
+<span class="sourceLineNo">145</span>        readForUpdateQueryStr = "SELECT * FROM " + mainTable + " WHERE objectid = ? FOR UPDATE";<a name="line.145"></a>
+<span class="sourceLineNo">146</span>        createQueryStr =<a name="line.146"></a>
+<span class="sourceLineNo">147</span>                "INSERT INTO " + mainTable + " (" + colNames + ") VALUES ( " + prepTokens + ")";<a name="line.147"></a>
+<span class="sourceLineNo">148</span>        updateQueryStr = "UPDATE " + mainTable + " SET " + updateAssign + " WHERE objectid = ?";<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        deleteQueryStr = "DELETE FROM " + mainTable + " WHERE objectid = ? AND rev = ?";<a name="line.149"></a>
+<span class="sourceLineNo">150</span><a name="line.150"></a>
+<span class="sourceLineNo">151</span>        logger.debug("Unprepared query strings {} {} {} {} {}", new Object[] { readQueryStr,<a name="line.151"></a>
+<span class="sourceLineNo">152</span>            createQueryStr, updateQueryStr, deleteQueryStr });<a name="line.152"></a>
+<span class="sourceLineNo">153</span><a name="line.153"></a>
+<span class="sourceLineNo">154</span>    }<a name="line.154"></a>
+<span class="sourceLineNo">155</span><a name="line.155"></a>
+<span class="sourceLineNo">156</span>    /**<a name="line.156"></a>
+<span class="sourceLineNo">157</span>     * @see org.forgerock.openidm.repo.jdbc.TableHandler#read(java.lang.String,<a name="line.157"></a>
+<span class="sourceLineNo">158</span>     *      java.lang.String, java.lang.String, java.sql.Connection)<a name="line.158"></a>
+<span class="sourceLineNo">159</span>     */<a name="line.159"></a>
+<span class="sourceLineNo">160</span>    @Override<a name="line.160"></a>
+<span class="sourceLineNo">161</span>    public Resource read(String fullId, String type, String localId, Connection connection)<a name="line.161"></a>
+<span class="sourceLineNo">162</span>            throws NotFoundException, SQLException, IOException, InternalServerErrorException {<a name="line.162"></a>
+<span class="sourceLineNo">163</span>        JsonValue resultValue = null;<a name="line.163"></a>
+<span class="sourceLineNo">164</span>        Resource result = null;<a name="line.164"></a>
+<span class="sourceLineNo">165</span>        PreparedStatement readStatement = null;<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        ResultSet rs = null;<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        try {<a name="line.167"></a>
+<span class="sourceLineNo">168</span>            readStatement = queries.getPreparedStatement(connection, readQueryStr);<a name="line.168"></a>
+<span class="sourceLineNo">169</span><a name="line.169"></a>
+<span class="sourceLineNo">170</span>            logger.debug("Populating prepared statement {} for {}", readStatement, fullId);<a name="line.170"></a>
+<span class="sourceLineNo">171</span>            readStatement.setString(1, localId);<a name="line.171"></a>
+<span class="sourceLineNo">172</span><a name="line.172"></a>
+<span class="sourceLineNo">173</span>            logger.debug("Executing: {}", readStatement);<a name="line.173"></a>
+<span class="sourceLineNo">174</span>            rs = readStatement.executeQuery();<a name="line.174"></a>
+<span class="sourceLineNo">175</span><a name="line.175"></a>
+<span class="sourceLineNo">176</span>            if (rs.next()) {<a name="line.176"></a>
+<span class="sourceLineNo">177</span>                resultValue = explicitMapping.mapToJsonValue(rs, Mapping.getColumnNames(rs));<a name="line.177"></a>
+<span class="sourceLineNo">178</span>                JsonValue rev = resultValue.get("_rev");<a name="line.178"></a>
+<span class="sourceLineNo">179</span>                logger.debug(" full id: {}, rev: {}, obj {}", new Object[] { fullId, rev,<a name="line.179"></a>
+<span class="sourceLineNo">180</span>                    resultValue });<a name="line.180"></a>
+<span class="sourceLineNo">181</span>                result = new Resource(fullId, rev.asString(), resultValue);<a name="line.181"></a>
+<span class="sourceLineNo">182</span>            } else {<a name="line.182"></a>
+<span class="sourceLineNo">183</span>                throw new NotFoundException("Object " + fullId + " not found in " + type);<a name="line.183"></a>
+<span class="sourceLineNo">184</span>            }<a name="line.184"></a>
+<span class="sourceLineNo">185</span>        } finally {<a name="line.185"></a>
+<span class="sourceLineNo">186</span>            CleanupHelper.loggedClose(rs);<a name="line.186"></a>
+<span class="sourceLineNo">187</span>            CleanupHelper.loggedClose(readStatement);<a name="line.187"></a>
+<span class="sourceLineNo">188</span>        }<a name="line.188"></a>
+<span class="sourceLineNo">189</span><a name="line.189"></a>
+<span class="sourceLineNo">190</span>        return result;<a name="line.190"></a>
+<span class="sourceLineNo">191</span>    }<a name="line.191"></a>
+<span class="sourceLineNo">192</span><a name="line.192"></a>
+<span class="sourceLineNo">193</span>    /**<a name="line.193"></a>
+<span class="sourceLineNo">194</span>     * Reads an object with for update locking applied<a name="line.194"></a>
+<span class="sourceLineNo">195</span>     *<a name="line.195"></a>
+<span class="sourceLineNo">196</span>     * Note: statement associated with the returned resultset is not closed upon<a name="line.196"></a>
+<span class="sourceLineNo">197</span>     * return. Aside from taking care to close the resultset it also is the<a name="line.197"></a>
+<span class="sourceLineNo">198</span>     * responsibility of the caller to close the associated statement. Although<a name="line.198"></a>
+<span class="sourceLineNo">199</span>     * the specification specifies that drivers/pools should close the statement<a name="line.199"></a>
+<span class="sourceLineNo">200</span>     * automatically, not all do this reliably.<a name="line.200"></a>
+<span class="sourceLineNo">201</span>     *<a name="line.201"></a>
+<span class="sourceLineNo">202</span>     * @param fullId<a name="line.202"></a>
+<span class="sourceLineNo">203</span>     *            qualified id of component type and id<a name="line.203"></a>
+<span class="sourceLineNo">204</span>     * @param type<a name="line.204"></a>
+<span class="sourceLineNo">205</span>     *            the component type<a name="line.205"></a>
+<span class="sourceLineNo">206</span>     * @param localId<a name="line.206"></a>
+<span class="sourceLineNo">207</span>     *            the id of the object within the component type<a name="line.207"></a>
+<span class="sourceLineNo">208</span>     * @param connection<a name="line.208"></a>
+<span class="sourceLineNo">209</span>     *            the connection to use<a name="line.209"></a>
+<span class="sourceLineNo">210</span>     * @return the row for the requested object, selected FOR UPDATE<a name="line.210"></a>
+<span class="sourceLineNo">211</span>     * @throws NotFoundException<a name="line.211"></a>
+<span class="sourceLineNo">212</span>     *             if the requested object was not found in the DB<a name="line.212"></a>
+<span class="sourceLineNo">213</span>     * @throws java.sql.SQLException<a name="line.213"></a>
+<span class="sourceLineNo">214</span>     *             for general DB issues<a name="line.214"></a>
+<span class="sourceLineNo">215</span>     */<a name="line.215"></a>
+<span class="sourceLineNo">216</span>    ResultSet readForUpdate(String fullId, String type, String localId, Connection connection)<a name="line.216"></a>
+<span class="sourceLineNo">217</span>            throws NotFoundException, SQLException {<a name="line.217"></a>
+<span class="sourceLineNo">218</span><a name="line.218"></a>
+<span class="sourceLineNo">219</span>        PreparedStatement readForUpdateStatement = null;<a name="line.219"></a>
+<span class="sourceLineNo">220</span>        ResultSet rs = null;<a name="line.220"></a>
+<span class="sourceLineNo">221</span>        try {<a name="line.221"></a>
+<span class="sourceLineNo">222</span>            readForUpdateStatement =<a name="line.222"></a>
+<span class="sourceLineNo">223</span>                    queries.getPreparedStatement(connection, readForUpdateQueryStr);<a name="line.223"></a>
+<span class="sourceLineNo">224</span>            logger.trace("Populating prepared statement {} for {}", readForUpdateStatement, fullId);<a name="line.224"></a>
+<span class="sourceLineNo">225</span>            readForUpdateStatement.setString(1, localId);<a name="line.225"></a>
+<span class="sourceLineNo">226</span><a name="line.226"></a>
+<span class="sourceLineNo">227</span>            logger.debug("Executing: {}", readForUpdateStatement);<a name="line.227"></a>
+<span class="sourceLineNo">228</span>            rs = readForUpdateStatement.executeQuery();<a name="line.228"></a>
+<span class="sourceLineNo">229</span>            if (rs.next()) {<a name="line.229"></a>
+<span class="sourceLineNo">230</span>                logger.debug("Read for update full id: {}", fullId);<a name="line.230"></a>
+<span class="sourceLineNo">231</span>                return rs;<a name="line.231"></a>
+<span class="sourceLineNo">232</span>            } else {<a name="line.232"></a>
+<span class="sourceLineNo">233</span>                CleanupHelper.loggedClose(rs);<a name="line.233"></a>
+<span class="sourceLineNo">234</span>                CleanupHelper.loggedClose(readForUpdateStatement);<a name="line.234"></a>
+<span class="sourceLineNo">235</span>                throw new NotFoundException("Object " + fullId + " not found in " + type);<a name="line.235"></a>
+<span class="sourceLineNo">236</span>            }<a name="line.236"></a>
+<span class="sourceLineNo">237</span>        } catch (SQLException ex) {<a name="line.237"></a>
+<span class="sourceLineNo">238</span>            CleanupHelper.loggedClose(rs);<a name="line.238"></a>
+<span class="sourceLineNo">239</span>            CleanupHelper.loggedClose(readForUpdateStatement);<a name="line.239"></a>
+<span class="sourceLineNo">240</span>            throw ex;<a name="line.240"></a>
+<span class="sourceLineNo">241</span>        }<a name="line.241"></a>
+<span class="sourceLineNo">242</span>    }<a name="line.242"></a>
+<span class="sourceLineNo">243</span><a name="line.243"></a>
+<span class="sourceLineNo">244</span>    /**<a name="line.244"></a>
+<span class="sourceLineNo">245</span>     * @see org.forgerock.openidm.repo.jdbc.TableHandler#create(java.lang.String,<a name="line.245"></a>
+<span class="sourceLineNo">246</span>     *      java.lang.String, java.lang.String, java.util.Map,<a name="line.246"></a>
+<span class="sourceLineNo">247</span>     *      java.sql.Connection)<a name="line.247"></a>
+<span class="sourceLineNo">248</span>     */<a name="line.248"></a>
+<span class="sourceLineNo">249</span>    @Override<a name="line.249"></a>
+<span class="sourceLineNo">250</span>    public void create(String fullId, String type, String localId, Map&lt;String, Object&gt; obj,<a name="line.250"></a>
+<span class="sourceLineNo">251</span>            Connection connection) throws SQLException, IOException {<a name="line.251"></a>
+<span class="sourceLineNo">252</span>        PreparedStatement createStatement =<a name="line.252"></a>
+<span class="sourceLineNo">253</span>                queries.getPreparedStatement(connection, createQueryStr);<a name="line.253"></a>
+<span class="sourceLineNo">254</span>        try {<a name="line.254"></a>
+<span class="sourceLineNo">255</span>            create(fullId, type, localId, obj, connection, createStatement, false);<a name="line.255"></a>
+<span class="sourceLineNo">256</span>        } finally {<a name="line.256"></a>
+<span class="sourceLineNo">257</span>            CleanupHelper.loggedClose(createStatement);<a name="line.257"></a>
+<span class="sourceLineNo">258</span>        }<a name="line.258"></a>
+<span class="sourceLineNo">259</span>    }<a name="line.259"></a>
+<span class="sourceLineNo">260</span><a name="line.260"></a>
+<span class="sourceLineNo">261</span>    /**<a name="line.261"></a>
+<span class="sourceLineNo">262</span>     * Adds the option to batch more than one create statement<a name="line.262"></a>
+<span class="sourceLineNo">263</span>     *<a name="line.263"></a>
+<span class="sourceLineNo">264</span>     * @param batchCreate<a name="line.264"></a>
+<span class="sourceLineNo">265</span>     *            if true just adds create to batched statements, does not<a name="line.265"></a>
+<span class="sourceLineNo">266</span>     *            execute. false the statement is executed directly<a name="line.266"></a>
+<span class="sourceLineNo">267</span>     * @see org.forgerock.openidm.repo.jdbc.TableHandler#create(java.lang.String,<a name="line.267"></a>
+<span class="sourceLineNo">268</span>     *      java.lang.String, java.lang.String, java.util.Map,<a name="line.268"></a>
+<span class="sourceLineNo">269</span>     *      java.sql.Connection) for the other parameters<a name="line.269"></a>
+<span class="sourceLineNo">270</span>     */<a name="line.270"></a>
+<span class="sourceLineNo">271</span>    protected void create(String fullId, String type, String localId, Map&lt;String, Object&gt; obj,<a name="line.271"></a>
+<span class="sourceLineNo">272</span>            Connection connection, PreparedStatement createStatement, boolean batchCreate)<a name="line.272"></a>
+<span class="sourceLineNo">273</span>            throws SQLException, IOException {<a name="line.273"></a>
+<span class="sourceLineNo">274</span><a name="line.274"></a>
+<span class="sourceLineNo">275</span>        logger.debug("Create with fullid {}", fullId);<a name="line.275"></a>
+<span class="sourceLineNo">276</span>        String rev = "0";<a name="line.276"></a>
+<span class="sourceLineNo">277</span>        obj.put("_id", localId); // Save the id in the object<a name="line.277"></a>
+<span class="sourceLineNo">278</span>        obj.put("_rev", rev); // Save the rev in the object, and return the<a name="line.278"></a>
+<span class="sourceLineNo">279</span>                              // changed rev from the create.<a name="line.279"></a>
+<span class="sourceLineNo">280</span>        JsonValue objVal = new JsonValue(obj);<a name="line.280"></a>
+<span class="sourceLineNo">281</span><a name="line.281"></a>
+<span class="sourceLineNo">282</span>        logger.debug("Preparing statement {} with {}, {}, {}", new Object[] { createStatement,<a name="line.282"></a>
+<span class="sourceLineNo">283</span>            type, localId, rev });<a name="line.283"></a>
+<span class="sourceLineNo">284</span>        populatePrepStatementColumns(createStatement, objVal, tokenReplacementPropPointers);<a name="line.284"></a>
+<span class="sourceLineNo">285</span><a name="line.285"></a>
+<span class="sourceLineNo">286</span>        if (!batchCreate) {<a name="line.286"></a>
+<span class="sourceLineNo">287</span>            logger.debug("Executing: {}", createStatement);<a name="line.287"></a>
+<span class="sourceLineNo">288</span>            int val = createStatement.executeUpdate();<a name="line.288"></a>
+<span class="sourceLineNo">289</span>            logger.debug("Created object for id {} with rev {}", fullId, rev);<a name="line.289"></a>
+<span class="sourceLineNo">290</span>        } else {<a name="line.290"></a>
+<span class="sourceLineNo">291</span>            createStatement.addBatch();<a name="line.291"></a>
+<span class="sourceLineNo">292</span>            logger.debug("Added create for object id {} with rev {} to batch", fullId, rev);<a name="line.292"></a>
+<span class="sourceLineNo">293</span>        }<a name="line.293"></a>
+<span class="sourceLineNo">294</span>    }<a name="line.294"></a>
+<span class="sourceLineNo">295</span><a name="line.295"></a>
+<span class="sourceLineNo">296</span>    /**<a name="line.296"></a>
+<span class="sourceLineNo">297</span>     * Populates the create or update statement with the token replacement<a name="line.297"></a>
+<span class="sourceLineNo">298</span>     * values in the appropriate order. For update the final objectid is not<a name="line.298"></a>
+<span class="sourceLineNo">299</span>     * part of the declarative mapping and needs to be populated separately.<a name="line.299"></a>
+<span class="sourceLineNo">300</span>     *<a name="line.300"></a>
+<span class="sourceLineNo">301</span>     * @param prepStatement<a name="line.301"></a>
+<span class="sourceLineNo">302</span>     *            the update or create prepared statement<a name="line.302"></a>
+<span class="sourceLineNo">303</span>     * @param tokenPointers<a name="line.303"></a>
+<span class="sourceLineNo">304</span>     *            the token replacement pointers pointing into the object set to<a name="line.304"></a>
+<span class="sourceLineNo">305</span>     *            extract the relevant values<a name="line.305"></a>
+<span class="sourceLineNo">306</span>     * @return the buildNext column position if further populating is desired<a name="line.306"></a>
+<span class="sourceLineNo">307</span>     */<a name="line.307"></a>
+<span class="sourceLineNo">308</span>    int populatePrepStatementColumns(PreparedStatement prepStatement, JsonValue objVal,<a name="line.308"></a>
+<span class="sourceLineNo">309</span>            List&lt;JsonPointer&gt; tokenPointers) throws IOException, SQLException {<a name="line.309"></a>
+<span class="sourceLineNo">310</span>        int colPos = 1;<a name="line.310"></a>
+<span class="sourceLineNo">311</span>        for (JsonPointer propPointer : tokenPointers) {<a name="line.311"></a>
+<span class="sourceLineNo">312</span>            // TODO: support explicit column types/conversion specified in<a name="line.312"></a>
+<span class="sourceLineNo">313</span>            // column mapping<a name="line.313"></a>
+<span class="sourceLineNo">314</span>            // This is currently limited to STRING handling<a name="line.314"></a>
+<span class="sourceLineNo">315</span>            JsonValue rawValue = objVal.get(propPointer);<a name="line.315"></a>
+<span class="sourceLineNo">316</span>            String propValue = null;<a name="line.316"></a>
+<span class="sourceLineNo">317</span>            if (null == rawValue) {<a name="line.317"></a>
+<span class="sourceLineNo">318</span>                propValue = null;<a name="line.318"></a>
+<span class="sourceLineNo">319</span>            } else if (rawValue.isString() || rawValue.isNull()) {<a name="line.319"></a>
+<span class="sourceLineNo">320</span>                propValue = rawValue.asString();<a name="line.320"></a>
+<span class="sourceLineNo">321</span>            } else {<a name="line.321"></a>
+<span class="sourceLineNo">322</span>                if (logger.isTraceEnabled()) {<a name="line.322"></a>
+<span class="sourceLineNo">323</span>                    logger.trace(<a name="line.323"></a>
+<span class="sourceLineNo">324</span>                            "Value for col {} from {} is getting Stringified from type {} to store in a STRING column as value: {}",<a name="line.324"></a>
+<span class="sourceLineNo">325</span>                            new Object[] { colPos, propPointer, rawValue.getClass(), rawValue });<a name="line.325"></a>
+<span class="sourceLineNo">326</span>                }<a name="line.326"></a>
+<span class="sourceLineNo">327</span>                propValue = mapper.writeValueAsString(rawValue.getObject());<a name="line.327"></a>
+<span class="sourceLineNo">328</span>            }<a name="line.328"></a>
+<span class="sourceLineNo">329</span><a name="line.329"></a>
+<span class="sourceLineNo">330</span>            prepStatement.setString(colPos, propValue);<a name="line.330"></a>
+<span class="sourceLineNo">331</span>            colPos++;<a name="line.331"></a>
+<span class="sourceLineNo">332</span>        }<a name="line.332"></a>
+<span class="sourceLineNo">333</span>        return colPos;<a name="line.333"></a>
+<span class="sourceLineNo">334</span>    }<a name="line.334"></a>
+<span class="sourceLineNo">335</span><a name="line.335"></a>
+<span class="sourceLineNo">336</span>    /**<a name="line.336"></a>
+<span class="sourceLineNo">337</span>     * @see org.forgerock.openidm.repo.jdbc.TableHandler#update(java.lang.String,<a name="line.337"></a>
+<span class="sourceLineNo">338</span>     *      java.lang.String, java.lang.String, java.lang.String, java.util.Map,<a name="line.338"></a>
+<span class="sourceLineNo">339</span>     *      java.sql.Connection)<a name="line.339"></a>
+<span class="sourceLineNo">340</span>     */<a name="line.340"></a>
+<span class="sourceLineNo">341</span>    @Override<a name="line.341"></a>
+<span class="sourceLineNo">342</span>    public void update(String fullId, String type, String localId, String rev,<a name="line.342"></a>
+<span class="sourceLineNo">343</span>            Map&lt;String, Object&gt; obj, Connection connection) throws SQLException, IOException,<a name="line.343"></a>
+<span class="sourceLineNo">344</span>            PreconditionFailedException, NotFoundException, InternalServerErrorException {<a name="line.344"></a>
+<span class="sourceLineNo">345</span>        logger.debug("Update with fullid {}", fullId);<a name="line.345"></a>
+<span class="sourceLineNo">346</span><a name="line.346"></a>
+<span class="sourceLineNo">347</span>        int revInt = Integer.parseInt(rev);<a name="line.347"></a>
+<span class="sourceLineNo">348</span>        ++revInt;<a name="line.348"></a>
+<span class="sourceLineNo">349</span>        String newRev = Integer.toString(revInt);<a name="line.349"></a>
+<span class="sourceLineNo">350</span>        obj.put("_rev", newRev); // Save the rev in the object, and return the<a name="line.350"></a>
+<span class="sourceLineNo">351</span>                                 // changed rev from the create.<a name="line.351"></a>
+<span class="sourceLineNo">352</span><a name="line.352"></a>
+<span class="sourceLineNo">353</span>        ResultSet rs = null;<a name="line.353"></a>
+<span class="sourceLineNo">354</span>        PreparedStatement updateStatement = null;<a name="line.354"></a>
+<span class="sourceLineNo">355</span>        try {<a name="line.355"></a>
+<span class="sourceLineNo">356</span>            rs = readForUpdate(fullId, type, localId, connection);<a name="line.356"></a>
+<span class="sourceLineNo">357</span>            String existingRev = explicitMapping.getRev(rs);<a name="line.357"></a>
+<span class="sourceLineNo">358</span>            logger.debug("Update existing object {} rev: {} ", fullId, existingRev);<a name="line.358"></a>
+<span class="sourceLineNo">359</span><a name="line.359"></a>
+<span class="sourceLineNo">360</span>            if (!existingRev.equals(rev)) {<a name="line.360"></a>
+<span class="sourceLineNo">361</span>                throw new PreconditionFailedException("Update rejected as current Object revision "<a name="line.361"></a>
+<span class="sourceLineNo">362</span>                        + existingRev + " is different than expected by caller (" + rev<a name="line.362"></a>
+<span class="sourceLineNo">363</span>                        + "), the object has changed since retrieval.");<a name="line.363"></a>
+<span class="sourceLineNo">364</span>            }<a name="line.364"></a>
+<span class="sourceLineNo">365</span>            updateStatement = queries.getPreparedStatement(connection, updateQueryStr);<a name="line.365"></a>
+<span class="sourceLineNo">366</span><a name="line.366"></a>
+<span class="sourceLineNo">367</span>            // Support changing object identifier<a name="line.367"></a>
+<span class="sourceLineNo">368</span>            String newLocalId = (String) obj.get("_id");<a name="line.368"></a>
+<span class="sourceLineNo">369</span>            if (newLocalId != null &amp;&amp; !localId.equals(newLocalId)) {<a name="line.369"></a>
+<span class="sourceLineNo">370</span>                logger.debug("Object identifier is changing from " + localId + " to " + newLocalId);<a name="line.370"></a>
+<span class="sourceLineNo">371</span>            } else {<a name="line.371"></a>
+<span class="sourceLineNo">372</span>                newLocalId = localId; // If it hasn't changed, use the existing<a name="line.372"></a>
+<span class="sourceLineNo">373</span>                                      // ID<a name="line.373"></a>
+<span class="sourceLineNo">374</span>                obj.put("_id", newLocalId); // Ensure the ID is saved in the<a name="line.374"></a>
+<span class="sourceLineNo">375</span>                                            // object<a name="line.375"></a>
+<span class="sourceLineNo">376</span>            }<a name="line.376"></a>
+<span class="sourceLineNo">377</span><a name="line.377"></a>
+<span class="sourceLineNo">378</span>            JsonValue objVal = new JsonValue(obj);<a name="line.378"></a>
+<span class="sourceLineNo">379</span>            logger.trace("Populating prepared statement {} for {} {} {}", new Object[] {<a name="line.379"></a>
+<span class="sourceLineNo">380</span>                updateStatement, fullId, newLocalId, newRev });<a name="line.380"></a>
+<span class="sourceLineNo">381</span>            int nextCol =<a name="line.381"></a>
+<span class="sourceLineNo">382</span>                    populatePrepStatementColumns(updateStatement, objVal,<a name="line.382"></a>
+<span class="sourceLineNo">383</span>                            tokenReplacementPropPointers);<a name="line.383"></a>
+<span class="sourceLineNo">384</span>            updateStatement.setString(nextCol, localId);<a name="line.384"></a>
+<span class="sourceLineNo">385</span>            logger.debug("Update statement: {}", updateStatement);<a name="line.385"></a>
+<span class="sourceLineNo">386</span>            int updateCount = updateStatement.executeUpdate();<a name="line.386"></a>
+<span class="sourceLineNo">387</span>            logger.trace("Updated rows: {} for {}", updateCount, fullId);<a name="line.387"></a>
+<span class="sourceLineNo">388</span>            if (updateCount != 1) {<a name="line.388"></a>
+<span class="sourceLineNo">389</span>                throw new InternalServerErrorException(<a name="line.389"></a>
+<span class="sourceLineNo">390</span>                        "Update execution did not result in updating 1 row as expected. Updated rows: "<a name="line.390"></a>
+<span class="sourceLineNo">391</span>                                + updateCount);<a name="line.391"></a>
+<span class="sourceLineNo">392</span>            }<a name="line.392"></a>
+<span class="sourceLineNo">393</span>        } finally {<a name="line.393"></a>
+<span class="sourceLineNo">394</span>            if (rs != null) {<a name="line.394"></a>
+<span class="sourceLineNo">395</span>                // Ensure associated statement also is closed<a name="line.395"></a>
+<span class="sourceLineNo">396</span>                Statement rsStatement = rs.getStatement();<a name="line.396"></a>
+<span class="sourceLineNo">397</span>                CleanupHelper.loggedClose(rs);<a name="line.397"></a>
+<span class="sourceLineNo">398</span>                CleanupHelper.loggedClose(rsStatement);<a name="line.398"></a>
+<span class="sourceLineNo">399</span>            }<a name="line.399"></a>
+<span class="sourceLineNo">400</span>            CleanupHelper.loggedClose(updateStatement);<a name="line.400"></a>
+<span class="sourceLineNo">401</span>        }<a name="line.401"></a>
+<span class="sourceLineNo">402</span>    }<a name="line.402"></a>
+<span class="sourceLineNo">403</span><a name="line.403"></a>
+<span class="sourceLineNo">404</span>    /**<a name="line.404"></a>
+<span class="sourceLineNo">405</span>     * @see org.forgerock.openidm.repo.jdbc.TableHandler#delete(java.lang.String,<a name="line.405"></a>
+<span class="sourceLineNo">406</span>     *      java.lang.String, java.lang.String, java.lang.String,<a name="line.406"></a>
+<span class="sourceLineNo">407</span>     *      java.sql.Connection)<a name="line.407"></a>
+<span class="sourceLineNo">408</span>     */<a name="line.408"></a>
+<span class="sourceLineNo">409</span>    @Override<a name="line.409"></a>
+<span class="sourceLineNo">410</span>    public void delete(String fullId, String type, String localId, String rev, Connection connection)<a name="line.410"></a>
+<span class="sourceLineNo">411</span>            throws PreconditionFailedException, InternalServerErrorException, NotFoundException,<a name="line.411"></a>
+<span class="sourceLineNo">412</span>            SQLException, IOException {<a name="line.412"></a>
+<span class="sourceLineNo">413</span>        logger.debug("Delete with fullid {}", fullId);<a name="line.413"></a>
+<span class="sourceLineNo">414</span><a name="line.414"></a>
+<span class="sourceLineNo">415</span>        // First check if the revision matches and select it for UPDATE<a name="line.415"></a>
+<span class="sourceLineNo">416</span>        ResultSet existing = null;<a name="line.416"></a>
+<span class="sourceLineNo">417</span>        PreparedStatement deleteStatement = null;<a name="line.417"></a>
+<span class="sourceLineNo">418</span>        try {<a name="line.418"></a>
+<span class="sourceLineNo">419</span>            try {<a name="line.419"></a>
+<span class="sourceLineNo">420</span>                existing = readForUpdate(fullId, type, localId, connection);<a name="line.420"></a>
+<span class="sourceLineNo">421</span>            } catch (NotFoundException ex) {<a name="line.421"></a>
+<span class="sourceLineNo">422</span>                throw new NotFoundException("Object does not exist for delete on: " + fullId);<a name="line.422"></a>
+<span class="sourceLineNo">423</span>            }<a name="line.423"></a>
+<span class="sourceLineNo">424</span>            String existingRev = explicitMapping.getRev(existing);<a name="line.424"></a>
+<span class="sourceLineNo">425</span>            if (!"*".equals(rev) &amp;&amp; !rev.equals(existingRev)) {<a name="line.425"></a>
+<span class="sourceLineNo">426</span>                throw new PreconditionFailedException("Delete rejected as current Object revision "<a name="line.426"></a>
+<span class="sourceLineNo">427</span>                        + existingRev + " is different than " + "expected by caller " + rev<a name="line.427"></a>
+<span class="sourceLineNo">428</span>                        + ", the object has changed since retrieval.");<a name="line.428"></a>
+<span class="sourceLineNo">429</span>            }<a name="line.429"></a>
+<span class="sourceLineNo">430</span><a name="line.430"></a>
+<span class="sourceLineNo">431</span>            // Proceed with the valid delete<a name="line.431"></a>
+<span class="sourceLineNo">432</span>            deleteStatement = queries.getPreparedStatement(connection, deleteQueryStr);<a name="line.432"></a>
+<span class="sourceLineNo">433</span>            logger.trace("Populating prepared statement {} for {} {} {} {}", new Object[] {<a name="line.433"></a>
+<span class="sourceLineNo">434</span>                deleteStatement, fullId, type, localId, rev });<a name="line.434"></a>
+<span class="sourceLineNo">435</span><a name="line.435"></a>
+<span class="sourceLineNo">436</span>            deleteStatement.setString(1, localId);<a name="line.436"></a>
+<span class="sourceLineNo">437</span>            deleteStatement.setString(2, rev);<a name="line.437"></a>
+<span class="sourceLineNo">438</span>            logger.debug("Delete statement: {}", deleteStatement);<a name="line.438"></a>
+<span class="sourceLineNo">439</span><a name="line.439"></a>
+<span class="sourceLineNo">440</span>            int deletedRows = deleteStatement.executeUpdate();<a name="line.440"></a>
+<span class="sourceLineNo">441</span>            logger.trace("Deleted {} rows for id : {} {}", deletedRows, localId);<a name="line.441"></a>
+<span class="sourceLineNo">442</span>            if (deletedRows &lt; 1) {<a name="line.442"></a>
+<span class="sourceLineNo">443</span>                throw new InternalServerErrorException("Deleting object for " + fullId<a name="line.443"></a>
+<span class="sourceLineNo">444</span>                        + " failed, DB reported " + deletedRows + " rows deleted");<a name="line.444"></a>
+<span class="sourceLineNo">445</span>            } else {<a name="line.445"></a>
+<span class="sourceLineNo">446</span>                logger.debug("delete for id succeeded: {} revision: {}", localId, rev);<a name="line.446"></a>
+<span class="sourceLineNo">447</span>            }<a name="line.447"></a>
+<span class="sourceLineNo">448</span>        } finally {<a name="line.448"></a>
+<span class="sourceLineNo">449</span>            if (existing != null) {<a name="line.449"></a>
+<span class="sourceLineNo">450</span>                // Ensure associated statement also is closed<a name="line.450"></a>
+<span class="sourceLineNo">451</span>                Statement existingStatement = existing.getStatement();<a name="line.451"></a>
+<span class="sourceLineNo">452</span>                CleanupHelper.loggedClose(existing);<a name="line.452"></a>
+<span class="sourceLineNo">453</span>                CleanupHelper.loggedClose(existingStatement);<a name="line.453"></a>
+<span class="sourceLineNo">454</span>            }<a name="line.454"></a>
+<span class="sourceLineNo">455</span>            CleanupHelper.loggedClose(deleteStatement);<a name="line.455"></a>
+<span class="sourceLineNo">456</span>        }<a name="line.456"></a>
+<span class="sourceLineNo">457</span>    }<a name="line.457"></a>
+<span class="sourceLineNo">458</span><a name="line.458"></a>
+<span class="sourceLineNo">459</span>    /**<a name="line.459"></a>
+<span class="sourceLineNo">460</span>     * @see org.forgerock.openidm.repo.jdbc.TableHandler#delete(java.lang.String,<a name="line.460"></a>
+<span class="sourceLineNo">461</span>     *      java.lang.String, java.lang.String, java.lang.String,<a name="line.461"></a>
+<span class="sourceLineNo">462</span>     *      java.sql.Connection)<a name="line.462"></a>
+<span class="sourceLineNo">463</span>     */<a name="line.463"></a>
+<span class="sourceLineNo">464</span>    @Override<a name="line.464"></a>
+<span class="sourceLineNo">465</span>    public List&lt;Map&lt;String, Object&gt;&gt; query(String type, Map&lt;String, Object&gt; params,<a name="line.465"></a>
+<span class="sourceLineNo">466</span>            Connection connection) throws ResourceException {<a name="line.466"></a>
+<span class="sourceLineNo">467</span>        return queries.query(type, params, connection);<a name="line.467"></a>
+<span class="sourceLineNo">468</span>    }<a name="line.468"></a>
+<span class="sourceLineNo">469</span><a name="line.469"></a>
+<span class="sourceLineNo">470</span>    @Override<a name="line.470"></a>
+<span class="sourceLineNo">471</span>    public boolean queryIdExists(String queryId) {<a name="line.471"></a>
+<span class="sourceLineNo">472</span>        return queries.queryIdExists(queryId);<a name="line.472"></a>
+<span class="sourceLineNo">473</span>    }<a name="line.473"></a>
+<span class="sourceLineNo">474</span><a name="line.474"></a>
+<span class="sourceLineNo">475</span>    // TODO: make common to generic and explicit handlers<a name="line.475"></a>
+<span class="sourceLineNo">476</span>    /**<a name="line.476"></a>
+<span class="sourceLineNo">477</span>     * @inheritDoc<a name="line.477"></a>
+<span class="sourceLineNo">478</span>     */<a name="line.478"></a>
+<span class="sourceLineNo">479</span>    public boolean isErrorType(SQLException ex, ErrorType errorType) {<a name="line.479"></a>
+<span class="sourceLineNo">480</span>        return sqlExceptionHandler.isErrorType(ex, errorType);<a name="line.480"></a>
+<span class="sourceLineNo">481</span>    }<a name="line.481"></a>
+<span class="sourceLineNo">482</span><a name="line.482"></a>
+<span class="sourceLineNo">483</span>    // TODO: make common to generic and explicit handlers<a name="line.483"></a>
+<span class="sourceLineNo">484</span>    /**<a name="line.484"></a>
+<span class="sourceLineNo">485</span>     * InheritDoc<a name="line.485"></a>
+<span class="sourceLineNo">486</span>     */<a name="line.486"></a>
+<span class="sourceLineNo">487</span>    public boolean isRetryable(SQLException ex, Connection connection) {<a name="line.487"></a>
+<span class="sourceLineNo">488</span>        return sqlExceptionHandler.isRetryable(ex, connection);<a name="line.488"></a>
+<span class="sourceLineNo">489</span>    }<a name="line.489"></a>
+<span class="sourceLineNo">490</span><a name="line.490"></a>
+<span class="sourceLineNo">491</span>    @Override<a name="line.491"></a>
+<span class="sourceLineNo">492</span>    public String toString() {<a name="line.492"></a>
+<span class="sourceLineNo">493</span>        return "Generic handler mapped to " + tableName + " and mapping " + rawMappingConfig;<a name="line.493"></a>
+<span class="sourceLineNo">494</span>    }<a name="line.494"></a>
+<span class="sourceLineNo">495</span>}<a name="line.495"></a>
+<span class="sourceLineNo">496</span><a name="line.496"></a>
+<span class="sourceLineNo">497</span>/**<a name="line.497"></a>
+<span class="sourceLineNo">498</span> * Handle the conversion of query results to the object set model<a name="line.498"></a>
+<span class="sourceLineNo">499</span> */<a name="line.499"></a>
+<span class="sourceLineNo">500</span>class ExplicitQueryResultMapper implements QueryResultMapper {<a name="line.500"></a>
+<span class="sourceLineNo">501</span>    final static Logger logger = LoggerFactory.getLogger(ExplicitQueryResultMapper.class);<a name="line.501"></a>
+<span class="sourceLineNo">502</span>    Mapping explicitMapping;<a name="line.502"></a>
+<span class="sourceLineNo">503</span><a name="line.503"></a>
+<span class="sourceLineNo">504</span>    public ExplicitQueryResultMapper(Mapping explicitMapping) {<a name="line.504"></a>
+<span class="sourceLineNo">505</span>        this.explicitMapping = explicitMapping;<a name="line.505"></a>
+<span class="sourceLineNo">506</span>    }<a name="line.506"></a>
+<span class="sourceLineNo">507</span><a name="line.507"></a>
+<span class="sourceLineNo">508</span>    public List&lt;Map&lt;String, Object&gt;&gt; mapQueryToObject(ResultSet rs, String queryId, String type,<a name="line.508"></a>
+<span class="sourceLineNo">509</span>            Map&lt;String, Object&gt; params, TableQueries tableQueries) throws SQLException,<a name="line.509"></a>
+<span class="sourceLineNo">510</span>            InternalServerErrorException {<a name="line.510"></a>
+<span class="sourceLineNo">511</span><a name="line.511"></a>
+<span class="sourceLineNo">512</span>        List&lt;Map&lt;String, Object&gt;&gt; result = new ArrayList&lt;Map&lt;String, Object&gt;&gt;();<a name="line.512"></a>
+<span class="sourceLineNo">513</span>        Set names = Mapping.getColumnNames(rs);<a name="line.513"></a>
+<span class="sourceLineNo">514</span>        while (rs.next()) {<a name="line.514"></a>
+<span class="sourceLineNo">515</span>            JsonValue obj = explicitMapping.mapToJsonValue(rs, names);<a name="line.515"></a>
+<span class="sourceLineNo">516</span>            result.add(obj.asMap());<a name="line.516"></a>
+<span class="sourceLineNo">517</span>        }<a name="line.517"></a>
+<span class="sourceLineNo">518</span>        return result;<a name="line.518"></a>
+<span class="sourceLineNo">519</span>    }<a name="line.519"></a>
+<span class="sourceLineNo">520</span>}<a name="line.520"></a>
+<span class="sourceLineNo">521</span><a name="line.521"></a>
+<span class="sourceLineNo">522</span>/**<a name="line.522"></a>
+<span class="sourceLineNo">523</span> * Parsed Config handling<a name="line.523"></a>
+<span class="sourceLineNo">524</span> */<a name="line.524"></a>
+<span class="sourceLineNo">525</span>class Mapping {<a name="line.525"></a>
+<span class="sourceLineNo">526</span><a name="line.526"></a>
+<span class="sourceLineNo">527</span>    final static Logger logger = LoggerFactory.getLogger(Mapping.class);<a name="line.527"></a>
+<span class="sourceLineNo">528</span><a name="line.528"></a>
+<span class="sourceLineNo">529</span>    String tableName;<a name="line.529"></a>
+<span class="sourceLineNo">530</span>    Accessor&lt;CryptoService&gt; cryptoServiceAccessor;<a name="line.530"></a>
+<span class="sourceLineNo">531</span>    List&lt;ColumnMapping&gt; columnMappings = new ArrayList();<a name="line.531"></a>
+<span class="sourceLineNo">532</span>    ColumnMapping revMapping; // Quick access to mapping for MVCC revision<a name="line.532"></a>
+<span class="sourceLineNo">533</span>    ObjectMapper mapper = new ObjectMapper();<a name="line.533"></a>
+<span class="sourceLineNo">534</span><a name="line.534"></a>
+<span class="sourceLineNo">535</span>    public Mapping(String tableName, JsonValue mappingConfig, Accessor&lt;CryptoService&gt; cryptoServiceAccessor) {<a name="line.535"></a>
+<span class="sourceLineNo">536</span>        this.cryptoServiceAccessor = cryptoServiceAccessor;<a name="line.536"></a>
+<span class="sourceLineNo">537</span>        this.tableName = tableName;<a name="line.537"></a>
+<span class="sourceLineNo">538</span>        for (Map.Entry&lt;String, Object&gt; entry : mappingConfig.asMap().entrySet()) {<a name="line.538"></a>
+<span class="sourceLineNo">539</span>            String key = entry.getKey();<a name="line.539"></a>
+<span class="sourceLineNo">540</span>            JsonValue value = mappingConfig.get(key);<a name="line.540"></a>
+<span class="sourceLineNo">541</span>            ColumnMapping colMapping = new ColumnMapping(key, value);<a name="line.541"></a>
+<span class="sourceLineNo">542</span>            columnMappings.add(colMapping);<a name="line.542"></a>
+<span class="sourceLineNo">543</span>            if ("_rev".equals(colMapping.objectColName)) {<a name="line.543"></a>
+<span class="sourceLineNo">544</span>                revMapping = colMapping;<a name="line.544"></a>
+<span class="sourceLineNo">545</span>            }<a name="line.545"></a>
+<span class="sourceLineNo">546</span>        }<a name="line.546"></a>
+<span class="sourceLineNo">547</span>    }<a name="line.547"></a>
+<span class="sourceLineNo">548</span><a name="line.548"></a>
+<span class="sourceLineNo">549</span>    public JsonValue mapToJsonValue(ResultSet rs, Set columnNames) throws SQLException,<a name="line.549"></a>
+<span class="sourceLineNo">550</span>    InternalServerErrorException {<a name="line.550"></a>
+<span class="sourceLineNo">551</span>        JsonValue mappedResult = new JsonValue(new LinkedHashMap&lt;String, Object&gt;());<a name="line.551"></a>
+<span class="sourceLineNo">552</span><a name="line.552"></a>
+<span class="sourceLineNo">553</span>        for (ColumnMapping entry : columnMappings) {<a name="line.553"></a>
+<span class="sourceLineNo">554</span>            Object value = null;<a name="line.554"></a>
+<span class="sourceLineNo">555</span>            if (columnNames.contains(entry.dbColName)) {<a name="line.555"></a>
+<span class="sourceLineNo">556</span>                if (ColumnMapping.TYPE_STRING.equals(entry.dbColType)) {<a name="line.556"></a>
+<span class="sourceLineNo">557</span>                    value = rs.getString(entry.dbColName);<a name="line.557"></a>
+<span class="sourceLineNo">558</span>                    if (cryptoServiceAccessor == null || cryptoServiceAccessor.access() == null) {<a name="line.558"></a>
+<span class="sourceLineNo">559</span>                        throw new InternalServerErrorException("CryptoService unavailable");<a name="line.559"></a>
+<span class="sourceLineNo">560</span>                    }<a name="line.560"></a>
+<span class="sourceLineNo">561</span>                    if (JsonUtil.isEncrypted((String) value)) {<a name="line.561"></a>
+<span class="sourceLineNo">562</span>                        value = convertToJson(entry.dbColName, "encrypted", (String)value, Map.class).asMap();<a name="line.562"></a>
+<span class="sourceLineNo">563</span>                    }<a name="line.563"></a>
+<span class="sourceLineNo">564</span>                } else if (ColumnMapping.TYPE_JSON_MAP.equals(entry.dbColType)) {<a name="line.564"></a>
+<span class="sourceLineNo">565</span>                    value = convertToJson(entry.dbColName, entry.dbColType, rs.getString(entry.dbColName), Map.class).asMap();<a name="line.565"></a>
+<span class="sourceLineNo">566</span>                } else if (ColumnMapping.TYPE_JSON_LIST.equals(entry.dbColType)) {<a name="line.566"></a>
+<span class="sourceLineNo">567</span>                    value = convertToJson(entry.dbColName, entry.dbColType, rs.getString(entry.dbColName), List.class).asList();<a name="line.567"></a>
+<span class="sourceLineNo">568</span>                } else {<a name="line.568"></a>
+<span class="sourceLineNo">569</span>                    throw new InternalServerErrorException("Unsupported DB column type " + entry.dbColType);<a name="line.569"></a>
+<span class="sourceLineNo">570</span>                }<a name="line.570"></a>
+<span class="sourceLineNo">571</span>                mappedResult.put(entry.objectColPointer, value);<a name="line.571"></a>
+<span class="sourceLineNo">572</span>            }<a name="line.572"></a>
+<span class="sourceLineNo">573</span>        }<a name="line.573"></a>
+<span class="sourceLineNo">574</span>        logger.debug("Mapped rs {} to {}", rs, mappedResult);<a name="line.574"></a>
+<span class="sourceLineNo">575</span>        return mappedResult;<a name="line.575"></a>
+<span class="sourceLineNo">576</span>    }<a name="line.576"></a>
+<span class="sourceLineNo">577</span><a name="line.577"></a>
+<span class="sourceLineNo">578</span>    private &lt;T&gt; JsonValue convertToJson(String name, String nameType, String value, Class&lt;T&gt; valueType) throws InternalServerErrorException {<a name="line.578"></a>
+<span class="sourceLineNo">579</span>        if (value != null) {<a name="line.579"></a>
+<span class="sourceLineNo">580</span>            try {<a name="line.580"></a>
+<span class="sourceLineNo">581</span>                return new JsonValue(mapper.readValue(value, valueType));<a name="line.581"></a>
+<span class="sourceLineNo">582</span>            } catch (IOException e) {<a name="line.582"></a>
+<span class="sourceLineNo">583</span>                throw new InternalServerErrorException("Unable to map " + nameType + " value for " + name, e);<a name="line.583"></a>
+<span class="sourceLineNo">584</span>            }<a name="line.584"></a>
+<span class="sourceLineNo">585</span>        }<a name="line.585"></a>
+<span class="sourceLineNo">586</span>        return new JsonValue(null);<a name="line.586"></a>
+<span class="sourceLineNo">587</span>    }<a name="line.587"></a>
+<span class="sourceLineNo">588</span><a name="line.588"></a>
+<span class="sourceLineNo">589</span>    public String getRev(ResultSet rs) throws SQLException {<a name="line.589"></a>
+<span class="sourceLineNo">590</span>        return rs.getString(revMapping.dbColName);<a name="line.590"></a>
+<span class="sourceLineNo">591</span>    }<a name="line.591"></a>
+<span class="sourceLineNo">592</span><a name="line.592"></a>
+<span class="sourceLineNo">593</span>    public String toString() {<a name="line.593"></a>
+<span class="sourceLineNo">594</span>        StringBuffer sb = new StringBuffer();<a name="line.594"></a>
+<span class="sourceLineNo">595</span>        sb.append("Explicit table mapping for " + tableName + " :\n");<a name="line.595"></a>
+<span class="sourceLineNo">596</span>        for (ColumnMapping entry : columnMappings) {<a name="line.596"></a>
+<span class="sourceLineNo">597</span>            sb.append(entry.toString());<a name="line.597"></a>
+<span class="sourceLineNo">598</span>        }<a name="line.598"></a>
+<span class="sourceLineNo">599</span>        return sb.toString();<a name="line.599"></a>
+<span class="sourceLineNo">600</span>    }<a name="line.600"></a>
+<span class="sourceLineNo">601</span><a name="line.601"></a>
+<span class="sourceLineNo">602</span>    public static Set&lt;String&gt; getColumnNames(ResultSet rs) throws SQLException {<a name="line.602"></a>
+<span class="sourceLineNo">603</span>        TreeSet&lt;String&gt; set = new TreeSet&lt;String&gt;(String.CASE_INSENSITIVE_ORDER);<a name="line.603"></a>
+<span class="sourceLineNo">604</span>        for (int i = 1; i &lt;= rs.getMetaData().getColumnCount(); i++) {<a name="line.604"></a>
+<span class="sourceLineNo">605</span>            set.add(rs.getMetaData().getColumnName(i));<a name="line.605"></a>
+<span class="sourceLineNo">606</span>        }<a name="line.606"></a>
+<span class="sourceLineNo">607</span>        return set;<a name="line.607"></a>
+<span class="sourceLineNo">608</span>    }<a name="line.608"></a>
+<span class="sourceLineNo">609</span>}<a name="line.609"></a>
+<span class="sourceLineNo">610</span><a name="line.610"></a>
+<span class="sourceLineNo">611</span>/**<a name="line.611"></a>
+<span class="sourceLineNo">612</span> * Parsed Config handling<a name="line.612"></a>
+<span class="sourceLineNo">613</span> */<a name="line.613"></a>
+<span class="sourceLineNo">614</span>class ColumnMapping {<a name="line.614"></a>
+<span class="sourceLineNo">615</span>    public static final String DB_COLUMN_NAME = "column";<a name="line.615"></a>
+<span class="sourceLineNo">616</span>    public static final String DB_COLUMN_TYPE = "type";<a name="line.616"></a>
+<span class="sourceLineNo">617</span><a name="line.617"></a>
+<span class="sourceLineNo">618</span>    public static final String TYPE_STRING = "STRING";<a name="line.618"></a>
+<span class="sourceLineNo">619</span>    public static final String TYPE_JSON_MAP = "JSON_MAP";<a name="line.619"></a>
+<span class="sourceLineNo">620</span>    public static final String TYPE_JSON_LIST = "JSON_LIST";<a name="line.620"></a>
+<span class="sourceLineNo">621</span>   <a name="line.621"></a>
+<span class="sourceLineNo">622</span>    <a name="line.622"></a>
+<span class="sourceLineNo">623</span>    public JsonPointer objectColPointer;<a name="line.623"></a>
+<span class="sourceLineNo">624</span>    public String objectColName; // String representation of the column<a name="line.624"></a>
+<span class="sourceLineNo">625</span>                                 // name/path<a name="line.625"></a>
+<span class="sourceLineNo">626</span>    public String dbColName;<a name="line.626"></a>
+<span class="sourceLineNo">627</span>    public String dbColType;<a name="line.627"></a>
+<span class="sourceLineNo">628</span><a name="line.628"></a>
+<span class="sourceLineNo">629</span>    public ColumnMapping(String objectColName, JsonValue dbColMappingConfig) {<a name="line.629"></a>
+<span class="sourceLineNo">630</span>        this.objectColName = objectColName;<a name="line.630"></a>
+<span class="sourceLineNo">631</span>        this.objectColPointer = new JsonPointer(objectColName);<a name="line.631"></a>
+<span class="sourceLineNo">632</span>        if (dbColMappingConfig.required().isList()) {<a name="line.632"></a>
+<span class="sourceLineNo">633</span>            if (dbColMappingConfig.asList().size() != 2) {<a name="line.633"></a>
+<span class="sourceLineNo">634</span>                throw new InvalidException("Explicit table mapping has invalid entry for "<a name="line.634"></a>
+<span class="sourceLineNo">635</span>                        + objectColName + ", expecting column name and type but contains "<a name="line.635"></a>
+<span class="sourceLineNo">636</span>                        + dbColMappingConfig.asList());<a name="line.636"></a>
+<span class="sourceLineNo">637</span>            }<a name="line.637"></a>
+<span class="sourceLineNo">638</span>            dbColName = dbColMappingConfig.get(0).required().asString();<a name="line.638"></a>
+<span class="sourceLineNo">639</span>            dbColType = dbColMappingConfig.get(1).required().asString();<a name="line.639"></a>
+<span class="sourceLineNo">640</span>        } else if (dbColMappingConfig.isMap()) {<a name="line.640"></a>
+<span class="sourceLineNo">641</span>            dbColName = dbColMappingConfig.asMap().get(DB_COLUMN_NAME).toString();<a name="line.641"></a>
+<span class="sourceLineNo">642</span>            dbColType = dbColMappingConfig.asMap().get(DB_COLUMN_TYPE).toString();<a name="line.642"></a>
+<span class="sourceLineNo">643</span>        } else {<a name="line.643"></a>
+<span class="sourceLineNo">644</span>            dbColName = dbColMappingConfig.asString();<a name="line.644"></a>
+<span class="sourceLineNo">645</span>            dbColType = TYPE_STRING;<a name="line.645"></a>
+<span class="sourceLineNo">646</span>        }<a name="line.646"></a>
+<span class="sourceLineNo">647</span>    }<a name="line.647"></a>
+<span class="sourceLineNo">648</span><a name="line.648"></a>
+<span class="sourceLineNo">649</span>    public String toString() {<a name="line.649"></a>
+<span class="sourceLineNo">650</span>        return "object column : " + objectColName + " -&gt; " + dbColName + ":" + dbColType + "\n";<a name="line.650"></a>
+<span class="sourceLineNo">651</span>    }<a name="line.651"></a>
+<span class="sourceLineNo">652</span>}<a name="line.652"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

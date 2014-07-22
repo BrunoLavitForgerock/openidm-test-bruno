@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * The contents of this file are subject to the terms of the Common Development and<a name="line.2"></a>
+<span class="sourceLineNo">003</span> * Distribution License (the License). You may not use this file except in compliance with the<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * License.<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * specific language governing permission and limitations under the License.<a name="line.7"></a>
+<span class="sourceLineNo">008</span> *<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * When distributing Covered Software, include this CDDL Header Notice in each file and include<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * Header, with the fields enclosed by brackets [] replaced by your own identifying<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * information: "Portions copyright [year] [name of copyright owner]".<a name="line.12"></a>
+<span class="sourceLineNo">013</span> *<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * Copyright 2013 ForgeRock Inc.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> */<a name="line.15"></a>
+<span class="sourceLineNo">016</span><a name="line.16"></a>
+<span class="sourceLineNo">017</span>package org.forgerock.openidm.servletregistration.impl;<a name="line.17"></a>
+<span class="sourceLineNo">018</span><a name="line.18"></a>
+<span class="sourceLineNo">019</span>import java.util.HashMap;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import java.util.Map;<a name="line.20"></a>
+<span class="sourceLineNo">021</span><a name="line.21"></a>
+<span class="sourceLineNo">022</span>import org.apache.felix.scr.annotations.Activate;<a name="line.22"></a>
+<span class="sourceLineNo">023</span>import org.apache.felix.scr.annotations.Component;<a name="line.23"></a>
+<span class="sourceLineNo">024</span>import org.apache.felix.scr.annotations.ConfigurationPolicy;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import org.apache.felix.scr.annotations.Deactivate;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import org.apache.felix.scr.annotations.Reference;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import org.apache.felix.scr.annotations.ReferenceCardinality;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import org.apache.felix.scr.annotations.ReferencePolicy;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import org.forgerock.json.fluent.JsonValue;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import org.forgerock.openidm.servletregistration.RegisteredFilter;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import org.forgerock.openidm.servletregistration.ServletRegistration;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SYSTEM_PROPERTIES;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import org.osgi.service.component.ComponentContext;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import org.slf4j.Logger;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import org.slf4j.LoggerFactory;<a name="line.36"></a>
+<span class="sourceLineNo">037</span><a name="line.37"></a>
+<span class="sourceLineNo">038</span>/**<a name="line.38"></a>
+<span class="sourceLineNo">039</span> * Takes configuration to register and de-register configured servlet filters,<a name="line.39"></a>
+<span class="sourceLineNo">040</span> * with support to load the filter or supporting classes off a defined class path.<a name="line.40"></a>
+<span class="sourceLineNo">041</span> *<a name="line.41"></a>
+<span class="sourceLineNo">042</span> * @author aegloff<a name="line.42"></a>
+<span class="sourceLineNo">043</span> * @author ckienle<a name="line.43"></a>
+<span class="sourceLineNo">044</span> */<a name="line.44"></a>
+<span class="sourceLineNo">045</span>@Component(<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        name = "org.forgerock.openidm.servletfilter",<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        immediate = true,<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        policy = ConfigurationPolicy.REQUIRE,<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        configurationFactory=true<a name="line.49"></a>
+<span class="sourceLineNo">050</span>)<a name="line.50"></a>
+<span class="sourceLineNo">051</span>public class ServletFilterConfiguration {<a name="line.51"></a>
+<span class="sourceLineNo">052</span>    private final static Logger logger = LoggerFactory.getLogger(ServletFilterConfiguration.class);<a name="line.52"></a>
+<span class="sourceLineNo">053</span><a name="line.53"></a>
+<span class="sourceLineNo">054</span>    // Handle to registered servlet filter<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    private RegisteredFilter registeredFilter;<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>    // Original setting of system properties<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    Map&lt;String, String&gt; origSystemProperties = new HashMap&lt;String, String&gt;();<a name="line.58"></a>
+<span class="sourceLineNo">059</span><a name="line.59"></a>
+<span class="sourceLineNo">060</span>    @Reference(<a name="line.60"></a>
+<span class="sourceLineNo">061</span>            name = "ref_ServletFilterRegistration",<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            referenceInterface = ServletRegistration.class,<a name="line.62"></a>
+<span class="sourceLineNo">063</span>            policy = ReferencePolicy.DYNAMIC,<a name="line.63"></a>
+<span class="sourceLineNo">064</span>            cardinality = ReferenceCardinality.MANDATORY_UNARY,<a name="line.64"></a>
+<span class="sourceLineNo">065</span>            bind = "bindServletFilterRegistration",<a name="line.65"></a>
+<span class="sourceLineNo">066</span>            unbind = "unbindServletFilterRegistration"<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    )<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    private ServletRegistration servletFilterRegistration;<a name="line.68"></a>
+<span class="sourceLineNo">069</span>    private void bindServletFilterRegistration(ServletRegistration servletFilterRegistration) {<a name="line.69"></a>
+<span class="sourceLineNo">070</span>        this.servletFilterRegistration = servletFilterRegistration;<a name="line.70"></a>
+<span class="sourceLineNo">071</span>    }<a name="line.71"></a>
+<span class="sourceLineNo">072</span>    private void unbindServletFilterRegistration(ServletRegistration servletFilterRegistration) {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        this.servletFilterRegistration = null;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>    }<a name="line.74"></a>
+<span class="sourceLineNo">075</span><a name="line.75"></a>
+<span class="sourceLineNo">076</span>    /**<a name="line.76"></a>
+<span class="sourceLineNo">077</span>     * Parses the servlet filter configuration and registers a servlet filter in OSGi.<a name="line.77"></a>
+<span class="sourceLineNo">078</span>     *<a name="line.78"></a>
+<span class="sourceLineNo">079</span>     * @param context The ComponentContext.<a name="line.79"></a>
+<span class="sourceLineNo">080</span>     * @throws Exception If a problem occurs whilst registering the filter.<a name="line.80"></a>
+<span class="sourceLineNo">081</span>     */<a name="line.81"></a>
+<span class="sourceLineNo">082</span>    @Activate<a name="line.82"></a>
+<span class="sourceLineNo">083</span>    protected synchronized void activate(ComponentContext context) throws Exception {<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        logger.info("Activating servlet registrator with configuration {}", context.getProperties());<a name="line.84"></a>
+<span class="sourceLineNo">085</span>        JsonValue config = new JSONEnhancedConfig().getConfigurationAsJson(context);<a name="line.85"></a>
+<span class="sourceLineNo">086</span><a name="line.86"></a>
+<span class="sourceLineNo">087</span>        logger.debug("Parsed servlet filter config: {}", config);<a name="line.87"></a>
+<span class="sourceLineNo">088</span><a name="line.88"></a>
+<span class="sourceLineNo">089</span>        registeredFilter = servletFilterRegistration.registerFilter(config);<a name="line.89"></a>
+<span class="sourceLineNo">090</span>        logger.info("Successfully registered servlet filter {}", context.getProperties());<a name="line.90"></a>
+<span class="sourceLineNo">091</span><a name="line.91"></a>
+<span class="sourceLineNo">092</span>        origSystemProperties = new HashMap&lt;String, String&gt;();<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        JsonValue rawSystemProperties = config.get(SERVLET_FILTER_SYSTEM_PROPERTIES);<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        for (String key : rawSystemProperties.keys()) {<a name="line.94"></a>
+<span class="sourceLineNo">095</span>            String prev = System.setProperty(key, rawSystemProperties.get(key).asString());<a name="line.95"></a>
+<span class="sourceLineNo">096</span>            // null value is used to keep track of properties that weren't set before<a name="line.96"></a>
+<span class="sourceLineNo">097</span>            origSystemProperties.put(key, prev);<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        }<a name="line.98"></a>
+<span class="sourceLineNo">099</span>    }<a name="line.99"></a>
+<span class="sourceLineNo">100</span><a name="line.100"></a>
+<span class="sourceLineNo">101</span>    /**<a name="line.101"></a>
+<span class="sourceLineNo">102</span>     * De-registers the corresponding servlet filter.<a name="line.102"></a>
+<span class="sourceLineNo">103</span>     *<a name="line.103"></a>
+<span class="sourceLineNo">104</span>     * @param context The ComponentContext.<a name="line.104"></a>
+<span class="sourceLineNo">105</span>     */<a name="line.105"></a>
+<span class="sourceLineNo">106</span>    @Deactivate<a name="line.106"></a>
+<span class="sourceLineNo">107</span>    protected synchronized void deactivate(ComponentContext context) {<a name="line.107"></a>
+<span class="sourceLineNo">108</span>        if (registeredFilter != null) {<a name="line.108"></a>
+<span class="sourceLineNo">109</span>            try {<a name="line.109"></a>
+<span class="sourceLineNo">110</span>                servletFilterRegistration.unregisterFilter(registeredFilter);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>                logger.info("Unregistered servlet filter {}.", context.getProperties());<a name="line.111"></a>
+<span class="sourceLineNo">112</span>            } catch (Exception ex) {<a name="line.112"></a>
+<span class="sourceLineNo">113</span>                logger.warn("Failure reported during unregistering of servlet filter {}: {}",<a name="line.113"></a>
+<span class="sourceLineNo">114</span>                        new Object[]{context.getProperties(), ex.getMessage(), ex});<a name="line.114"></a>
+<span class="sourceLineNo">115</span>            }<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        }<a name="line.116"></a>
+<span class="sourceLineNo">117</span><a name="line.117"></a>
+<span class="sourceLineNo">118</span>        // Restore the system properties before this config was applied<a name="line.118"></a>
+<span class="sourceLineNo">119</span>        for (String key : origSystemProperties.keySet()) {<a name="line.119"></a>
+<span class="sourceLineNo">120</span>            String val = origSystemProperties.get(key);<a name="line.120"></a>
+<span class="sourceLineNo">121</span>            if (val == null) {<a name="line.121"></a>
+<span class="sourceLineNo">122</span>                System.clearProperty(key);<a name="line.122"></a>
+<span class="sourceLineNo">123</span>            } else {<a name="line.123"></a>
+<span class="sourceLineNo">124</span>                System.setProperty(key, val);<a name="line.124"></a>
+<span class="sourceLineNo">125</span>            }<a name="line.125"></a>
+<span class="sourceLineNo">126</span>        }<a name="line.126"></a>
+<span class="sourceLineNo">127</span>        logger.debug("Deactivated {}", context);<a name="line.127"></a>
+<span class="sourceLineNo">128</span>    }<a name="line.128"></a>
+<span class="sourceLineNo">129</span>}<a name="line.129"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

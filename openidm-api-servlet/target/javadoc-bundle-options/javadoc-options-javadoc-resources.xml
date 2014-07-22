@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<javadocOptions>
+  <docletArtifacts>
+    <docletArtifact />
+  </docletArtifacts>
+  <tagletArtifacts>
+    <tagletArtifact />
+  </tagletArtifacts>
+  <links>
+    <link>http://docs.oracle.com/javase/6/docs/api</link>
+    <link>http://java.sun.com/products/servlet/2.5/docs/servlet-2_5-mr2/</link>
+  </links>
+  <excludePackageNames>
+    <excludePackageName>com.*</excludePackageName>
+  </excludePackageNames>
+  <javadocResourcesDirectory>src/main/javadoc</javadocResourcesDirectory>
+</javadocOptions>

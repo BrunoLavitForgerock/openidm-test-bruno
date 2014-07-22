@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component enabled="true" immediate="true" name="org.forgerock.openidm.repo.orientdb" configuration-policy="require" activate="activate" deactivate="deactivate" modified="modified">
+        <implementation class="org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.openidm.repo.RepositoryService"/>
+            <provide interface="org.forgerock.json.resource.RequestHandler"/>
+        </service>
+        <property name="service.description" value="Repository Service using OrientDB"/>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="openidm.router.prefix" value="/repo/*"/>
+        <property name="service.pid" value="org.forgerock.openidm.repo.orientdb"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+    </scr:component>
+</components>

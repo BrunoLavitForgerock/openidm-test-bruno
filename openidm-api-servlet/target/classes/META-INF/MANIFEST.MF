@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-Description: OpenIDM is an open standards based Identity Manageme
+ nt, Provisioning and Compliance solution.        Experience shows that 
+ the most important features of an identity management product are: high
+  flexibility in        Business Process handling and compliance with op
+ en standards and interfaces. A highly flexible user interface        co
+ mbined with a very robust workflow engine make OpenIDM ready for any Id
+ entity Management project.
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM API servlet
+Bundle-SymbolicName: org.forgerock.openidm.api-servlet
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.config.enhanced;version="[3.0,3.1)
+ ",org.forgerock.openidm.core.filter;version="[3.0,3.1)",org.forgerock.o
+ penidm.servletregistration;version="[3.0,3.1)",org.forgerock.json.fluen
+ t;version="[2.3,2.4)",org.forgerock.json.resource;version="[2.3,2.4)",o
+ rg.forgerock.json.resource.servlet;version="[2.3,2.4)",javax.script,jav
+ ax.servlet;version="[3.0,4)",javax.servlet.http;version="[3.0,4)",org.a
+ pache.commons.lang3;version="[3.1,4)",org.apache.commons.lang3.tuple;ve
+ rsion="[3.1,4)",org.forgerock.script;version="[1.3,2)",org.forgerock.sc
+ ript.engine;version="[1.3,2)",org.forgerock.script.exception;version="[
+ 1.3,2)",org.osgi.service.component;version="[1.1,2)",org.osgi.service.e
+ vent;version="[1.2,2)",org.osgi.service.http;version="[1.2,2)",org.slf4
+ j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.servlet.internal.Servl
+ etComponent.xml,OSGI-INF/org.forgerock.openidm.servlet.internal.Servlet
+ ConnectionFactory.xml

@@ -1,0 +1,227 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.<a name="line.2"></a>
+<span class="sourceLineNo">003</span> *<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * The contents of this file are subject to the terms<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * of the Common Development and Distribution License<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * (the License). You may not use this file except in<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * compliance with the License.<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * You can obtain a copy of the License at<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * http://forgerock.org/license/CDDLv1.0.html<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * See the License for the specific language governing<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * permission and limitations under the License.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> *<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * When distributing Covered Code, include this CDDL<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * Header Notice in each file and include the License file<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * at http://forgerock.org/license/CDDLv1.0.html<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * If applicable, add the following below the CDDL Header,<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * with the fields enclosed by brackets [] replaced by<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * your own identifying information:<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * "Portions Copyrighted [year] [name of copyright owner]"<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span><a name="line.24"></a>
+<span class="sourceLineNo">025</span>package org.forgerock.openidm.crypto;<a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.List;<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>import org.forgerock.json.crypto.JsonCryptoException;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import org.forgerock.json.crypto.JsonEncryptor;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import org.forgerock.json.fluent.JsonException;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import org.forgerock.json.fluent.JsonTransformer;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import org.forgerock.json.fluent.JsonValue;<a name="line.33"></a>
+<span class="sourceLineNo">034</span><a name="line.34"></a>
+<span class="sourceLineNo">035</span>/**<a name="line.35"></a>
+<span class="sourceLineNo">036</span> * Provides encryption and decryption services to OpenIDM components.<a name="line.36"></a>
+<span class="sourceLineNo">037</span> *<a name="line.37"></a>
+<span class="sourceLineNo">038</span> * @author Paul C. Bryan<a name="line.38"></a>
+<span class="sourceLineNo">039</span> * @author aegloff<a name="line.39"></a>
+<span class="sourceLineNo">040</span> */<a name="line.40"></a>
+<span class="sourceLineNo">041</span>public interface CryptoService {<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>    /**<a name="line.43"></a>
+<span class="sourceLineNo">044</span>     * TODO: Description.<a name="line.44"></a>
+<span class="sourceLineNo">045</span>     *<a name="line.45"></a>
+<span class="sourceLineNo">046</span>     * @param cipher<a name="line.46"></a>
+<span class="sourceLineNo">047</span>     *            the cipher with which to encrypt the value.<a name="line.47"></a>
+<span class="sourceLineNo">048</span>     * @param alias<a name="line.48"></a>
+<span class="sourceLineNo">049</span>     *            the key alias in the key store with which to encrypt the<a name="line.49"></a>
+<span class="sourceLineNo">050</span>     *            value.<a name="line.50"></a>
+<span class="sourceLineNo">051</span>     * @return TODO.<a name="line.51"></a>
+<span class="sourceLineNo">052</span>     * @throws JsonCryptoException<a name="line.52"></a>
+<span class="sourceLineNo">053</span>     *             TODO.<a name="line.53"></a>
+<span class="sourceLineNo">054</span>     */<a name="line.54"></a>
+<span class="sourceLineNo">055</span>    JsonEncryptor getEncryptor(String cipher, String alias) throws JsonCryptoException;<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>    /**<a name="line.57"></a>
+<span class="sourceLineNo">058</span>     * Returns a list of decryption transformers that can decrypt JSON values.<a name="line.58"></a>
+<span class="sourceLineNo">059</span>     *<a name="line.59"></a>
+<span class="sourceLineNo">060</span>     * @return a list of transformers that can decrypt JSON values.<a name="line.60"></a>
+<span class="sourceLineNo">061</span>     */<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    List&lt;JsonTransformer&gt; getDecryptionTransformers();<a name="line.62"></a>
+<span class="sourceLineNo">063</span><a name="line.63"></a>
+<span class="sourceLineNo">064</span>    /**<a name="line.64"></a>
+<span class="sourceLineNo">065</span>     * Encrypts a JSON value.<a name="line.65"></a>
+<span class="sourceLineNo">066</span>     *<a name="line.66"></a>
+<span class="sourceLineNo">067</span>     * @param value<a name="line.67"></a>
+<span class="sourceLineNo">068</span>     *            the JSON value to be encrypted.<a name="line.68"></a>
+<span class="sourceLineNo">069</span>     * @param cipher<a name="line.69"></a>
+<span class="sourceLineNo">070</span>     *            the cipher with which to encrypt the value.<a name="line.70"></a>
+<span class="sourceLineNo">071</span>     * @param alias<a name="line.71"></a>
+<span class="sourceLineNo">072</span>     *            the key alias in the key store with which to encrypt the<a name="line.72"></a>
+<span class="sourceLineNo">073</span>     *            value.<a name="line.73"></a>
+<span class="sourceLineNo">074</span>     * @return a copy of the value, encrypted with the specified cipher and key.<a name="line.74"></a>
+<span class="sourceLineNo">075</span>     * @throws JsonCryptoException<a name="line.75"></a>
+<span class="sourceLineNo">076</span>     *             if and invalid cipher and/or alias is provided.<a name="line.76"></a>
+<span class="sourceLineNo">077</span>     * @throws JsonException<a name="line.77"></a>
+<span class="sourceLineNo">078</span>     *             if an exception occurred encrypting the value.<a name="line.78"></a>
+<span class="sourceLineNo">079</span>     */<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    JsonValue encrypt(JsonValue value, String cipher, String alias) throws JsonCryptoException,<a name="line.80"></a>
+<span class="sourceLineNo">081</span>            JsonException;<a name="line.81"></a>
+<span class="sourceLineNo">082</span><a name="line.82"></a>
+<span class="sourceLineNo">083</span>    /**<a name="line.83"></a>
+<span class="sourceLineNo">084</span>     * Decrypts a JSON value and all of its children.<a name="line.84"></a>
+<span class="sourceLineNo">085</span>     *<a name="line.85"></a>
+<span class="sourceLineNo">086</span>     * @param value<a name="line.86"></a>
+<span class="sourceLineNo">087</span>     *            the JSON value to be decrypted.<a name="line.87"></a>
+<span class="sourceLineNo">088</span>     * @return a deep copy of the value, with all values decrypted.<a name="line.88"></a>
+<span class="sourceLineNo">089</span>     * @throws JsonException<a name="line.89"></a>
+<span class="sourceLineNo">090</span>     *             if an exception occurred decrypting the value.<a name="line.90"></a>
+<span class="sourceLineNo">091</span>     */<a name="line.91"></a>
+<span class="sourceLineNo">092</span>    JsonValue decrypt(JsonValue value);<a name="line.92"></a>
+<span class="sourceLineNo">093</span><a name="line.93"></a>
+<span class="sourceLineNo">094</span>    /**<a name="line.94"></a>
+<span class="sourceLineNo">095</span>     * Decrypts a String if in a format supported by this service.<a name="line.95"></a>
+<span class="sourceLineNo">096</span>     *<a name="line.96"></a>
+<span class="sourceLineNo">097</span>     * @param value<a name="line.97"></a>
+<span class="sourceLineNo">098</span>     *            the Stringified value to be decrypted.<a name="line.98"></a>
+<span class="sourceLineNo">099</span>     * @return The decrypted structure value, with all values decrypted.<a name="line.99"></a>
+<span class="sourceLineNo">100</span>     * @throws JsonException<a name="line.100"></a>
+<span class="sourceLineNo">101</span>     *             if an exception occurred decrypting the value.<a name="line.101"></a>
+<span class="sourceLineNo">102</span>     */<a name="line.102"></a>
+<span class="sourceLineNo">103</span>    JsonValue decrypt(String value);<a name="line.103"></a>
+<span class="sourceLineNo">104</span><a name="line.104"></a>
+<span class="sourceLineNo">105</span>    /**<a name="line.105"></a>
+<span class="sourceLineNo">106</span>     * Decrypts a JSON value and all of its children if necessary. If not,<a name="line.106"></a>
+<span class="sourceLineNo">107</span>     * returns the original object.<a name="line.107"></a>
+<span class="sourceLineNo">108</span>     *<a name="line.108"></a>
+<span class="sourceLineNo">109</span>     * &lt;p&gt;<a name="line.109"></a>
+<span class="sourceLineNo">110</span>     * Note that if the argument is null, this return a JsonValue wrapping null.<a name="line.110"></a>
+<span class="sourceLineNo">111</span>     *<a name="line.111"></a>
+<span class="sourceLineNo">112</span>     * @param value<a name="line.112"></a>
+<span class="sourceLineNo">113</span>     *            the JSON value to be decrypted.<a name="line.113"></a>
+<span class="sourceLineNo">114</span>     * @return The structure value, decrypted if necessary.<a name="line.114"></a>
+<span class="sourceLineNo">115</span>     * @throws JsonException<a name="line.115"></a>
+<span class="sourceLineNo">116</span>     *             if an exception occurred decrypting the value.<a name="line.116"></a>
+<span class="sourceLineNo">117</span>     */<a name="line.117"></a>
+<span class="sourceLineNo">118</span>    JsonValue decryptIfNecessary(JsonValue value);<a name="line.118"></a>
+<span class="sourceLineNo">119</span><a name="line.119"></a>
+<span class="sourceLineNo">120</span>    /**<a name="line.120"></a>
+<span class="sourceLineNo">121</span>     * Decrypts a String if in a format supported by this service and is<a name="line.121"></a>
+<span class="sourceLineNo">122</span>     * decryption is necessary. If decryption is unnecessary, it returns the<a name="line.122"></a>
+<span class="sourceLineNo">123</span>     * structure value.<a name="line.123"></a>
+<span class="sourceLineNo">124</span>     *<a name="line.124"></a>
+<span class="sourceLineNo">125</span>     * &lt;p&gt;<a name="line.125"></a>
+<span class="sourceLineNo">126</span>     * Note that if the argument is null, this will return a JsonValue wrapping<a name="line.126"></a>
+<span class="sourceLineNo">127</span>     * null.<a name="line.127"></a>
+<span class="sourceLineNo">128</span>     *<a name="line.128"></a>
+<span class="sourceLineNo">129</span>     * @param value<a name="line.129"></a>
+<span class="sourceLineNo">130</span>     *            the Stringified value to be decrypted.<a name="line.130"></a>
+<span class="sourceLineNo">131</span>     * @return The structure value, decrypted if necessary.<a name="line.131"></a>
+<span class="sourceLineNo">132</span>     * @throws JsonException<a name="line.132"></a>
+<span class="sourceLineNo">133</span>     *             if an exception occurred decrypting the value.<a name="line.133"></a>
+<span class="sourceLineNo">134</span>     */<a name="line.134"></a>
+<span class="sourceLineNo">135</span>    JsonValue decryptIfNecessary(String value);<a name="line.135"></a>
+<span class="sourceLineNo">136</span><a name="line.136"></a>
+<span class="sourceLineNo">137</span>    /**<a name="line.137"></a>
+<span class="sourceLineNo">138</span>     * Detects if a JSON value is encrypted in a format supported by this<a name="line.138"></a>
+<span class="sourceLineNo">139</span>     * service.<a name="line.139"></a>
+<span class="sourceLineNo">140</span>     *<a name="line.140"></a>
+<span class="sourceLineNo">141</span>     * @param value<a name="line.141"></a>
+<span class="sourceLineNo">142</span>     *            the JSON value to check.<a name="line.142"></a>
+<span class="sourceLineNo">143</span>     * @return true if encrypted, false otherwise.<a name="line.143"></a>
+<span class="sourceLineNo">144</span>     */<a name="line.144"></a>
+<span class="sourceLineNo">145</span>    boolean isEncrypted(JsonValue value);<a name="line.145"></a>
+<span class="sourceLineNo">146</span><a name="line.146"></a>
+<span class="sourceLineNo">147</span>    /**<a name="line.147"></a>
+<span class="sourceLineNo">148</span>     * Detects if a String is encrypted in a format supported by this service.<a name="line.148"></a>
+<span class="sourceLineNo">149</span>     *<a name="line.149"></a>
+<span class="sourceLineNo">150</span>     * @param value<a name="line.150"></a>
+<span class="sourceLineNo">151</span>     *            the JSON value to check.<a name="line.151"></a>
+<span class="sourceLineNo">152</span>     * @return true if encrypted, false otherwise.<a name="line.152"></a>
+<span class="sourceLineNo">153</span>     */<a name="line.153"></a>
+<span class="sourceLineNo">154</span>    boolean isEncrypted(String value);<a name="line.154"></a>
+<span class="sourceLineNo">155</span>}<a name="line.155"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

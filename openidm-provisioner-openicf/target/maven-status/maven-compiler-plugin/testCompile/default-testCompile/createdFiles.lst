@@ -1,0 +1,14 @@
+org/forgerock/openidm/provisioner/openicf/connector/TestConnector.class
+org/forgerock/openidm/provisioner/openicf/impl/OpenICFProvisionerServiceTest$3.class
+org/forgerock/openidm/provisioner/openicf/internal/SystemActionTest.class
+org/forgerock/openidm/provisioner/openicf/impl/OpenICFProvisionerServiceTest.class
+org/forgerock/openidm/provisioner/openicf/impl/OpenICFProvisionerServiceTest$SyncStub.class
+org/forgerock/openidm/provisioner/openicf/impl/OpenICFProvisionerServiceTest$5.class
+org/forgerock/openidm/provisioner/openicf/connector/TestConfiguration.class
+org/forgerock/openidm/provisioner/openicf/impl/OpenICFProvisionerServiceTest$4.class
+org/forgerock/openidm/provisioner/openicf/impl/OpenICFProvisionerServiceTest$2.class
+org/forgerock/openidm/provisioner/openicf/syncfailure/SyncFailureHandlerFactoryImplTest.class
+org/forgerock/openidm/provisioner/openicf/impl/ConnectorInfoProviderServiceTest.class
+org/forgerock/openidm/provisioner/openicf/commons/ConnectorUtilTest.class
+org/forgerock/openidm/provisioner/openicf/impl/OpenICFProvisionerServiceTest$6.class
+org/forgerock/openidm/provisioner/openicf/impl/OpenICFProvisionerServiceTest$1.class

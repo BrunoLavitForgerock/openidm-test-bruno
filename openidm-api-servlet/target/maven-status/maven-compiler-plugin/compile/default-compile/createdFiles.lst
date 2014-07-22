@@ -1,0 +1,4 @@
+org/forgerock/openidm/servlet/internal/ServletConnectionFactory.class
+org/forgerock/openidm/servlet/internal/ServletComponent.class
+org/forgerock/openidm/servlet/internal/IDMSecurityContextFactory.class
+org/forgerock/openidm/servlet/internal/ServletConnectionFactory$1.class

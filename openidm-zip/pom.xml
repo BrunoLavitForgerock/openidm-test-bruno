@@ -21,13 +21,12 @@
   ~ with the fields enclosed by brackets [] replaced by
   ~ your own identifying information:
   ~ "Portions Copyrighted [year] [name of copyright owner]"
-  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>3.0.0-RC31-SNAPSHOT</version>
+        <version>3.0.0</version>
     </parent>
     <artifactId>openidm-zip</artifactId>
     <name>OpenIDM ZIP file assembly</name>
@@ -54,123 +53,123 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-audit</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-config</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-shell</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-external-rest</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-external-email</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-jetty-fragment</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-policy</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner-openicf</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-orientdb</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-jdbc</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-script</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-api-servlet</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-servlet</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
          <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-authnfilter</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
          <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-servlet-registrator</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-scheduler</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-infoservice</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-customendpoint</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-security-jetty</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-security</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-ui-enduser</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-workflow-activiti</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <!--dependency>
             <groupId>org.forgerock.openidm</groupId>
@@ -187,7 +186,7 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-cluster</artifactId>
-            <version>${project.version}</version>
+            <version>3.0.0</version>
         </dependency>
         <!-- Core OSGi -->
         <dependency>

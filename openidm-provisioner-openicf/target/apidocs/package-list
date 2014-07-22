@@ -1,0 +1,5 @@
+org.forgerock.openidm.provisioner.openicf
+org.forgerock.openidm.provisioner.openicf.commons
+org.forgerock.openidm.provisioner.openicf.impl
+org.forgerock.openidm.provisioner.openicf.internal
+org.forgerock.openidm.provisioner.openicf.syncfailure

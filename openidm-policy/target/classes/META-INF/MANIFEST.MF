@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-Description: This bundle gives you headache
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Policy Bundle
+Bundle-SymbolicName: org.forgerock.openidm.policy
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.policy.metadata;uses:="org.forgero
+ ck.json.fluent,org.forgerock.openidm.metadata";version="3.0.0",org.forg
+ erock.openidm.policy;uses:="javax.script,org.forgerock.json.fluent,org.
+ forgerock.json.resource,org.forgerock.openidm.script,org.osgi.framework
+ ,org.osgi.service.component";version="3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.config.enhanced;version="[3.0,3.1)
+ ",org.forgerock.openidm.core;version="[3.0,3.1)",org.forgerock.openidm.
+ metadata;version="[3.0,3.1)",org.forgerock.openidm.script;version="[3.0
+ ,3.1)",org.forgerock.openidm.util;version="[3.0,3.1)",org.forgerock.jso
+ n.fluent;version="[2.3,2.4)";resolution:=optional,org.forgerock.json.re
+ source;version="[2.3,2.4)";resolution:=optional,javax.script,org.forger
+ ock.script;version="[1.3,2)",org.osgi.framework;version="[1.6,2)",org.o
+ sgi.service.component;version="[1.1,2)",org.slf4j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.policy.PolicyService.x
+ ml

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.health" configuration-policy="ignore" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.info.impl.HealthService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.openidm.info.HealthInfo"/>
+            <provide interface="org.forgerock.openidm.cluster.ClusterEventListener"/>
+            <provide interface="org.forgerock.openidm.osgi.ServiceTrackerListener"/>
+        </service>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="service.description" value="OpenIDM Health Service"/>
+        <property name="service.pid" value="org.forgerock.openidm.health"/>
+    </scr:component>
+</components>

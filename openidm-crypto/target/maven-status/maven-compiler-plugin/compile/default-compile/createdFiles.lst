@@ -1,0 +1,7 @@
+org/forgerock/openidm/crypto/util/JettyPropertyUtil.class
+org/forgerock/openidm/crypto/impl/CryptoServiceImpl.class
+org/forgerock/openidm/crypto/impl/UpdatableKeyStoreSelector.class
+org/forgerock/openidm/crypto/factory/CryptoUpdateService.class
+org/forgerock/openidm/crypto/impl/Activator.class
+org/forgerock/openidm/crypto/factory/CryptoServiceFactory.class
+org/forgerock/openidm/crypto/impl/Main.class

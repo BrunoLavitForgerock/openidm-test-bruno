@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-Description: This fragment attaches to PAX Jetty and allow access
+  to OpenIDM boot properties
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Jetty Fragment
+Bundle-SymbolicName: org.forgerock.openidm.jetty-fragment
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+DynamicImport-Package: org.forgerock.openidm.jaas
+Export-Package: org.forgerock.openidm.jetty;version="3.0.0"
+Fragment-Host: org.ops4j.pax.web.pax-web-jetty-bundle
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.crypto.util;version="[3.0,3.1)",or
+ g.eclipse.jetty.server;version="[8.1,9)",org.eclipse.jetty.server.ssl;v
+ ersion="[8.1,9)",org.osgi.framework;version="[1.7,2)",org.osgi.service.
+ cm;version="[1.3,2)",org.slf4j;version="[1.7,2)"
+SCM-Revision: 0

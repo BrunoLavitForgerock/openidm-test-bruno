@@ -1,0 +1,59 @@
+Manifest-Version: 1.0
+Bundle-Description: This bundle integrates OpenICF under /system
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Provisioner System Bundle - OpenICF
+Bundle-SymbolicName: org.forgerock.openidm.provisioner-openicf
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.provisioner.openicf.commons;uses:=
+ "org.forgerock.json.crypto,org.forgerock.json.fluent,org.forgerock.json
+ .resource,org.forgerock.json.schema.validator.exceptions,org.forgerock.
+ openidm.crypto,org.forgerock.openidm.provisioner.openicf,org.identityco
+ nnectors.common.pooling,org.identityconnectors.framework.api,org.identi
+ tyconnectors.framework.api.operations,org.identityconnectors.framework.
+ common.objects";version="3.0.0",org.forgerock.openidm.provisioner.openi
+ cf;uses:="org.forgerock.i18n,org.forgerock.json.fluent,org.forgerock.js
+ on.resource,org.identityconnectors.framework.api,org.identityconnectors
+ .framework.api.operations,org.identityconnectors.framework.common.objec
+ ts";version="3.0.0",org.forgerock.openidm.provisioner.openicf.syncfailu
+ re;uses:="javax.script,org.forgerock.json.fluent,org.forgerock.json.res
+ ource,org.forgerock.openidm.util,org.forgerock.script";version="3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.audit.util;version="[3.0,3.1)",org
+ .forgerock.openidm.config.enhanced;version="[3.0,3.1)",org.forgerock.op
+ enidm.core;version="[3.0,3.1)",org.forgerock.openidm.crypto;version="[3
+ .0,3.1)",org.forgerock.openidm.metadata;version="[3.0,3.1)",org.forgero
+ ck.openidm.provisioner;version="[3.0,3.1)",org.forgerock.openidm.provis
+ ioner.openicf.commons,org.forgerock.openidm.provisioner.openicf.syncfai
+ lure,org.forgerock.openidm.router;version="[3.0,3.1)",org.forgerock.ope
+ nidm.smartevent;version="[3.0,3.1)",org.forgerock.openidm.util;version=
+ "[3.0,3.1)",org.forgerock.json.crypto;version="[2.3,2.4)",org.forgerock
+ .json.fluent;version="[2.3,2.4)",org.forgerock.json.resource;version="[
+ 2.3,2.4)",org.forgerock.json.resource.servlet;version="[2.3,2.4)",org.f
+ orgerock.json.schema.validator;version="[2.3,2.4)",org.forgerock.json.s
+ chema.validator.exceptions;version="[2.3,2.4)",javax.script,org.apache.
+ commons.lang3;version="[3.1,4)",org.forgerock.i18n;version="[1.4,2)",or
+ g.forgerock.script;version="[1.3,2)",org.forgerock.util;version="[1.3,2
+ )",org.identityconnectors.common;version="[1.4,2)",org.identityconnecto
+ rs.common.event;version="[1.4,2)",org.identityconnectors.common.pooling
+ ;version="[1.4,2)",org.identityconnectors.common.script;version="[1.4,2
+ )",org.identityconnectors.common.security;version="[1.4,2)",org.identit
+ yconnectors.framework.api;version="[1.4,2)",org.identityconnectors.fram
+ ework.api.operations;version="[1.4,2)",org.identityconnectors.framework
+ .common;version="[1.4,2)",org.identityconnectors.framework.common.excep
+ tions;version="[1.4,2)",org.identityconnectors.framework.common.objects
+ ;version="[1.4,2)",org.identityconnectors.framework.common.objects.filt
+ er;version="[1.4,2)",org.identityconnectors.framework.common.serializer
+ ;version="[1.4,2)",org.identityconnectors.framework.impl.api;version="[
+ 1.4,2)",org.identityconnectors.framework.impl.api.remote;version="[1.4,
+ 2)",org.osgi.service.component;version="[1.1,2)",org.slf4j;version="[1.
+ 7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.provisioner.openicf.sy
+ ncfailure.SyncFailureHandlerFactoryImpl.xml,OSGI-INF/org.forgerock.open
+ idm.provisioner.openicf.impl.OpenICFProvisionerService.xml,OSGI-INF/org
+ .forgerock.openidm.provisioner.openicf.impl.ConnectorInfoProviderServic
+ e.xml

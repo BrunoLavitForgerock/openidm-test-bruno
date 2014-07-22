@@ -1,0 +1,3 @@
+org.forgerock.openidm.repo.orientdb.impl
+org.forgerock.openidm.repo.orientdb.impl.query
+org.forgerock.openidm.repo.orientdb.metadata

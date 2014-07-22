@@ -1,0 +1,3 @@
+org/forgerock/openidm/external/email/metadata/ConfigMeta.class
+org/forgerock/openidm/external/email/impl/EmailClient.class
+org/forgerock/openidm/external/email/impl/EmailServiceImpl.class

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
+    <OCD id="org.forgerock.openidm.provisioner" name="%org.forgerock.openidm.provisioner.name" description="OpenIDM System Object Set Service">
+        <AD id="openidm.router.prefix" type="String" default="/system" name="%openidm.router.prefix.name" description="%openidm.router.prefix.description"/>
+    </OCD>
+    <Designate pid="org.forgerock.openidm.provisioner">
+        <Object ocdref="org.forgerock.openidm.provisioner"/>
+    </Designate>
+</metatype:MetaData>

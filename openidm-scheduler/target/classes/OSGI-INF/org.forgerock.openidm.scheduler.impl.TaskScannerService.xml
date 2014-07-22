@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.taskscanner" configuration-policy="ignore" activate="activate">
+        <implementation class="org.forgerock.openidm.scheduler.impl.TaskScannerService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.json.resource.RequestHandler"/>
+            <provide interface="org.forgerock.openidm.quartz.impl.ScheduledService"/>
+        </service>
+        <property name="service.description" value="OpenIDM TaskScanner Service"/>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="openidm.router.prefix" value="/taskscanner*"/>
+        <property name="service.pid" value="org.forgerock.openidm.taskscanner"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+        <reference name="scopeFactory" interface="org.forgerock.script.ScriptRegistry" cardinality="1..1" policy="dynamic" bind="bindScopeFactory" unbind="unbindScopeFactory"/>
+    </scr:component>
+</components>

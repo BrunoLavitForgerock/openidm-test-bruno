@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.config.enhanced" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.config.manage.ConfigObjectService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.json.resource.RequestHandler"/>
+        </service>
+        <property name="service.description" value="OpenIDM Configuration Service"/>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="openidm.router.prefix" value="/config*"/>
+        <property name="service.pid" value="org.forgerock.openidm.config.enhanced"/>
+        <reference name="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" cardinality="1..1" policy="static" bind="bindConfigAdmin" unbind="unbindConfigAdmin"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+    </scr:component>
+</components>

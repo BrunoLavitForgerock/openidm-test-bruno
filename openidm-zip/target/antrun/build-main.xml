@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <unzip dest="/Users/Shared/Jenkins/Home/jobs/OpenIDM trunk (build release in local Artifactory repo)/workspace/openidm-zip/target/orientdb-community-1.6.6">
+    <fileset dir="/Users/Shared/Jenkins/Home/jobs/OpenIDM trunk (build release in local Artifactory repo)/workspace/openidm-zip/target/orientdb-community-1.6.6\plugins">
+      <include name="studio-**.zip"/>
+    </fileset>
+  </unzip>
+</target>
+</project>

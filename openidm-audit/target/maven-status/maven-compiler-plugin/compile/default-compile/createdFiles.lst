@@ -1,0 +1,11 @@
+org/forgerock/openidm/audit/impl/CSVAuditLogger.class
+org/forgerock/openidm/audit/impl/AuditLogger.class
+org/forgerock/openidm/audit/impl/AbstractAuditLogger.class
+org/forgerock/openidm/audit/impl/RepoAuditLogger.class
+org/forgerock/openidm/audit/impl/RouterAuditLogger.class
+org/forgerock/openidm/audit/impl/RepoAuditLogger$1.class
+org/forgerock/openidm/audit/impl/AuditServiceImpl.class
+org/forgerock/openidm/audit/impl/AuditContext.class
+org/forgerock/openidm/audit/impl/RouterAuditLogger$1.class
+org/forgerock/openidm/audit/AuditService.class
+org/forgerock/openidm/audit/impl/CSVAuditLogger$ParseJsonValue.class

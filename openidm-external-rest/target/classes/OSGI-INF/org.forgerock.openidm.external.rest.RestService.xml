@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component enabled="true" immediate="true" name="org.forgerock.openidm.external.rest" configuration-policy="ignore" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.external.rest.RestService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.json.resource.SingletonResourceProvider"/>
+        </service>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="service.description" value="ForgeRock AS"/>
+        <property name="openidm.router.prefix" value="/external/rest"/>
+        <property name="service.pid" value="org.forgerock.openidm.external.rest"/>
+    </scr:component>
+</components>

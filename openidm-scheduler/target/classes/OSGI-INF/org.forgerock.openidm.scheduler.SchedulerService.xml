@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.scheduler" configuration-policy="require" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.scheduler.SchedulerService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.openidm.scheduler.SchedulerService"/>
+            <provide interface="org.forgerock.json.resource.RequestHandler"/>
+        </service>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="service.description" value="Scheduler Service using Quartz"/>
+        <property name="openidm.router.prefix" value="/scheduler*"/>
+        <property name="service.pid" value="org.forgerock.openidm.scheduler"/>
+        <reference name="clusterManager" interface="org.forgerock.openidm.cluster.ClusterManagementService" cardinality="1..1" policy="static" bind="bindClusterManager" unbind="unbindClusterManager"/>
+        <reference name="ref_SchedulerService_PolicyService" interface="org.forgerock.openidm.router.RouteService" cardinality="1..1" policy="static" target="(openidm.router.prefix=/policy*)" bind="bindRef_SchedulerService_PolicyService" unbind="unbindRef_SchedulerService_PolicyService"/>
+        <reference name="ref_SchedulerService_RepositoryService" interface="org.forgerock.openidm.router.RouteService" cardinality="1..1" policy="static" target="(openidm.router.prefix=/repo*)" bind="bindRepo" unbind="unbindRepo"/>
+    </scr:component>
+</components>

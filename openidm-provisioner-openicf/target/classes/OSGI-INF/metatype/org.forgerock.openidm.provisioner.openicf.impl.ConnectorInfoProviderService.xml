@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?><metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
+    <OCD id="org.forgerock.openidm.provisioner.openicf.connectorinfoprovider" name="%org.forgerock.openidm.provisioner.openicf.connectorinfoprovider.name" description="OpenICF Connector Info Service"/>
+    <Designate pid="org.forgerock.openidm.provisioner.openicf.connectorinfoprovider">
+        <Object ocdref="org.forgerock.openidm.provisioner.openicf.connectorinfoprovider"/>
+    </Designate>
+</metatype:MetaData>

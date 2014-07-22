@@ -1,0 +1,8 @@
+org.forgerock.openidm.audit
+org.forgerock.openidm.audit.util
+org.forgerock.openidm.cluster
+org.forgerock.openidm.crypto
+org.forgerock.openidm.metadata
+org.forgerock.openidm.osgi
+org.forgerock.openidm.patch
+org.forgerock.openidm.util

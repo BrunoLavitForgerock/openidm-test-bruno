@@ -1,0 +1,57 @@
+Manifest-Version: 1.0
+Bundle-Description: OpenIDM is an open standards based Identity Manageme
+ nt, Provisioning and Compliance solution.        Experience shows that 
+ the most important features of an identity management product are: high
+  flexibility in        Business Process handling and compliance with op
+ en standards and interfaces. A highly flexible user interface        co
+ mbined with a very robust workflow engine make OpenIDM ready for any Id
+ entity Management project.
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Activiti BPMN 2.0 Integration
+Bundle-SymbolicName: org.forgerock.openidm.workflow-activiti
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.workflow.activiti;version="3.0.0",
+ org.forgerock.openidm.workflow.activiti.metadata;uses:="org.forgerock.j
+ son.fluent,org.forgerock.openidm.metadata";version="3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.config.enhanced;version="[3.0,3.1)
+ ",org.forgerock.openidm.core;version="[3.0,3.1)",org.forgerock.openidm.
+ crypto;version="[3.0,3.1)",org.forgerock.openidm.metadata;version="[3.0
+ ,3.1)",org.forgerock.openidm.router;version="[3.0,3.1)",org.forgerock.o
+ penidm.util;version="[3.0,3.1)",org.forgerock.json.fluent;version="[2.3
+ ,2.4)",org.forgerock.json.resource;version="[2.3,2.4)",javax.naming,jav
+ ax.script,javax.sql,javax.transaction;version="[1.1,2)",org.activiti.en
+ gine;version="[5.15,6)",org.activiti.engine.delegate;version="[5.15,6)"
+ ,org.activiti.engine.form;version="[5.15,6)",org.activiti.engine.histor
+ y;version="[5.15,6)",org.activiti.engine.identity;version="[5.15,6)",or
+ g.activiti.engine.impl;version="[5.15,6)",org.activiti.engine.impl.bpmn
+ .behavior;version="[5.15,6)",org.activiti.engine.impl.bpmn.data;version
+ ="[5.15,6)",org.activiti.engine.impl.cfg;version="[5.15,6)",org.activit
+ i.engine.impl.context;version="[5.15,6)",org.activiti.engine.impl.el;ve
+ rsion="[5.15,6)",org.activiti.engine.impl.form;version="[5.15,6)",org.a
+ ctiviti.engine.impl.identity;version="[5.15,6)",org.activiti.engine.imp
+ l.interceptor;version="[5.15,6)",org.activiti.engine.impl.javax.el;vers
+ ion="[5.15,6)",org.activiti.engine.impl.persistence.entity;version="[5.
+ 15,6)",org.activiti.engine.impl.pvm;version="[5.15,6)",org.activiti.eng
+ ine.impl.pvm.delegate;version="[5.15,6)",org.activiti.engine.impl.pvm.p
+ rocess;version="[5.15,6)",org.activiti.engine.impl.scripting;version="[
+ 5.15,6)",org.activiti.engine.impl.task;version="[5.15,6)",org.activiti.
+ engine.impl.variable;version="[5.15,6)",org.activiti.engine.repository;
+ version="[5.15,6)",org.activiti.engine.runtime;version="[5.15,6)",org.a
+ ctiviti.engine.task;version="[5.15,6)",org.activiti.osgi,org.activiti.o
+ sgi.blueprint,org.apache.ibatis.exceptions;version="[3.2,4)",org.codeha
+ us.jackson;version="[1.9,2)",org.codehaus.jackson.annotate;version="[1.
+ 9,2)",org.codehaus.jackson.map;version="[1.9,2)",org.codehaus.jackson.m
+ ap.annotate;version="[1.9,2)",org.forgerock.script;version="[1.3,2)",or
+ g.forgerock.script.groovy;version="[1.3,2)",org.forgerock.util;version=
+ "[1.3,2)",org.h2.jdbcx;version="[1.3,2)",org.joda.time;version="[2.1,3)
+ ",org.osgi.framework;version="[1.6,2)",org.osgi.service.cm;version="[1.
+ 3,2)",org.osgi.service.component;version="[1.1,2)",org.slf4j;version="[
+ 1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.workflow.activiti.impl
+ .ActivitiServiceImpl.xml

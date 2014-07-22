@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-Description: This bundle gives some information about OpenIDM via
+  /info
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Info Bundle
+Bundle-SymbolicName: org.forgerock.openidm.infoservice
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.info;uses:="org.forgerock.json.flu
+ ent";version="3.0.0",org.forgerock.openidm.info.metadata;uses:="org.for
+ gerock.json.fluent,org.forgerock.openidm.metadata";version="3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.cluster;version="[3.0,3.1)",org.fo
+ rgerock.openidm.config.enhanced;version="[3.0,3.1)",org.forgerock.openi
+ dm.core;version="[3.0,3.1)",org.forgerock.openidm.info,org.forgerock.op
+ enidm.metadata;version="[3.0,3.1)",org.forgerock.openidm.osgi;version="
+ [3.0,3.1)",org.forgerock.openidm.script;version="[3.0,3.1)",org.forgero
+ ck.json.fluent;version="[2.3,2.4)",org.forgerock.json.resource;version=
+ "[2.3,2.4)",javax.script,org.apache.commons.lang3;version="[3.1,4)",org
+ .forgerock.script;version="[1.3,2)",org.osgi.framework;version="[1.6,2)
+ ",org.osgi.service.component;version="[1.1,2)",org.osgi.util.tracker;ve
+ rsion="[1.5,2)",org.slf4j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.info.impl.HealthServic
+ e.xml,OSGI-INF/org.forgerock.openidm.info.impl.InfoService.xml

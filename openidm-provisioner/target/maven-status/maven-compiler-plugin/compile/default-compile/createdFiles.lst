@@ -1,0 +1,5 @@
+org/forgerock/openidm/provisioner/impl/SystemObjectSetService.class
+org/forgerock/openidm/provisioner/ConfigurationService.class
+org/forgerock/openidm/provisioner/ProvisionerService.class
+org/forgerock/openidm/provisioner/Id.class
+org/forgerock/openidm/provisioner/SystemIdentifier.class

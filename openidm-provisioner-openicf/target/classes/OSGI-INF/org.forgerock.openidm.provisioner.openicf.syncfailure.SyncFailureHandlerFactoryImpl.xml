@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.openicf.syncfailure" configuration-policy="ignore">
+        <implementation class="org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandlerFactoryImpl"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandlerFactory"/>
+        </service>
+        <property name="service.pid" value="org.forgerock.openidm.openicf.syncfailure"/>
+        <reference name="scriptRegistry" interface="org.forgerock.script.ScriptRegistry" cardinality="1..1" policy="dynamic" bind="bindScriptRegistry" unbind="unbindScriptRegistry"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+        <reference name="routeService" interface="org.forgerock.openidm.router.RouteService" cardinality="1..1" policy="static" target="(openidm.router.prefix=/*)" bind="bindRouteService" unbind="unbindRouteService"/>
+    </scr:component>
+</components>

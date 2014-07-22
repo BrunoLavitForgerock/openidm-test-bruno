@@ -1,0 +1,614 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/**<a name="line.1"></a>
+<span class="sourceLineNo">002</span>* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.<a name="line.2"></a>
+<span class="sourceLineNo">003</span>*<a name="line.3"></a>
+<span class="sourceLineNo">004</span>* Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved<a name="line.4"></a>
+<span class="sourceLineNo">005</span>*<a name="line.5"></a>
+<span class="sourceLineNo">006</span>* The contents of this file are subject to the terms<a name="line.6"></a>
+<span class="sourceLineNo">007</span>* of the Common Development and Distribution License<a name="line.7"></a>
+<span class="sourceLineNo">008</span>* (the License). You may not use this file except in<a name="line.8"></a>
+<span class="sourceLineNo">009</span>* compliance with the License.<a name="line.9"></a>
+<span class="sourceLineNo">010</span>*<a name="line.10"></a>
+<span class="sourceLineNo">011</span>* You can obtain a copy of the License at<a name="line.11"></a>
+<span class="sourceLineNo">012</span>* http://forgerock.org/license/CDDLv1.0.html<a name="line.12"></a>
+<span class="sourceLineNo">013</span>* See the License for the specific language governing<a name="line.13"></a>
+<span class="sourceLineNo">014</span>* permission and limitations under the License.<a name="line.14"></a>
+<span class="sourceLineNo">015</span>*<a name="line.15"></a>
+<span class="sourceLineNo">016</span>* When distributing Covered Code, include this CDDL<a name="line.16"></a>
+<span class="sourceLineNo">017</span>* Header Notice in each file and include the License file<a name="line.17"></a>
+<span class="sourceLineNo">018</span>* at http://forgerock.org/license/CDDLv1.0.html<a name="line.18"></a>
+<span class="sourceLineNo">019</span>* If applicable, add the following below the CDDL Header,<a name="line.19"></a>
+<span class="sourceLineNo">020</span>* with the fields enclosed by brackets [] replaced by<a name="line.20"></a>
+<span class="sourceLineNo">021</span>* your own identifying information:<a name="line.21"></a>
+<span class="sourceLineNo">022</span>* "Portions Copyrighted [year] [name of copyright owner]"<a name="line.22"></a>
+<span class="sourceLineNo">023</span>*/<a name="line.23"></a>
+<span class="sourceLineNo">024</span>package org.forgerock.openidm.scheduler.impl;<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.util.ArrayList;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.HashMap;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.Iterator;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.util.List;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import java.util.Map;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import java.util.concurrent.Callable;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import java.util.concurrent.ExecutorService;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import java.util.concurrent.Executors;<a name="line.33"></a>
+<span class="sourceLineNo">034</span><a name="line.34"></a>
+<span class="sourceLineNo">035</span>import javax.script.ScriptException;<a name="line.35"></a>
+<span class="sourceLineNo">036</span><a name="line.36"></a>
+<span class="sourceLineNo">037</span>import org.forgerock.json.fluent.JsonPointer;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import org.forgerock.json.fluent.JsonValue;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import org.forgerock.json.fluent.JsonValueException;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import org.forgerock.json.resource.ConnectionFactory;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import org.forgerock.json.resource.PreconditionFailedException;<a name="line.41"></a>
+<span class="sourceLineNo">042</span>import org.forgerock.json.resource.QueryRequest;<a name="line.42"></a>
+<span class="sourceLineNo">043</span>import org.forgerock.json.resource.QueryResult;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import org.forgerock.json.resource.QueryResultHandler;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import org.forgerock.json.resource.Requests;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import org.forgerock.json.resource.Resource;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import org.forgerock.json.resource.ResourceException;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import org.forgerock.json.resource.ServerContext;<a name="line.48"></a>
+<span class="sourceLineNo">049</span>import org.forgerock.json.resource.UpdateRequest;<a name="line.49"></a>
+<span class="sourceLineNo">050</span>import org.forgerock.openidm.quartz.impl.ExecutionException;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>import org.forgerock.openidm.util.ConfigMacroUtil;<a name="line.51"></a>
+<span class="sourceLineNo">052</span>import org.forgerock.openidm.util.DateUtil;<a name="line.52"></a>
+<span class="sourceLineNo">053</span>import org.forgerock.script.Script;<a name="line.53"></a>
+<span class="sourceLineNo">054</span>import org.forgerock.script.ScriptEntry;<a name="line.54"></a>
+<span class="sourceLineNo">055</span>import org.forgerock.script.ScriptRegistry;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>import org.joda.time.DateTime;<a name="line.56"></a>
+<span class="sourceLineNo">057</span>import org.joda.time.ReadablePeriod;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>import org.slf4j.Logger;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>import org.slf4j.LoggerFactory;<a name="line.59"></a>
+<span class="sourceLineNo">060</span><a name="line.60"></a>
+<span class="sourceLineNo">061</span>public class TaskScannerJob {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    private final static Logger logger = LoggerFactory.getLogger(TaskScannerJob.class);<a name="line.62"></a>
+<span class="sourceLineNo">063</span>    private final static DateUtil DATE_UTIL = DateUtil.getDateUtil("UTC");<a name="line.63"></a>
+<span class="sourceLineNo">064</span><a name="line.64"></a>
+<span class="sourceLineNo">065</span>    private ConnectionFactory connectionFactory;<a name="line.65"></a>
+<span class="sourceLineNo">066</span>    private TaskScannerContext taskScannerContext;<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    private ScriptRegistry scopeFactory;<a name="line.67"></a>
+<span class="sourceLineNo">068</span>    private ScriptEntry script;<a name="line.68"></a>
+<span class="sourceLineNo">069</span><a name="line.69"></a>
+<span class="sourceLineNo">070</span>    public TaskScannerJob(ConnectionFactory connectionFactory, TaskScannerContext context, ScriptRegistry scopeFactory)<a name="line.70"></a>
+<span class="sourceLineNo">071</span>            throws ExecutionException, ScriptException {<a name="line.71"></a>
+<span class="sourceLineNo">072</span>        this.connectionFactory = connectionFactory;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        this.taskScannerContext = context;<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        this.scopeFactory = scopeFactory;<a name="line.74"></a>
+<span class="sourceLineNo">075</span><a name="line.75"></a>
+<span class="sourceLineNo">076</span>        JsonValue scriptValue = context.getScriptValue();<a name="line.76"></a>
+<span class="sourceLineNo">077</span>        if (!scriptValue.isNull()) {<a name="line.77"></a>
+<span class="sourceLineNo">078</span>            this.script = scopeFactory.takeScript(scriptValue);<a name="line.78"></a>
+<span class="sourceLineNo">079</span>        } else {<a name="line.79"></a>
+<span class="sourceLineNo">080</span>            throw new ExecutionException("No valid script '" + scriptValue + "' configured in task scanner.");<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        }<a name="line.81"></a>
+<span class="sourceLineNo">082</span>    }<a name="line.82"></a>
+<span class="sourceLineNo">083</span><a name="line.83"></a>
+<span class="sourceLineNo">084</span>    /**<a name="line.84"></a>
+<span class="sourceLineNo">085</span>     * Starts the task associated with a task scanner event.<a name="line.85"></a>
+<span class="sourceLineNo">086</span>     * This method may run synchronously or launch a new thread depending upon the settings in the TaskScannerContext<a name="line.86"></a>
+<span class="sourceLineNo">087</span>     * @return identifier associated with this task scan job<a name="line.87"></a>
+<span class="sourceLineNo">088</span>     * @throws ExecutionException<a name="line.88"></a>
+<span class="sourceLineNo">089</span>     */<a name="line.89"></a>
+<span class="sourceLineNo">090</span>    public String startTask() throws ExecutionException {<a name="line.90"></a>
+<span class="sourceLineNo">091</span>        int numberOfThreads = taskScannerContext.getNumberOfThreads();<a name="line.91"></a>
+<span class="sourceLineNo">092</span>        final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        <a name="line.93"></a>
+<span class="sourceLineNo">094</span>        if (taskScannerContext.getWaitForCompletion()) {<a name="line.94"></a>
+<span class="sourceLineNo">095</span>            try {<a name="line.95"></a>
+<span class="sourceLineNo">096</span>                performTask(executor);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>            } catch (ExecutionException ex) {<a name="line.97"></a>
+<span class="sourceLineNo">098</span>                throw ex;<a name="line.98"></a>
+<span class="sourceLineNo">099</span>            } finally {<a name="line.99"></a>
+<span class="sourceLineNo">100</span>                executor.shutdown();<a name="line.100"></a>
+<span class="sourceLineNo">101</span>            }<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        } else {<a name="line.102"></a>
+<span class="sourceLineNo">103</span>            // Launch a new thread for the whole taskscan process<a name="line.103"></a>
+<span class="sourceLineNo">104</span>            final ServerContext context = taskScannerContext.getContext();<a name="line.104"></a>
+<span class="sourceLineNo">105</span>            Runnable command = new Runnable() {<a name="line.105"></a>
+<span class="sourceLineNo">106</span>                @Override<a name="line.106"></a>
+<span class="sourceLineNo">107</span>                public void run() {<a name="line.107"></a>
+<span class="sourceLineNo">108</span>                    try {<a name="line.108"></a>
+<span class="sourceLineNo">109</span>                        performTask(executor);<a name="line.109"></a>
+<span class="sourceLineNo">110</span>                    } catch (Exception ex) {<a name="line.110"></a>
+<span class="sourceLineNo">111</span>                        logger.warn("Taskscanner failed with unexpected exception", ex);<a name="line.111"></a>
+<span class="sourceLineNo">112</span>                    } finally {<a name="line.112"></a>
+<span class="sourceLineNo">113</span>                        executor.shutdown();<a name="line.113"></a>
+<span class="sourceLineNo">114</span>                    }<a name="line.114"></a>
+<span class="sourceLineNo">115</span>                }<a name="line.115"></a>
+<span class="sourceLineNo">116</span>            };<a name="line.116"></a>
+<span class="sourceLineNo">117</span>            new Thread(command).start();<a name="line.117"></a>
+<span class="sourceLineNo">118</span>            // Shouldn't need to keep ahold of this, I don't think? Can just start it and let it go<a name="line.118"></a>
+<span class="sourceLineNo">119</span>        }<a name="line.119"></a>
+<span class="sourceLineNo">120</span>        return taskScannerContext.getTaskScanID();<a name="line.120"></a>
+<span class="sourceLineNo">121</span>    }<a name="line.121"></a>
+<span class="sourceLineNo">122</span><a name="line.122"></a>
+<span class="sourceLineNo">123</span>    /**<a name="line.123"></a>
+<span class="sourceLineNo">124</span>     * Performs the task associated with the task scanner event.<a name="line.124"></a>
+<span class="sourceLineNo">125</span>     * Runs the query and executes the script across each resulting object.<a name="line.125"></a>
+<span class="sourceLineNo">126</span>     *<a name="line.126"></a>
+<span class="sourceLineNo">127</span>     * @param invokerName name of the invoker<a name="line.127"></a>
+<span class="sourceLineNo">128</span>     * @param scriptName name of the script associated with the task scanner event<a name="line.128"></a>
+<span class="sourceLineNo">129</span>     * @param params parameters necessary for the execution of the script<a name="line.129"></a>
+<span class="sourceLineNo">130</span>     * @throws ExecutionException<a name="line.130"></a>
+<span class="sourceLineNo">131</span>     */<a name="line.131"></a>
+<span class="sourceLineNo">132</span>    private void performTask(ExecutorService executor)<a name="line.132"></a>
+<span class="sourceLineNo">133</span>            throws ExecutionException {<a name="line.133"></a>
+<span class="sourceLineNo">134</span>        taskScannerContext.startJob();<a name="line.134"></a>
+<span class="sourceLineNo">135</span>        logger.info("Task {} started from {} with script {}",<a name="line.135"></a>
+<span class="sourceLineNo">136</span>                new Object[] { taskScannerContext.getTaskScanID(), taskScannerContext.getInvokerName(), taskScannerContext.getScriptName() });<a name="line.136"></a>
+<span class="sourceLineNo">137</span><a name="line.137"></a>
+<span class="sourceLineNo">138</span>        JsonValue results;<a name="line.138"></a>
+<span class="sourceLineNo">139</span>        taskScannerContext.startQuery();<a name="line.139"></a>
+<span class="sourceLineNo">140</span>        try {<a name="line.140"></a>
+<span class="sourceLineNo">141</span>            results = fetchAllObjects();<a name="line.141"></a>
+<span class="sourceLineNo">142</span>        } catch (ResourceException e1) {<a name="line.142"></a>
+<span class="sourceLineNo">143</span>            throw new ExecutionException("Error during query", e1);<a name="line.143"></a>
+<span class="sourceLineNo">144</span>        }<a name="line.144"></a>
+<span class="sourceLineNo">145</span>        taskScannerContext.endQuery();<a name="line.145"></a>
+<span class="sourceLineNo">146</span>        Integer maxRecords = taskScannerContext.getMaxRecords();<a name="line.146"></a>
+<span class="sourceLineNo">147</span>        if (maxRecords == null) {<a name="line.147"></a>
+<span class="sourceLineNo">148</span>            taskScannerContext.setNumberOfTasksToProcess(results.size());<a name="line.148"></a>
+<span class="sourceLineNo">149</span>        } else {<a name="line.149"></a>
+<span class="sourceLineNo">150</span>            taskScannerContext.setNumberOfTasksToProcess(Math.min(results.size(), maxRecords));<a name="line.150"></a>
+<span class="sourceLineNo">151</span>        }<a name="line.151"></a>
+<span class="sourceLineNo">152</span>        logger.debug("TaskScan {} query results: {}", taskScannerContext.getInvokerName(), results.size());<a name="line.152"></a>
+<span class="sourceLineNo">153</span>        // TODO jump out early if it's empty?<a name="line.153"></a>
+<span class="sourceLineNo">154</span><a name="line.154"></a>
+<span class="sourceLineNo">155</span>        // Split and prune the result set according to our max and if we're synchronous or not<a name="line.155"></a>
+<span class="sourceLineNo">156</span>        List&lt;JsonValue&gt; resultSets = splitResultsOverThreads(results, taskScannerContext.getNumberOfThreads(), maxRecords);<a name="line.156"></a>
+<span class="sourceLineNo">157</span>        logger.debug("Split result set into {} units", resultSets.size());<a name="line.157"></a>
+<span class="sourceLineNo">158</span><a name="line.158"></a>
+<span class="sourceLineNo">159</span>        List&lt;Callable&lt;Object&gt;&gt; todo = new ArrayList&lt;Callable&lt;Object&gt;&gt;();<a name="line.159"></a>
+<span class="sourceLineNo">160</span>        for (final JsonValue result : resultSets) {<a name="line.160"></a>
+<span class="sourceLineNo">161</span>            Runnable command = new Runnable() {<a name="line.161"></a>
+<span class="sourceLineNo">162</span>                @Override<a name="line.162"></a>
+<span class="sourceLineNo">163</span>                public void run() {<a name="line.163"></a>
+<span class="sourceLineNo">164</span>                    try {<a name="line.164"></a>
+<span class="sourceLineNo">165</span>                        performTaskOverSet(result);<a name="line.165"></a>
+<span class="sourceLineNo">166</span>                    } catch (Exception ex) {<a name="line.166"></a>
+<span class="sourceLineNo">167</span>                        logger.warn("Taskscanner failed with unexpected exception", ex);<a name="line.167"></a>
+<span class="sourceLineNo">168</span>                    }<a name="line.168"></a>
+<span class="sourceLineNo">169</span>                }<a name="line.169"></a>
+<span class="sourceLineNo">170</span>            };<a name="line.170"></a>
+<span class="sourceLineNo">171</span>            todo.add(Executors.callable(command));<a name="line.171"></a>
+<span class="sourceLineNo">172</span>        }<a name="line.172"></a>
+<span class="sourceLineNo">173</span><a name="line.173"></a>
+<span class="sourceLineNo">174</span>        try {<a name="line.174"></a>
+<span class="sourceLineNo">175</span>            executor.invokeAll(todo);<a name="line.175"></a>
+<span class="sourceLineNo">176</span>        } catch (InterruptedException e) {<a name="line.176"></a>
+<span class="sourceLineNo">177</span>            // Mark it interrupted<a name="line.177"></a>
+<span class="sourceLineNo">178</span>            taskScannerContext.interrupted();<a name="line.178"></a>
+<span class="sourceLineNo">179</span>            logger.warn("Task scan '" + taskScannerContext.getTaskScanID() + "' interrupted");<a name="line.179"></a>
+<span class="sourceLineNo">180</span>        }<a name="line.180"></a>
+<span class="sourceLineNo">181</span>        // Don't mark the job as completed if its been deactivated<a name="line.181"></a>
+<span class="sourceLineNo">182</span>        if (!taskScannerContext.isInactive()) {<a name="line.182"></a>
+<span class="sourceLineNo">183</span>            taskScannerContext.endJob();<a name="line.183"></a>
+<span class="sourceLineNo">184</span>        }<a name="line.184"></a>
+<span class="sourceLineNo">185</span><a name="line.185"></a>
+<span class="sourceLineNo">186</span>        logger.info("Task '{}' completed. Total time: {}ms. Query time: {}ms. Progress: {}",<a name="line.186"></a>
+<span class="sourceLineNo">187</span>                new Object[] { taskScannerContext.getTaskScanID(),<a name="line.187"></a>
+<span class="sourceLineNo">188</span>                taskScannerContext.getStatistics().getJobDuration(),<a name="line.188"></a>
+<span class="sourceLineNo">189</span>                taskScannerContext.getStatistics().getQueryDuration(),<a name="line.189"></a>
+<span class="sourceLineNo">190</span>                taskScannerContext.getProgress()<a name="line.190"></a>
+<span class="sourceLineNo">191</span>        });<a name="line.191"></a>
+<span class="sourceLineNo">192</span>    }<a name="line.192"></a>
+<span class="sourceLineNo">193</span><a name="line.193"></a>
+<span class="sourceLineNo">194</span>    private List&lt;JsonValue&gt; splitResultsOverThreads(JsonValue results, int numberOfThreads, Integer max) {<a name="line.194"></a>
+<span class="sourceLineNo">195</span>        List&lt;List&lt;Object&gt;&gt; resultSets = new ArrayList&lt;List&lt;Object&gt;&gt;();<a name="line.195"></a>
+<span class="sourceLineNo">196</span>        for (int i = 0; i &lt; numberOfThreads; i++) {<a name="line.196"></a>
+<span class="sourceLineNo">197</span>            resultSets.add(new ArrayList&lt;Object&gt;());<a name="line.197"></a>
+<span class="sourceLineNo">198</span>        }<a name="line.198"></a>
+<span class="sourceLineNo">199</span><a name="line.199"></a>
+<span class="sourceLineNo">200</span>        int i = 0;<a name="line.200"></a>
+<span class="sourceLineNo">201</span>        for (JsonValue obj : results) {<a name="line.201"></a>
+<span class="sourceLineNo">202</span>            if (max != null &amp;&amp; i &gt;= max) {<a name="line.202"></a>
+<span class="sourceLineNo">203</span>                break;<a name="line.203"></a>
+<span class="sourceLineNo">204</span>            }<a name="line.204"></a>
+<span class="sourceLineNo">205</span>            resultSets.get(i % numberOfThreads).add(obj.getObject());<a name="line.205"></a>
+<span class="sourceLineNo">206</span>            i++;<a name="line.206"></a>
+<span class="sourceLineNo">207</span>        }<a name="line.207"></a>
+<span class="sourceLineNo">208</span><a name="line.208"></a>
+<span class="sourceLineNo">209</span>        List&lt;JsonValue&gt; jsonSets = new ArrayList&lt;JsonValue&gt;();<a name="line.209"></a>
+<span class="sourceLineNo">210</span>        for (List&lt;Object&gt; set : resultSets) {<a name="line.210"></a>
+<span class="sourceLineNo">211</span>            jsonSets.add(new JsonValue(set));<a name="line.211"></a>
+<span class="sourceLineNo">212</span>        }<a name="line.212"></a>
+<span class="sourceLineNo">213</span><a name="line.213"></a>
+<span class="sourceLineNo">214</span>        return jsonSets;<a name="line.214"></a>
+<span class="sourceLineNo">215</span>    }<a name="line.215"></a>
+<span class="sourceLineNo">216</span><a name="line.216"></a>
+<span class="sourceLineNo">217</span>    private void performTaskOverSet(JsonValue results)<a name="line.217"></a>
+<span class="sourceLineNo">218</span>                    throws ExecutionException {<a name="line.218"></a>
+<span class="sourceLineNo">219</span>        for (JsonValue input : results) {<a name="line.219"></a>
+<span class="sourceLineNo">220</span>            if (taskScannerContext.isCanceled()) {<a name="line.220"></a>
+<span class="sourceLineNo">221</span>                logger.info("Task '" + taskScannerContext.getTaskScanID() + "' cancelled. Terminating execution.");<a name="line.221"></a>
+<span class="sourceLineNo">222</span>                break; // Jump out quick since we've cancelled the job<a name="line.222"></a>
+<span class="sourceLineNo">223</span>            }<a name="line.223"></a>
+<span class="sourceLineNo">224</span>            // Check if this object has a STARTED time already<a name="line.224"></a>
+<span class="sourceLineNo">225</span>            JsonValue startTime = input.get(taskScannerContext.getStartField());<a name="line.225"></a>
+<span class="sourceLineNo">226</span>            String startTimeString = null;<a name="line.226"></a>
+<span class="sourceLineNo">227</span>            if (startTime != null &amp;&amp; !startTime.isNull()) {<a name="line.227"></a>
+<span class="sourceLineNo">228</span>                startTimeString = startTime.asString();<a name="line.228"></a>
+<span class="sourceLineNo">229</span>                DateTime startedTime = DATE_UTIL.parseTimestamp(startTimeString);<a name="line.229"></a>
+<span class="sourceLineNo">230</span><a name="line.230"></a>
+<span class="sourceLineNo">231</span>                // Skip if the startTime + interval has not been passed<a name="line.231"></a>
+<span class="sourceLineNo">232</span>                ReadablePeriod period = taskScannerContext.getRecoveryTimeout();<a name="line.232"></a>
+<span class="sourceLineNo">233</span>                DateTime expirationDate = startedTime.plus(period);<a name="line.233"></a>
+<span class="sourceLineNo">234</span>                if (expirationDate.isAfterNow()) {<a name="line.234"></a>
+<span class="sourceLineNo">235</span>                    logger.debug("Object already started and has not expired. Started at: {}. Timeout: {}. Expires at: {}",<a name="line.235"></a>
+<span class="sourceLineNo">236</span>                            new Object[] {<a name="line.236"></a>
+<span class="sourceLineNo">237</span>                            DATE_UTIL.formatDateTime(startedTime),<a name="line.237"></a>
+<span class="sourceLineNo">238</span>                            period,<a name="line.238"></a>
+<span class="sourceLineNo">239</span>                            DATE_UTIL.formatDateTime(expirationDate)});<a name="line.239"></a>
+<span class="sourceLineNo">240</span>                    continue;<a name="line.240"></a>
+<span class="sourceLineNo">241</span>                }<a name="line.241"></a>
+<span class="sourceLineNo">242</span>            }<a name="line.242"></a>
+<span class="sourceLineNo">243</span><a name="line.243"></a>
+<span class="sourceLineNo">244</span>            try {<a name="line.244"></a>
+<span class="sourceLineNo">245</span>                claimAndExecScript(input, startTimeString);<a name="line.245"></a>
+<span class="sourceLineNo">246</span>            } catch (ResourceException e) {<a name="line.246"></a>
+<span class="sourceLineNo">247</span>                throw new ExecutionException("Error during claim and execution phase", e);<a name="line.247"></a>
+<span class="sourceLineNo">248</span>            }<a name="line.248"></a>
+<span class="sourceLineNo">249</span>        }<a name="line.249"></a>
+<span class="sourceLineNo">250</span>    }<a name="line.250"></a>
+<span class="sourceLineNo">251</span><a name="line.251"></a>
+<span class="sourceLineNo">252</span>    /**<a name="line.252"></a>
+<span class="sourceLineNo">253</span>     * Flatten a list of parameters and perform a query to fetch all objects from storage<a name="line.253"></a>
+<span class="sourceLineNo">254</span>     * @param id the identifier of the resource to query<a name="line.254"></a>
+<span class="sourceLineNo">255</span>     * @param params the parameters of the query<a name="line.255"></a>
+<span class="sourceLineNo">256</span>     * @return JsonValue containing a list of all the retrieved objects<a name="line.256"></a>
+<span class="sourceLineNo">257</span>     * @throws JsonResourceException<a name="line.257"></a>
+<span class="sourceLineNo">258</span>     */<a name="line.258"></a>
+<span class="sourceLineNo">259</span>    private JsonValue fetchAllObjects() throws ResourceException {<a name="line.259"></a>
+<span class="sourceLineNo">260</span>        JsonValue flatParams = flattenJson(taskScannerContext.getScanValue());<a name="line.260"></a>
+<span class="sourceLineNo">261</span>        ConfigMacroUtil.expand(flatParams);<a name="line.261"></a>
+<span class="sourceLineNo">262</span>        return performQuery(taskScannerContext.getObjectID(), flatParams);<a name="line.262"></a>
+<span class="sourceLineNo">263</span>    }<a name="line.263"></a>
+<span class="sourceLineNo">264</span><a name="line.264"></a>
+<span class="sourceLineNo">265</span>    /**<a name="line.265"></a>
+<span class="sourceLineNo">266</span>     * Performs a query on a resource and returns the result set<a name="line.266"></a>
+<span class="sourceLineNo">267</span>     * @param resourceID the identifier of the resource to query<a name="line.267"></a>
+<span class="sourceLineNo">268</span>     * @param params parameters to supply to the query<a name="line.268"></a>
+<span class="sourceLineNo">269</span>     * @return the set of results from the performed query<a name="line.269"></a>
+<span class="sourceLineNo">270</span>     * @throws JsonResourceException<a name="line.270"></a>
+<span class="sourceLineNo">271</span>     */<a name="line.271"></a>
+<span class="sourceLineNo">272</span>    private JsonValue performQuery(String resourceID, JsonValue params) throws ResourceException {<a name="line.272"></a>
+<span class="sourceLineNo">273</span>        final JsonValue queryResults = new JsonValue(new ArrayList&lt;Map&lt;String, Object&gt;&gt;());;<a name="line.273"></a>
+<span class="sourceLineNo">274</span>        QueryRequest queryRequest = Requests.newQueryRequest(resourceID);<a name="line.274"></a>
+<span class="sourceLineNo">275</span>        queryRequest.setQueryId(params.get("_queryId").asString());<a name="line.275"></a>
+<span class="sourceLineNo">276</span>        queryRequest.setQueryExpression(params.get("_queryExpression").asString());<a name="line.276"></a>
+<span class="sourceLineNo">277</span>        for (Map.Entry&lt;String, Object&gt; e: params.asMap().entrySet()){<a name="line.277"></a>
+<span class="sourceLineNo">278</span>            queryRequest.getAdditionalParameters().put(e.getKey(), String.valueOf(e.getValue()));<a name="line.278"></a>
+<span class="sourceLineNo">279</span>        }<a name="line.279"></a>
+<span class="sourceLineNo">280</span>        connectionFactory.getConnection().query(taskScannerContext.getContext(), queryRequest, new QueryResultHandler() {<a name="line.280"></a>
+<span class="sourceLineNo">281</span>            @Override<a name="line.281"></a>
+<span class="sourceLineNo">282</span>            public void handleError(ResourceException error) {<a name="line.282"></a>
+<span class="sourceLineNo">283</span>                // Ignore<a name="line.283"></a>
+<span class="sourceLineNo">284</span>            }<a name="line.284"></a>
+<span class="sourceLineNo">285</span><a name="line.285"></a>
+<span class="sourceLineNo">286</span>            @Override<a name="line.286"></a>
+<span class="sourceLineNo">287</span>            public boolean handleResource(Resource resource) {<a name="line.287"></a>
+<span class="sourceLineNo">288</span>                queryResults.add(resource.getContent().getObject());<a name="line.288"></a>
+<span class="sourceLineNo">289</span>                return true;<a name="line.289"></a>
+<span class="sourceLineNo">290</span>            }<a name="line.290"></a>
+<span class="sourceLineNo">291</span><a name="line.291"></a>
+<span class="sourceLineNo">292</span>            @Override<a name="line.292"></a>
+<span class="sourceLineNo">293</span>            public void handleResult(QueryResult result) {<a name="line.293"></a>
+<span class="sourceLineNo">294</span>                // Ignore<a name="line.294"></a>
+<span class="sourceLineNo">295</span>            }<a name="line.295"></a>
+<span class="sourceLineNo">296</span>        });<a name="line.296"></a>
+<span class="sourceLineNo">297</span>        return queryResults;<a name="line.297"></a>
+<span class="sourceLineNo">298</span>    }<a name="line.298"></a>
+<span class="sourceLineNo">299</span><a name="line.299"></a>
+<span class="sourceLineNo">300</span>    /**<a name="line.300"></a>
+<span class="sourceLineNo">301</span>     * Performs a read on a resource and returns the result<a name="line.301"></a>
+<span class="sourceLineNo">302</span>     * @param resourceID the identifier of the resource to read<a name="line.302"></a>
+<span class="sourceLineNo">303</span>     * @return the results from the performed read<a name="line.303"></a>
+<span class="sourceLineNo">304</span>     * @throws JsonResourceException<a name="line.304"></a>
+<span class="sourceLineNo">305</span>     */<a name="line.305"></a>
+<span class="sourceLineNo">306</span>    private JsonValue performRead(String resourceID) throws ResourceException {<a name="line.306"></a>
+<span class="sourceLineNo">307</span>        JsonValue readResults = null;<a name="line.307"></a>
+<span class="sourceLineNo">308</span><a name="line.308"></a>
+<span class="sourceLineNo">309</span>        readResults = connectionFactory.getConnection().read(taskScannerContext.getContext(), Requests.newReadRequest(resourceID)).getContent();<a name="line.309"></a>
+<span class="sourceLineNo">310</span>        return readResults;<a name="line.310"></a>
+<span class="sourceLineNo">311</span>    }<a name="line.311"></a>
+<span class="sourceLineNo">312</span><a name="line.312"></a>
+<span class="sourceLineNo">313</span>    /**<a name="line.313"></a>
+<span class="sourceLineNo">314</span>     * Adds an object to a JsonValue and performs an update<a name="line.314"></a>
+<span class="sourceLineNo">315</span>     * @param resourceID the resource identifier that the updated value belongs to<a name="line.315"></a>
+<span class="sourceLineNo">316</span>     * @param value value to perform the update with<a name="line.316"></a>
+<span class="sourceLineNo">317</span>     * @param path JsonPointer to the updated/added field<a name="line.317"></a>
+<span class="sourceLineNo">318</span>     * @param obj object to add to the field<a name="line.318"></a>
+<span class="sourceLineNo">319</span>     * @return the updated JsonValue<a name="line.319"></a>
+<span class="sourceLineNo">320</span>     * @throws JsonResourceException<a name="line.320"></a>
+<span class="sourceLineNo">321</span>     */<a name="line.321"></a>
+<span class="sourceLineNo">322</span>    private JsonValue updateValueWithObject(String resourceID, JsonValue value, JsonPointer path, Object obj) throws ResourceException {<a name="line.322"></a>
+<span class="sourceLineNo">323</span>        ensureJsonPointerExists(path, value);<a name="line.323"></a>
+<span class="sourceLineNo">324</span>        value.put(path, obj);<a name="line.324"></a>
+<span class="sourceLineNo">325</span>        return performUpdate(resourceID, value);<a name="line.325"></a>
+<span class="sourceLineNo">326</span>    }<a name="line.326"></a>
+<span class="sourceLineNo">327</span><a name="line.327"></a>
+<span class="sourceLineNo">328</span>    /**<a name="line.328"></a>
+<span class="sourceLineNo">329</span>     * Performs an update on a given resource with a supplied JsonValue<a name="line.329"></a>
+<span class="sourceLineNo">330</span>     * @param resourceID the resource identifier to perform the update on<a name="line.330"></a>
+<span class="sourceLineNo">331</span>     * @param value the object to update with<a name="line.331"></a>
+<span class="sourceLineNo">332</span>     * @return the updated object<a name="line.332"></a>
+<span class="sourceLineNo">333</span>     * @throws JsonResourceException<a name="line.333"></a>
+<span class="sourceLineNo">334</span>     */<a name="line.334"></a>
+<span class="sourceLineNo">335</span>    private JsonValue performUpdate(String resourceID, JsonValue value) throws ResourceException {<a name="line.335"></a>
+<span class="sourceLineNo">336</span>        String id = value.get("_id").required().asString();<a name="line.336"></a>
+<span class="sourceLineNo">337</span>        String fullID = retrieveFullID(resourceID, value);<a name="line.337"></a>
+<span class="sourceLineNo">338</span>        String rev = value.get("_rev").required().asString();<a name="line.338"></a>
+<span class="sourceLineNo">339</span>        UpdateRequest updateRequest = Requests.newUpdateRequest(fullID, value);<a name="line.339"></a>
+<span class="sourceLineNo">340</span>        updateRequest.setRevision(rev);<a name="line.340"></a>
+<span class="sourceLineNo">341</span><a name="line.341"></a>
+<span class="sourceLineNo">342</span>        connectionFactory.getConnection().update(taskScannerContext.getContext(), updateRequest);<a name="line.342"></a>
+<span class="sourceLineNo">343</span>        return retrieveObject(resourceID, id);<a name="line.343"></a>
+<span class="sourceLineNo">344</span>    }<a name="line.344"></a>
+<span class="sourceLineNo">345</span><a name="line.345"></a>
+<span class="sourceLineNo">346</span>    /**<a name="line.346"></a>
+<span class="sourceLineNo">347</span>     * Constructs a full object ID from the supplied resourceID and the JsonValue<a name="line.347"></a>
+<span class="sourceLineNo">348</span>     * @param resourceID resource ID that the value originates from<a name="line.348"></a>
+<span class="sourceLineNo">349</span>     * @param value JsonValue to create the full ID with<a name="line.349"></a>
+<span class="sourceLineNo">350</span>     * @return string indicating the full id<a name="line.350"></a>
+<span class="sourceLineNo">351</span>     */<a name="line.351"></a>
+<span class="sourceLineNo">352</span>    private String retrieveFullID(String resourceID, JsonValue value) {<a name="line.352"></a>
+<span class="sourceLineNo">353</span>        String id = value.get("_id").required().asString();<a name="line.353"></a>
+<span class="sourceLineNo">354</span>        return retrieveFullID(resourceID, id);<a name="line.354"></a>
+<span class="sourceLineNo">355</span>    }<a name="line.355"></a>
+<span class="sourceLineNo">356</span><a name="line.356"></a>
+<span class="sourceLineNo">357</span>    /**<a name="line.357"></a>
+<span class="sourceLineNo">358</span>     * Constructs a full object ID from the supplied resourceID and the objectID<a name="line.358"></a>
+<span class="sourceLineNo">359</span>     * @param resourceID resource ID that the object originates from<a name="line.359"></a>
+<span class="sourceLineNo">360</span>     * @param objectID ID of some object<a name="line.360"></a>
+<span class="sourceLineNo">361</span>     * @return string indicating the full ID<a name="line.361"></a>
+<span class="sourceLineNo">362</span>     */<a name="line.362"></a>
+<span class="sourceLineNo">363</span>    private String retrieveFullID(String resourceID, String objectID) {<a name="line.363"></a>
+<span class="sourceLineNo">364</span>        return resourceID + '/' + objectID;<a name="line.364"></a>
+<span class="sourceLineNo">365</span>    }<a name="line.365"></a>
+<span class="sourceLineNo">366</span><a name="line.366"></a>
+<span class="sourceLineNo">367</span>    /**<a name="line.367"></a>
+<span class="sourceLineNo">368</span>     * Fetches an updated copy of some specified object from the given resource<a name="line.368"></a>
+<span class="sourceLineNo">369</span>     * @param resourceID the resource identifier to fetch an object from<a name="line.369"></a>
+<span class="sourceLineNo">370</span>     * @param value the value to retrieve an updated copy of<a name="line.370"></a>
+<span class="sourceLineNo">371</span>     * @return the updated value<a name="line.371"></a>
+<span class="sourceLineNo">372</span>     * @throws JsonResourceException<a name="line.372"></a>
+<span class="sourceLineNo">373</span>     */<a name="line.373"></a>
+<span class="sourceLineNo">374</span>    private JsonValue retrieveUpdatedObject(String resourceID, JsonValue value)<a name="line.374"></a>
+<span class="sourceLineNo">375</span>            throws JsonValueException, ResourceException {<a name="line.375"></a>
+<span class="sourceLineNo">376</span>        return retrieveObject(resourceID, value.get("_id").required().asString());<a name="line.376"></a>
+<span class="sourceLineNo">377</span>    }<a name="line.377"></a>
+<span class="sourceLineNo">378</span><a name="line.378"></a>
+<span class="sourceLineNo">379</span>    /**<a name="line.379"></a>
+<span class="sourceLineNo">380</span>     * Retrieves a specified object from a resource<a name="line.380"></a>
+<span class="sourceLineNo">381</span>     * @param resourceID the resource identifier to fetch the object from<a name="line.381"></a>
+<span class="sourceLineNo">382</span>     * @param id the identifier of the object to fetch<a name="line.382"></a>
+<span class="sourceLineNo">383</span>     * @return the object retrieved from the resource<a name="line.383"></a>
+<span class="sourceLineNo">384</span>     * @throws JsonResourceException<a name="line.384"></a>
+<span class="sourceLineNo">385</span>     */<a name="line.385"></a>
+<span class="sourceLineNo">386</span>    private JsonValue retrieveObject(String resourceID, String id) throws ResourceException {<a name="line.386"></a>
+<span class="sourceLineNo">387</span>        return performRead(retrieveFullID(resourceID, id));<a name="line.387"></a>
+<span class="sourceLineNo">388</span>    }<a name="line.388"></a>
+<span class="sourceLineNo">389</span><a name="line.389"></a>
+<span class="sourceLineNo">390</span>    private void claimAndExecScript(JsonValue input, String expectedStartDateStr)<a name="line.390"></a>
+<span class="sourceLineNo">391</span>            throws ExecutionException, ResourceException {<a name="line.391"></a>
+<span class="sourceLineNo">392</span>        String id = input.get("_id").required().asString();<a name="line.392"></a>
+<span class="sourceLineNo">393</span>        boolean claimedTask = false;<a name="line.393"></a>
+<span class="sourceLineNo">394</span>        boolean retryClaimTask = false;<a name="line.394"></a>
+<span class="sourceLineNo">395</span><a name="line.395"></a>
+<span class="sourceLineNo">396</span>        JsonPointer startField = taskScannerContext.getStartField();<a name="line.396"></a>
+<span class="sourceLineNo">397</span>        JsonPointer completedField = taskScannerContext.getCompletedField();<a name="line.397"></a>
+<span class="sourceLineNo">398</span>        String resourceID = taskScannerContext.getObjectID();<a name="line.398"></a>
+<span class="sourceLineNo">399</span><a name="line.399"></a>
+<span class="sourceLineNo">400</span>        JsonValue _input = input;<a name="line.400"></a>
+<span class="sourceLineNo">401</span>        do {<a name="line.401"></a>
+<span class="sourceLineNo">402</span>            try {<a name="line.402"></a>
+<span class="sourceLineNo">403</span>                retryClaimTask = false;<a name="line.403"></a>
+<span class="sourceLineNo">404</span>                _input = updateValueWithObject(resourceID, _input, startField, DATE_UTIL.now());<a name="line.404"></a>
+<span class="sourceLineNo">405</span>                _input = updateValueWithObject(resourceID, _input, completedField, null);<a name="line.405"></a>
+<span class="sourceLineNo">406</span>                logger.debug("Claimed task and updated StartField: {}", _input);<a name="line.406"></a>
+<span class="sourceLineNo">407</span>                claimedTask = true;<a name="line.407"></a>
+<span class="sourceLineNo">408</span>            } catch (PreconditionFailedException ex) {<a name="line.408"></a>
+<span class="sourceLineNo">409</span>                    // If the object changed since we queried, get the latest<a name="line.409"></a>
+<span class="sourceLineNo">410</span>                    // and check if it's still in a state we want to process the task.<a name="line.410"></a>
+<span class="sourceLineNo">411</span>                    _input = retrieveObject(resourceID, id);<a name="line.411"></a>
+<span class="sourceLineNo">412</span>                    String currentStartDateStr = (_input.get(startField) == null)  ? null : _input.get(startField).asString();<a name="line.412"></a>
+<span class="sourceLineNo">413</span>                    String currentCompletedDateStr = (_input.get(completedField) == null)  ? null : _input.get(completedField).asString();<a name="line.413"></a>
+<span class="sourceLineNo">414</span>                    if (currentCompletedDateStr == null &amp;&amp; (currentStartDateStr == null || currentStartDateStr.equals(expectedStartDateStr))) {<a name="line.414"></a>
+<span class="sourceLineNo">415</span>                        retryClaimTask = true;<a name="line.415"></a>
+<span class="sourceLineNo">416</span>                    } else {<a name="line.416"></a>
+<span class="sourceLineNo">417</span>                        // Someone else managed to update the started field first,<a name="line.417"></a>
+<span class="sourceLineNo">418</span>                        // claimed the task. Do not execute it here this run.<a name="line.418"></a>
+<span class="sourceLineNo">419</span>                        logger.debug("Task for {} {} was already claimed, ignore.", resourceID, id);<a name="line.419"></a>
+<span class="sourceLineNo">420</span>                    }<a name="line.420"></a>
+<span class="sourceLineNo">421</span>            }<a name="line.421"></a>
+<span class="sourceLineNo">422</span>        } while (retryClaimTask &amp;&amp; !taskScannerContext.isCanceled());<a name="line.422"></a>
+<span class="sourceLineNo">423</span>        if (claimedTask) {<a name="line.423"></a>
+<span class="sourceLineNo">424</span>            execScript(_input);<a name="line.424"></a>
+<span class="sourceLineNo">425</span>        }<a name="line.425"></a>
+<span class="sourceLineNo">426</span>    }<a name="line.426"></a>
+<span class="sourceLineNo">427</span><a name="line.427"></a>
+<span class="sourceLineNo">428</span>    /**<a name="line.428"></a>
+<span class="sourceLineNo">429</span>     * Performs the individual executions of the supplied script<a name="line.429"></a>
+<span class="sourceLineNo">430</span>     *<a name="line.430"></a>
+<span class="sourceLineNo">431</span>     * Passes &lt;b&gt;"input"&lt;/b&gt; and &lt;b&gt;"objectID"&lt;/b&gt; to the script.&lt;br&gt;<a name="line.431"></a>
+<span class="sourceLineNo">432</span>     *   &lt;b&gt;"objectID"&lt;/b&gt; contains the full ID of the supplied object (including resource identifier).<a name="line.432"></a>
+<span class="sourceLineNo">433</span>     *      Useful for performing updates.&lt;br&gt;<a name="line.433"></a>
+<span class="sourceLineNo">434</span>     *   &lt;b&gt;"input"&lt;/b&gt; contains the supplied object<a name="line.434"></a>
+<span class="sourceLineNo">435</span>     *<a name="line.435"></a>
+<span class="sourceLineNo">436</span>     * @param scriptName name of the script<a name="line.436"></a>
+<span class="sourceLineNo">437</span>     * @param invokerName name of the invoker<a name="line.437"></a>
+<span class="sourceLineNo">438</span>     * @param script the script to execute<a name="line.438"></a>
+<span class="sourceLineNo">439</span>     * @param resourceID the resource identifier for the object that the script will be performed on<a name="line.439"></a>
+<span class="sourceLineNo">440</span>     * @param startField JsonPointer to the field that will be marked at script start<a name="line.440"></a>
+<span class="sourceLineNo">441</span>     * @param completedField JsonPointer to the field that will be marked at script completion<a name="line.441"></a>
+<span class="sourceLineNo">442</span>     * @param input value to input to the script<a name="line.442"></a>
+<span class="sourceLineNo">443</span>     * @throws ExecutionException<a name="line.443"></a>
+<span class="sourceLineNo">444</span>     * @throws JsonResourceException<a name="line.444"></a>
+<span class="sourceLineNo">445</span>     */<a name="line.445"></a>
+<span class="sourceLineNo">446</span>    private void execScript(JsonValue input)<a name="line.446"></a>
+<span class="sourceLineNo">447</span>            throws ExecutionException, ResourceException {<a name="line.447"></a>
+<span class="sourceLineNo">448</span>        if (script != null) {<a name="line.448"></a>
+<span class="sourceLineNo">449</span>            String resourceID = taskScannerContext.getObjectID();<a name="line.449"></a>
+<span class="sourceLineNo">450</span>            ServerContext context = taskScannerContext.getContext();<a name="line.450"></a>
+<span class="sourceLineNo">451</span><a name="line.451"></a>
+<span class="sourceLineNo">452</span>            try {<a name="line.452"></a>
+<span class="sourceLineNo">453</span>                Script scope = script.getScript(context);<a name="line.453"></a>
+<span class="sourceLineNo">454</span>                scope.put("input", input.getObject());<a name="line.454"></a>
+<span class="sourceLineNo">455</span>                scope.put("objectID", retrieveFullID(resourceID, input));<a name="line.455"></a>
+<span class="sourceLineNo">456</span><a name="line.456"></a>
+<span class="sourceLineNo">457</span>                Object returnedValue = scope.eval();<a name="line.457"></a>
+<span class="sourceLineNo">458</span>                JsonValue _input = retrieveUpdatedObject(resourceID, input);<a name="line.458"></a>
+<span class="sourceLineNo">459</span>                logger.debug("After script execution: {}", _input);<a name="line.459"></a>
+<span class="sourceLineNo">460</span><a name="line.460"></a>
+<span class="sourceLineNo">461</span>                if (returnedValue == Boolean.TRUE) {<a name="line.461"></a>
+<span class="sourceLineNo">462</span>                   _input = updateValueWithObject(resourceID, _input, taskScannerContext.getCompletedField(), DATE_UTIL.now());<a name="line.462"></a>
+<span class="sourceLineNo">463</span>                   taskScannerContext.getStatistics().taskSucceded();<a name="line.463"></a>
+<span class="sourceLineNo">464</span>                   logger.debug("Updated CompletedField: {}", _input);<a name="line.464"></a>
+<span class="sourceLineNo">465</span>                } else {<a name="line.465"></a>
+<span class="sourceLineNo">466</span>                    taskScannerContext.getStatistics().taskFailed();<a name="line.466"></a>
+<span class="sourceLineNo">467</span>                }<a name="line.467"></a>
+<span class="sourceLineNo">468</span><a name="line.468"></a>
+<span class="sourceLineNo">469</span>            } catch (ScriptException se) {<a name="line.469"></a>
+<span class="sourceLineNo">470</span>                taskScannerContext.getStatistics().taskFailed();<a name="line.470"></a>
+<span class="sourceLineNo">471</span>                String msg = taskScannerContext.getScriptName() + " script invoked by " +<a name="line.471"></a>
+<span class="sourceLineNo">472</span>                        taskScannerContext.getInvokerName() + " encountered exception";<a name="line.472"></a>
+<span class="sourceLineNo">473</span>                logger.debug(msg, se);<a name="line.473"></a>
+<span class="sourceLineNo">474</span>                throw new ExecutionException(msg, se);<a name="line.474"></a>
+<span class="sourceLineNo">475</span>            }<a name="line.475"></a>
+<span class="sourceLineNo">476</span>        }<a name="line.476"></a>
+<span class="sourceLineNo">477</span>    }<a name="line.477"></a>
+<span class="sourceLineNo">478</span><a name="line.478"></a>
+<span class="sourceLineNo">479</span>    /**<a name="line.479"></a>
+<span class="sourceLineNo">480</span>     * Flattens JsonValue into a one-level-deep object<a name="line.480"></a>
+<span class="sourceLineNo">481</span>     * @param original original JsonValue object<a name="line.481"></a>
+<span class="sourceLineNo">482</span>     * @return flattened JsonValue<a name="line.482"></a>
+<span class="sourceLineNo">483</span>     */<a name="line.483"></a>
+<span class="sourceLineNo">484</span>    private static JsonValue flattenJson(JsonValue original) {<a name="line.484"></a>
+<span class="sourceLineNo">485</span>        return flattenJson("", original);<a name="line.485"></a>
+<span class="sourceLineNo">486</span>    }<a name="line.486"></a>
+<span class="sourceLineNo">487</span><a name="line.487"></a>
+<span class="sourceLineNo">488</span>    /**<a name="line.488"></a>
+<span class="sourceLineNo">489</span>     * Flattens JsonValue into a one-level-deep object<a name="line.489"></a>
+<span class="sourceLineNo">490</span>     * @param parent name of the parent object (for nested objects)<a name="line.490"></a>
+<span class="sourceLineNo">491</span>     * @param original original JsonValue object<a name="line.491"></a>
+<span class="sourceLineNo">492</span>     * @return flattened JsonValue<a name="line.492"></a>
+<span class="sourceLineNo">493</span>     */<a name="line.493"></a>
+<span class="sourceLineNo">494</span>    private static JsonValue flattenJson(String parent, JsonValue original) {<a name="line.494"></a>
+<span class="sourceLineNo">495</span>        JsonValue flattened = new JsonValue(new HashMap&lt;String, Object&gt;());<a name="line.495"></a>
+<span class="sourceLineNo">496</span>        Iterator&lt;String&gt; iter = original.keys().iterator();<a name="line.496"></a>
+<span class="sourceLineNo">497</span>        while (iter.hasNext()) {<a name="line.497"></a>
+<span class="sourceLineNo">498</span>            String oKey = iter.next();<a name="line.498"></a>
+<span class="sourceLineNo">499</span>            String key = (parent.isEmpty() ? "" : parent + ".") + oKey;<a name="line.499"></a>
+<span class="sourceLineNo">500</span><a name="line.500"></a>
+<span class="sourceLineNo">501</span>            JsonValue value = original.get(oKey);<a name="line.501"></a>
+<span class="sourceLineNo">502</span>            if (value.isMap()) {<a name="line.502"></a>
+<span class="sourceLineNo">503</span>                addAllToJson(flattened, flattenJson(key, value));<a name="line.503"></a>
+<span class="sourceLineNo">504</span>            } else {<a name="line.504"></a>
+<span class="sourceLineNo">505</span>                flattened.put(key, value.getObject());<a name="line.505"></a>
+<span class="sourceLineNo">506</span>            }<a name="line.506"></a>
+<span class="sourceLineNo">507</span>        }<a name="line.507"></a>
+<span class="sourceLineNo">508</span>        return flattened;<a name="line.508"></a>
+<span class="sourceLineNo">509</span>    }<a name="line.509"></a>
+<span class="sourceLineNo">510</span><a name="line.510"></a>
+<span class="sourceLineNo">511</span>    /**<a name="line.511"></a>
+<span class="sourceLineNo">512</span>     * Adds all objects from one JsonValue to another (performs a merge).<a name="line.512"></a>
+<span class="sourceLineNo">513</span>     * Any values contained in both objects will be overwritten to reflect the values in &lt;b&gt;from&lt;/b&gt;<a name="line.513"></a>
+<span class="sourceLineNo">514</span>     * &lt;br&gt;&lt;br&gt;<a name="line.514"></a>
+<span class="sourceLineNo">515</span>     * &lt;i&gt;&lt;b&gt;NOTE:&lt;/b&gt; this should be a part of JsonValue itself (so we can support merging two JsonValue objects)&lt;/i&gt;<a name="line.515"></a>
+<span class="sourceLineNo">516</span>     * @param to JsonValue that will have objects added to it<a name="line.516"></a>
+<span class="sourceLineNo">517</span>     * @param from JsonValue that will be used as reference for updating<a name="line.517"></a>
+<span class="sourceLineNo">518</span>     */<a name="line.518"></a>
+<span class="sourceLineNo">519</span>    private static void addAllToJson(JsonValue to, JsonValue from) {<a name="line.519"></a>
+<span class="sourceLineNo">520</span>        Iterator&lt;String&gt; iter = from.keys().iterator();<a name="line.520"></a>
+<span class="sourceLineNo">521</span>        while (iter.hasNext()) {<a name="line.521"></a>
+<span class="sourceLineNo">522</span>            String key = iter.next();<a name="line.522"></a>
+<span class="sourceLineNo">523</span>            to.put(key, from.get(key).getObject());<a name="line.523"></a>
+<span class="sourceLineNo">524</span>        }<a name="line.524"></a>
+<span class="sourceLineNo">525</span>    }<a name="line.525"></a>
+<span class="sourceLineNo">526</span><a name="line.526"></a>
+<span class="sourceLineNo">527</span>    /**<a name="line.527"></a>
+<span class="sourceLineNo">528</span>     * Ensure that some JsonPointer exists within a supplied object so that some object can be placed in that field<a name="line.528"></a>
+<span class="sourceLineNo">529</span>     * @param ptr JsonPointer to ensure exists at each level<a name="line.529"></a>
+<span class="sourceLineNo">530</span>     * @param obj object to ensure the JsonPointer exists within<a name="line.530"></a>
+<span class="sourceLineNo">531</span>     */<a name="line.531"></a>
+<span class="sourceLineNo">532</span>    private static void ensureJsonPointerExists(JsonPointer ptr, JsonValue obj) {<a name="line.532"></a>
+<span class="sourceLineNo">533</span>        JsonValue refObj = obj;<a name="line.533"></a>
+<span class="sourceLineNo">534</span><a name="line.534"></a>
+<span class="sourceLineNo">535</span>        for (String p : ptr) {<a name="line.535"></a>
+<span class="sourceLineNo">536</span>            if (!refObj.isDefined(p)) {<a name="line.536"></a>
+<span class="sourceLineNo">537</span>                refObj.put(p, new JsonValue(new HashMap&lt;String, Object&gt;()));<a name="line.537"></a>
+<span class="sourceLineNo">538</span>            }<a name="line.538"></a>
+<span class="sourceLineNo">539</span>            refObj = refObj.get(p);<a name="line.539"></a>
+<span class="sourceLineNo">540</span>        }<a name="line.540"></a>
+<span class="sourceLineNo">541</span>    }<a name="line.541"></a>
+<span class="sourceLineNo">542</span>}<a name="line.542"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+Manifest-Version: 1.0
+Bundle-Description: OpenIDM is an open standards based Identity Manageme
+ nt, Provisioning and Compliance solution.        Experience shows that 
+ the most important features of an identity management product are: high
+  flexibility in        Business Process handling and compliance with op
+ en standards and interfaces. A highly flexible user interface        co
+ mbined with a very robust workflow engine make OpenIDM ready for any Id
+ entity Management project.
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM JASPI Authentication Filter
+Bundle-SymbolicName: org.forgerock.openidm.authnfilter
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.jaspi.auth;uses:="org.forgerock.js
+ on.fluent,org.forgerock.json.resource,org.forgerock.openidm.crypto,org.
+ forgerock.openidm.jaspi.config,org.forgerock.util.promise,org.osgi.serv
+ ice.component";version="3.0.0",org.forgerock.openidm.jaspi.config;uses:
+ ="org.forgerock.auth.common,org.forgerock.jaspi.logging,org.forgerock.j
+ aspi.runtime.context.config,org.forgerock.json.fluent,org.forgerock.jso
+ n.resource,org.forgerock.openidm.crypto,org.forgerock.openidm.router,or
+ g.forgerock.openidm.servletregistration,org.forgerock.script,org.osgi.s
+ ervice.component";version="3.0.0",org.forgerock.openidm.jaspi.modules;u
+ ses:="javax.security.auth,javax.security.auth.callback,javax.security.a
+ uth.message,javax.security.auth.message.module,javax.servlet.http,org.f
+ orgerock.auth.common,org.forgerock.jaspi.logging,org.forgerock.openidm.
+ jaspi.config";version="3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.audit.util;version="[3.0,3.1)",org
+ .forgerock.openidm.config.enhanced;version="[3.0,3.1)",org.forgerock.op
+ enidm.core;version="[3.0,3.1)",org.forgerock.openidm.crypto;version="[3
+ .0,3.1)",org.forgerock.openidm.router;version="[3.0,3.1)",org.forgerock
+ .openidm.servletregistration;version="[3.0,3.1)",org.forgerock.openidm.
+ util;version="[3.0,3.1)",org.forgerock.json.fluent;version="[2.3,2.4)",
+ org.forgerock.json.resource;version="[2.3,2.4)",org.forgerock.json.reso
+ urce.servlet;version="[2.3,2.4)",javax.script,javax.security.auth,javax
+ .security.auth.callback,javax.security.auth.message;version="[1.0,2)",j
+ avax.security.auth.message.module;version="[1.0,2)",javax.servlet;versi
+ on="[2.6,3)",javax.servlet.http;version="[2.6,3)",org.apache.commons.co
+ dec.binary;version="[1.8,2)",org.apache.commons.lang3;version="[3.1,4)"
+ ,org.eclipse.jetty.plus.jaas.spi;version="[8.1,9)",org.eclipse.jetty.ut
+ il.security;version="[8.1,9)",org.forgerock.auth.common;version="[1.4,2
+ )",org.forgerock.jaspi;version="[1.4,2)",org.forgerock.jaspi.exceptions
+ ;version="[1.4,2)",org.forgerock.jaspi.logging;version="[1.4,2)",org.fo
+ rgerock.jaspi.modules.iwa;version="[1.4,2)",org.forgerock.jaspi.modules
+ .session.jwt;version="[1.4,2)",org.forgerock.jaspi.modules.session.open
+ am;version="[1.4,2)",org.forgerock.jaspi.runtime.context.config;version
+ ="[1.4,2)",org.forgerock.script;version="[1.3,2)",org.forgerock.script.
+ exception;version="[1.3,2)",org.forgerock.util;version="[1.3,2)",org.fo
+ rgerock.util.promise;version="[1.3,2)",org.osgi.service.component;versi
+ on="[1.1,2)",org.slf4j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.jaspi.config.OSGiAuthn
+ FilterBuilder.xml,OSGI-INF/org.forgerock.openidm.jaspi.auth.Authenticat
+ ionService.xml

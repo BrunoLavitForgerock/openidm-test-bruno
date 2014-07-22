@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.provisioner" configuration-policy="ignore">
+        <implementation class="org.forgerock.openidm.provisioner.impl.SystemObjectSetService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.openidm.quartz.impl.ScheduledService"/>
+            <provide interface="org.forgerock.json.resource.SingletonResourceProvider"/>
+        </service>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="service.description" value="OpenIDM System Object Set Service"/>
+        <property name="openidm.router.prefix" value="/system"/>
+        <property name="service.pid" value="org.forgerock.openidm.provisioner"/>
+        <reference name="provisionerServices" interface="org.forgerock.openidm.provisioner.ProvisionerService" cardinality="0..n" policy="dynamic" bind="bindProvisionerService" unbind="unbindProvisionerService"/>
+        <reference name="routeService" interface="org.forgerock.openidm.router.RouteService" cardinality="1..1" policy="static" target="(openidm.router.prefix=/*)" bind="bindRouteService" unbind="unbindRouteService"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+        <reference name="configurationService" interface="org.forgerock.openidm.provisioner.ConfigurationService" cardinality="0..1" policy="dynamic" bind="bindConfigurationService" unbind="unbindConfigurationService"/>
+    </scr:component>
+</components>

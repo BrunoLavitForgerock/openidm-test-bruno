@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-Activator: org.forgerock.openidm.core.internal.Activator
+Bundle-Category: utility
+Bundle-Description: This bundle loads the boot properties of OpenIDM to 
+ bootstrap the start process.
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM System Bundle
+Bundle-SymbolicName: org.forgerock.openidm.system
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.core;uses:="org.osgi.framework,org
+ .osgi.util.tracker";version="3.0.0",org.forgerock.openidm.logging.util;
+ version="3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.core,org.osgi.framework;version="[
+ 1.6,2)",org.osgi.util.tracker;version="[1.5,2)"
+SCM-Revision: 0

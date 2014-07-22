@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-Description: This bundle simulates cluster
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Cluster Management Bundle
+Bundle-SymbolicName: org.forgerock.openidm.cluster
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.cluster;version="3.0.0";uses:="org
+ .forgerock.json.fluent,org.forgerock.json.resource,org.forgerock.openid
+ m.repo"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.config.enhanced;version="[3.0,3.1)
+ ",org.forgerock.openidm.repo;version="[3.0,3.1)",org.forgerock.openidm.
+ util;version="[3.0,3.1)",org.forgerock.json.fluent;version="[2.3,2.4)",
+ org.forgerock.json.resource;version="[2.3,2.4)",org.osgi.service.compon
+ ent;version="[1.1,2)",org.slf4j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.cluster.ClusterManager
+ .xml

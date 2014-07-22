@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.servletfilter" configuration-policy="require" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.servletregistration.impl.ServletFilterConfiguration"/>
+        <property name="service.pid" value="org.forgerock.openidm.servletfilter"/>
+        <reference name="ref_ServletFilterRegistration" interface="org.forgerock.openidm.servletregistration.ServletRegistration" cardinality="1..1" policy="dynamic" bind="bindServletFilterRegistration" unbind="unbindServletFilterRegistration"/>
+    </scr:component>
+</components>

@@ -1,0 +1,334 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.<a name="line.2"></a>
+<span class="sourceLineNo">003</span> *<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * Copyright © 2011 ForgeRock AS. All rights reserved.<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * The contents of this file are subject to the terms<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * of the Common Development and Distribution License<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * (the License). You may not use this file except in<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * compliance with the License.<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * You can obtain a copy of the License at<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * http://forgerock.org/license/CDDLv1.0.html<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * See the License for the specific language governing<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * permission and limitations under the License.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> *<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * When distributing Covered Code, include this CDDL<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * Header Notice in each file and include the License file<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * at http://forgerock.org/license/CDDLv1.0.html<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * If applicable, add the following below the CDDL Header,<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * with the fields enclosed by brackets [] replaced by<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * your own identifying information:<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * "Portions Copyrighted [year] [name of copyright owner]"<a name="line.22"></a>
+<span class="sourceLineNo">023</span> *<a name="line.23"></a>
+<span class="sourceLineNo">024</span> * $Id$<a name="line.24"></a>
+<span class="sourceLineNo">025</span> */<a name="line.25"></a>
+<span class="sourceLineNo">026</span><a name="line.26"></a>
+<span class="sourceLineNo">027</span>package org.forgerock.openidm.provisioner.openicf.impl;<a name="line.27"></a>
+<span class="sourceLineNo">028</span><a name="line.28"></a>
+<span class="sourceLineNo">029</span>import org.forgerock.json.crypto.JsonCryptoException;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import org.forgerock.json.fluent.JsonValue;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import org.forgerock.json.resource.ForbiddenException;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import org.forgerock.json.resource.Resource;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import org.forgerock.json.resource.ResourceException;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import org.forgerock.openidm.crypto.CryptoService;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import org.forgerock.openidm.provisioner.Id;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import org.forgerock.openidm.provisioner.openicf.OperationHelper;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import org.identityconnectors.common.Assertions;<a name="line.39"></a>
+<span class="sourceLineNo">040</span>import org.identityconnectors.framework.api.operations.APIOperation;<a name="line.40"></a>
+<span class="sourceLineNo">041</span>import org.identityconnectors.framework.common.objects.*;<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>import java.io.IOException;<a name="line.43"></a>
+<span class="sourceLineNo">044</span>import java.lang.reflect.UndeclaredThrowableException;<a name="line.44"></a>
+<span class="sourceLineNo">045</span>import java.net.URI;<a name="line.45"></a>
+<span class="sourceLineNo">046</span>import java.util.ArrayList;<a name="line.46"></a>
+<span class="sourceLineNo">047</span>import java.util.List;<a name="line.47"></a>
+<span class="sourceLineNo">048</span>import java.util.Map;<a name="line.48"></a>
+<span class="sourceLineNo">049</span><a name="line.49"></a>
+<span class="sourceLineNo">050</span><a name="line.50"></a>
+<span class="sourceLineNo">051</span>/**<a name="line.51"></a>
+<span class="sourceLineNo">052</span> * @author $author$<a name="line.52"></a>
+<span class="sourceLineNo">053</span> * @version $Revision$ $Date$<a name="line.53"></a>
+<span class="sourceLineNo">054</span> */<a name="line.54"></a>
+<span class="sourceLineNo">055</span>public class OperationHelperImpl implements OperationHelper {<a name="line.55"></a>
+<span class="sourceLineNo">056</span><a name="line.56"></a>
+<span class="sourceLineNo">057</span>    private final ObjectClassInfoHelper objectClassInfoHelper;<a name="line.57"></a>
+<span class="sourceLineNo">058</span>    private final Map&lt;Class&lt;? extends APIOperation&gt;, OperationOptionInfoHelper&gt; operations;<a name="line.58"></a>
+<span class="sourceLineNo">059</span>    private final List&lt;Map&lt;String, Object&gt;&gt; resultList = new ArrayList&lt;Map&lt;String, Object&gt;&gt;();<a name="line.59"></a>
+<span class="sourceLineNo">060</span>    private final Id systemObjectSetId;<a name="line.60"></a>
+<span class="sourceLineNo">061</span>    private final CryptoService cryptoService;<a name="line.61"></a>
+<span class="sourceLineNo">062</span><a name="line.62"></a>
+<span class="sourceLineNo">063</span>    /**<a name="line.63"></a>
+<span class="sourceLineNo">064</span>     * @param systemObjectSetId<a name="line.64"></a>
+<span class="sourceLineNo">065</span>     * @param objectClassInfoHelper<a name="line.65"></a>
+<span class="sourceLineNo">066</span>     * @param connectorObjectOptions<a name="line.66"></a>
+<span class="sourceLineNo">067</span>     * @param cryptoService<a name="line.67"></a>
+<span class="sourceLineNo">068</span>     * @throws NullPointerException if any of the input values is null.<a name="line.68"></a>
+<span class="sourceLineNo">069</span>     */<a name="line.69"></a>
+<span class="sourceLineNo">070</span>    public OperationHelperImpl(Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper,<a name="line.70"></a>
+<span class="sourceLineNo">071</span>                               Map&lt;Class&lt;? extends APIOperation&gt;, OperationOptionInfoHelper&gt; connectorObjectOptions,<a name="line.71"></a>
+<span class="sourceLineNo">072</span>                               CryptoService cryptoService) {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>        this.objectClassInfoHelper = Assertions.nullChecked(objectClassInfoHelper, "objectClassInfoHelper");<a name="line.73"></a>
+<span class="sourceLineNo">074</span>        this.operations = Assertions.nullChecked(connectorObjectOptions, "connectorObjectOptions");<a name="line.74"></a>
+<span class="sourceLineNo">075</span>        this.systemObjectSetId = Assertions.nullChecked(systemObjectSetId, "systemObjectSetId");<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        this.cryptoService = cryptoService;<a name="line.76"></a>
+<span class="sourceLineNo">077</span>    }<a name="line.77"></a>
+<span class="sourceLineNo">078</span><a name="line.78"></a>
+<span class="sourceLineNo">079</span>    public boolean isOperationPermitted(Class&lt;? extends APIOperation&gt; operation) throws ResourceException {<a name="line.79"></a>
+<span class="sourceLineNo">080</span>        OperationOptionInfoHelper operationOptionInfoHelper = operations.get(operation);<a name="line.80"></a>
+<span class="sourceLineNo">081</span>        String reason = "not supported.";<a name="line.81"></a>
+<span class="sourceLineNo">082</span>        if (null != operationOptionInfoHelper<a name="line.82"></a>
+<span class="sourceLineNo">083</span>                &amp;&amp; (null == operationOptionInfoHelper.getSupportedObjectTypes()<a name="line.83"></a>
+<span class="sourceLineNo">084</span>                    || operationOptionInfoHelper.getSupportedObjectTypes().contains(<a name="line.84"></a>
+<span class="sourceLineNo">085</span>                        objectClassInfoHelper.getObjectClass().getObjectClassValue()))) {<a name="line.85"></a>
+<span class="sourceLineNo">086</span><a name="line.86"></a>
+<span class="sourceLineNo">087</span>            if (!operationOptionInfoHelper.isDenied()) {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>                return true;<a name="line.88"></a>
+<span class="sourceLineNo">089</span>            } else if (OperationOptionInfoHelper.OnActionPolicy.ALLOW.equals(operationOptionInfoHelper.getOnActionPolicy())) {<a name="line.89"></a>
+<span class="sourceLineNo">090</span>                return false;<a name="line.90"></a>
+<span class="sourceLineNo">091</span>            }<a name="line.91"></a>
+<span class="sourceLineNo">092</span>            reason = "denied.";<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        }<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        throw new ForbiddenException("Operation " + operation.getCanonicalName() + " is " + reason);<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    }<a name="line.95"></a>
+<span class="sourceLineNo">096</span><a name="line.96"></a>
+<span class="sourceLineNo">097</span><a name="line.97"></a>
+<span class="sourceLineNo">098</span>    public OperationOptionsBuilder getOperationOptionsBuilder(Class&lt;? extends APIOperation&gt; operation, ConnectorObject connectorObject, JsonValue source) throws Exception {<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        return operations.get(operation).build(source, objectClassInfoHelper);<a name="line.99"></a>
+<span class="sourceLineNo">100</span>    }<a name="line.100"></a>
+<span class="sourceLineNo">101</span><a name="line.101"></a>
+<span class="sourceLineNo">102</span><a name="line.102"></a>
+<span class="sourceLineNo">103</span>    public ObjectClass getObjectClass() {<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        return objectClassInfoHelper.getObjectClass();<a name="line.104"></a>
+<span class="sourceLineNo">105</span>    }<a name="line.105"></a>
+<span class="sourceLineNo">106</span><a name="line.106"></a>
+<span class="sourceLineNo">107</span><a name="line.107"></a>
+<span class="sourceLineNo">108</span>/*<a name="line.108"></a>
+<span class="sourceLineNo">109</span>    public Filter build(Map&lt;String, Object&gt; query, Map&lt;String, Object&gt; params) throws Exception {<a name="line.109"></a>
+<span class="sourceLineNo">110</span>        Operator operator = createOperator(query, params);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>        return operator.createFilter();<a name="line.111"></a>
+<span class="sourceLineNo">112</span>    }<a name="line.112"></a>
+<span class="sourceLineNo">113</span>*/<a name="line.113"></a>
+<span class="sourceLineNo">114</span>    public ConnectorObject build(Class&lt;? extends APIOperation&gt; operation, JsonValue source) throws Exception {<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        return objectClassInfoHelper.build(operation, null, source, cryptoService);<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    }<a name="line.116"></a>
+<span class="sourceLineNo">117</span><a name="line.117"></a>
+<span class="sourceLineNo">118</span>/*<a name="line.118"></a>
+<span class="sourceLineNo">119</span>    public ConnectorObject build(Class&lt;? extends APIOperation&gt; operation, String id, JsonValue source) throws Exception {<a name="line.119"></a>
+<span class="sourceLineNo">120</span>        //TODO do something with ID<a name="line.120"></a>
+<span class="sourceLineNo">121</span>        return objectClassInfoHelper.build(operation, id, source, cryptoService);<a name="line.121"></a>
+<span class="sourceLineNo">122</span>    }<a name="line.122"></a>
+<span class="sourceLineNo">123</span>    */<a name="line.123"></a>
+<span class="sourceLineNo">124</span><a name="line.124"></a>
+<span class="sourceLineNo">125</span><a name="line.125"></a>
+<span class="sourceLineNo">126</span>    public JsonValue build(ConnectorObject source) throws Exception {<a name="line.126"></a>
+<span class="sourceLineNo">127</span>        JsonValue result = objectClassInfoHelper.build(source, cryptoService).getContent();<a name="line.127"></a>
+<span class="sourceLineNo">128</span>        resetUid(source.getUid(), result);<a name="line.128"></a>
+<span class="sourceLineNo">129</span>        if (null != source.getUid().getRevision()) {<a name="line.129"></a>
+<span class="sourceLineNo">130</span>            //System supports Revision<a name="line.130"></a>
+<span class="sourceLineNo">131</span>            result.put(Resource.FIELD_CONTENT_REVISION, source.getUid().getRevision());<a name="line.131"></a>
+<span class="sourceLineNo">132</span>        }<a name="line.132"></a>
+<span class="sourceLineNo">133</span>        return result;<a name="line.133"></a>
+<span class="sourceLineNo">134</span>    }<a name="line.134"></a>
+<span class="sourceLineNo">135</span><a name="line.135"></a>
+<span class="sourceLineNo">136</span>    public void resetUid(Uid uid, JsonValue target) {<a name="line.136"></a>
+<span class="sourceLineNo">137</span>        if (null != uid &amp;&amp; null != target) {<a name="line.137"></a>
+<span class="sourceLineNo">138</span>            // TODO are we going to encode ids?<a name="line.138"></a>
+<span class="sourceLineNo">139</span>            target.put(Resource.FIELD_CONTENT_ID, /*Id.escapeUid(*/uid.getUidValue()/*)*/);<a name="line.139"></a>
+<span class="sourceLineNo">140</span>        }<a name="line.140"></a>
+<span class="sourceLineNo">141</span>    }<a name="line.141"></a>
+<span class="sourceLineNo">142</span><a name="line.142"></a>
+<span class="sourceLineNo">143</span>    /**<a name="line.143"></a>
+<span class="sourceLineNo">144</span>     * Generate the fully qualified id from unqualified object {@link org.identityconnectors.framework.common.objects.Uid}<a name="line.144"></a>
+<span class="sourceLineNo">145</span>     * &lt;p/&gt;<a name="line.145"></a>
+<span class="sourceLineNo">146</span>     * The result id will be system/{@code [endSystemName]}/{@code [objectType]}/{@code [escapedObjectId]}<a name="line.146"></a>
+<span class="sourceLineNo">147</span>     *<a name="line.147"></a>
+<span class="sourceLineNo">148</span>     * @param uid original un escaped unique identifier of the object<a name="line.148"></a>
+<span class="sourceLineNo">149</span>     * @return<a name="line.149"></a>
+<span class="sourceLineNo">150</span>     */<a name="line.150"></a>
+<span class="sourceLineNo">151</span>    public URI resolveQualifiedId(Uid uid) {<a name="line.151"></a>
+<span class="sourceLineNo">152</span>        if (null != uid) {<a name="line.152"></a>
+<span class="sourceLineNo">153</span>            try {<a name="line.153"></a>
+<span class="sourceLineNo">154</span>                return systemObjectSetId.resolveLocalId(uid.getUidValue()).getQualifiedId();<a name="line.154"></a>
+<span class="sourceLineNo">155</span>            } catch (ResourceException e) {<a name="line.155"></a>
+<span class="sourceLineNo">156</span>                // Should never happen in a copy constructor.<a name="line.156"></a>
+<span class="sourceLineNo">157</span>                throw new UndeclaredThrowableException(e);<a name="line.157"></a>
+<span class="sourceLineNo">158</span>            }<a name="line.158"></a>
+<span class="sourceLineNo">159</span>        } else {<a name="line.159"></a>
+<span class="sourceLineNo">160</span>            return systemObjectSetId.getQualifiedId();<a name="line.160"></a>
+<span class="sourceLineNo">161</span>        }<a name="line.161"></a>
+<span class="sourceLineNo">162</span>    }<a name="line.162"></a>
+<span class="sourceLineNo">163</span><a name="line.163"></a>
+<span class="sourceLineNo">164</span>/*<a name="line.164"></a>
+<span class="sourceLineNo">165</span>    public ResultsHandler getResultsHandler() {<a name="line.165"></a>
+<span class="sourceLineNo">166</span>        resultList.clear();<a name="line.166"></a>
+<span class="sourceLineNo">167</span>        return new ConnectorObjectResultsHandler();<a name="line.167"></a>
+<span class="sourceLineNo">168</span>    }<a name="line.168"></a>
+<span class="sourceLineNo">169</span><a name="line.169"></a>
+<span class="sourceLineNo">170</span><a name="line.170"></a>
+<span class="sourceLineNo">171</span>    public List&lt;Map&lt;String, Object&gt;&gt; getQueryResult() {<a name="line.171"></a>
+<span class="sourceLineNo">172</span>        return resultList;<a name="line.172"></a>
+<span class="sourceLineNo">173</span>    }<a name="line.173"></a>
+<span class="sourceLineNo">174</span>*/<a name="line.174"></a>
+<span class="sourceLineNo">175</span><a name="line.175"></a>
+<span class="sourceLineNo">176</span> //   private class ConnectorObjectResultsHandler implements ResultsHandler {<a name="line.176"></a>
+<span class="sourceLineNo">177</span>        /**<a name="line.177"></a>
+<span class="sourceLineNo">178</span>         * Call-back method to do whatever it is the caller wants to do with<a name="line.178"></a>
+<span class="sourceLineNo">179</span>         * each {@link org.identityconnectors.framework.common.objects.ConnectorObject} that is returned in the result of<a name="line.179"></a>
+<span class="sourceLineNo">180</span>         * {@link org.identityconnectors.framework.api.operations.SearchApiOp}.<a name="line.180"></a>
+<span class="sourceLineNo">181</span>         *<a name="line.181"></a>
+<span class="sourceLineNo">182</span>         * @param obj each object return from the search.<a name="line.182"></a>
+<span class="sourceLineNo">183</span>         * @return true if we should keep processing else false to cancel.<a name="line.183"></a>
+<span class="sourceLineNo">184</span>         * @throws RuntimeException the implementor should throw a {@link RuntimeException}<a name="line.184"></a>
+<span class="sourceLineNo">185</span>         *                          that wraps any native exception (or that describes any other problem<a name="line.185"></a>
+<span class="sourceLineNo">186</span>         *                          during execution) that is serious enough to stop the iteration.<a name="line.186"></a>
+<span class="sourceLineNo">187</span>         */<a name="line.187"></a>
+<span class="sourceLineNo">188</span>/*<a name="line.188"></a>
+<span class="sourceLineNo">189</span>        public boolean handle(ConnectorObject obj) {<a name="line.189"></a>
+<span class="sourceLineNo">190</span>            try {<a name="line.190"></a>
+<span class="sourceLineNo">191</span>                return resultList.add(objectClassInfoHelper.build(obj, cryptoService).asMap());<a name="line.191"></a>
+<span class="sourceLineNo">192</span>            } catch (IOException e) {<a name="line.192"></a>
+<span class="sourceLineNo">193</span>                throw new IllegalArgumentException(e);<a name="line.193"></a>
+<span class="sourceLineNo">194</span>            } catch (JsonCryptoException e) {<a name="line.194"></a>
+<span class="sourceLineNo">195</span>                //TODO: This is a configuaration exception. Improve it later.<a name="line.195"></a>
+<span class="sourceLineNo">196</span>                throw new IllegalArgumentException(e);<a name="line.196"></a>
+<span class="sourceLineNo">197</span>            }<a name="line.197"></a>
+<span class="sourceLineNo">198</span>        }<a name="line.198"></a>
+<span class="sourceLineNo">199</span>    }<a name="line.199"></a>
+<span class="sourceLineNo">200</span>*/<a name="line.200"></a>
+<span class="sourceLineNo">201</span>/*<a name="line.201"></a>
+<span class="sourceLineNo">202</span>    private Operator createOperator(Map&lt;String, Object&gt; node, final Map&lt;String, Object&gt; params) throws Exception {<a name="line.202"></a>
+<span class="sourceLineNo">203</span><a name="line.203"></a>
+<span class="sourceLineNo">204</span>        String nodeName = getKey(node);<a name="line.204"></a>
+<span class="sourceLineNo">205</span><a name="line.205"></a>
+<span class="sourceLineNo">206</span>        if (isBooleanOperator(nodeName)) {<a name="line.206"></a>
+<span class="sourceLineNo">207</span><a name="line.207"></a>
+<span class="sourceLineNo">208</span>            BooleanOperator booleanOperator = OperatorFactory.createBooleanOperator(nodeName);<a name="line.208"></a>
+<span class="sourceLineNo">209</span><a name="line.209"></a>
+<span class="sourceLineNo">210</span>            List&lt;Object&gt; parts = (List&lt;Object&gt;) node.get(nodeName);<a name="line.210"></a>
+<span class="sourceLineNo">211</span><a name="line.211"></a>
+<span class="sourceLineNo">212</span>            if (parts.size() &lt; 2) {<a name="line.212"></a>
+<span class="sourceLineNo">213</span>                throw new IllegalArgumentException("To few elements in the 'BooleanOperator'-object (" + parts.size() + "). Must be 2 or more");<a name="line.213"></a>
+<span class="sourceLineNo">214</span>            }<a name="line.214"></a>
+<span class="sourceLineNo">215</span><a name="line.215"></a>
+<span class="sourceLineNo">216</span>            for (Object part : parts) {<a name="line.216"></a>
+<span class="sourceLineNo">217</span>                Operator op = createOperator((Map&lt;String, Object&gt;) part, params);<a name="line.217"></a>
+<span class="sourceLineNo">218</span>                booleanOperator.addOperator(op);<a name="line.218"></a>
+<span class="sourceLineNo">219</span>            }<a name="line.219"></a>
+<span class="sourceLineNo">220</span><a name="line.220"></a>
+<span class="sourceLineNo">221</span>            return booleanOperator;<a name="line.221"></a>
+<span class="sourceLineNo">222</span><a name="line.222"></a>
+<span class="sourceLineNo">223</span>        } else {<a name="line.223"></a>
+<span class="sourceLineNo">224</span>            return createFunctionalOperator(node, params);<a name="line.224"></a>
+<span class="sourceLineNo">225</span>        }<a name="line.225"></a>
+<span class="sourceLineNo">226</span>    }<a name="line.226"></a>
+<span class="sourceLineNo">227</span><a name="line.227"></a>
+<span class="sourceLineNo">228</span>    private Operator createFunctionalOperator(Map&lt;String, Object&gt; node, final Map&lt;String, Object&gt; params) throws Exception {<a name="line.228"></a>
+<span class="sourceLineNo">229</span><a name="line.229"></a>
+<span class="sourceLineNo">230</span>        String operatorName = getKey(node);<a name="line.230"></a>
+<span class="sourceLineNo">231</span><a name="line.231"></a>
+<span class="sourceLineNo">232</span>        Map&lt;String, Object&gt; nodeValueMap = (Map&lt;String, Object&gt;) node.get(operatorName);<a name="line.232"></a>
+<span class="sourceLineNo">233</span><a name="line.233"></a>
+<span class="sourceLineNo">234</span>        String field = (String) nodeValueMap.get("field");<a name="line.234"></a>
+<span class="sourceLineNo">235</span>        List&lt;String&gt; values = (List&lt;String&gt;) nodeValueMap.get("values");<a name="line.235"></a>
+<span class="sourceLineNo">236</span><a name="line.236"></a>
+<span class="sourceLineNo">237</span>        if (values == null) {<a name="line.237"></a>
+<span class="sourceLineNo">238</span>            List&lt;String&gt; providedValues = (List&lt;String&gt;) params.get(field);<a name="line.238"></a>
+<span class="sourceLineNo">239</span><a name="line.239"></a>
+<span class="sourceLineNo">240</span>            if (providedValues == null) {<a name="line.240"></a>
+<span class="sourceLineNo">241</span>                throw new IllegalArgumentException("No predefined or provided values for property: " + field);<a name="line.241"></a>
+<span class="sourceLineNo">242</span>            }<a name="line.242"></a>
+<span class="sourceLineNo">243</span><a name="line.243"></a>
+<span class="sourceLineNo">244</span>            values = (List&lt;String&gt;) params.get(field);<a name="line.244"></a>
+<span class="sourceLineNo">245</span>        }<a name="line.245"></a>
+<span class="sourceLineNo">246</span><a name="line.246"></a>
+<span class="sourceLineNo">247</span>        return OperatorFactory.createFunctionalOperator(operatorName, objectClassInfoHelper.build(field, values, cryptoService));<a name="line.247"></a>
+<span class="sourceLineNo">248</span>    }<a name="line.248"></a>
+<span class="sourceLineNo">249</span><a name="line.249"></a>
+<span class="sourceLineNo">250</span>    private boolean isBooleanOperator(String key) {<a name="line.250"></a>
+<span class="sourceLineNo">251</span>        return key.equals(OPERATOR_AND)<a name="line.251"></a>
+<span class="sourceLineNo">252</span>                || key.equals(OPERATOR_OR)<a name="line.252"></a>
+<span class="sourceLineNo">253</span>                || key.equals(OPERATOR_NOR)<a name="line.253"></a>
+<span class="sourceLineNo">254</span>                || key.equals(OPERATOR_NAND);<a name="line.254"></a>
+<span class="sourceLineNo">255</span><a name="line.255"></a>
+<span class="sourceLineNo">256</span>    }<a name="line.256"></a>
+<span class="sourceLineNo">257</span><a name="line.257"></a>
+<span class="sourceLineNo">258</span>    private String getKey(Map&lt;String, Object&gt; node) {<a name="line.258"></a>
+<span class="sourceLineNo">259</span>        return node.keySet().isEmpty() ? null : node.keySet().iterator().next();<a name="line.259"></a>
+<span class="sourceLineNo">260</span>    }<a name="line.260"></a>
+<span class="sourceLineNo">261</span>*/<a name="line.261"></a>
+<span class="sourceLineNo">262</span>}<a name="line.262"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

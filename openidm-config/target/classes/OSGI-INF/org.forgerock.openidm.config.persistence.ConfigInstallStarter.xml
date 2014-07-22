@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.config.enhanced.starter" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.config.persistence.ConfigInstallStarter"/>
+        <property name="service.description" value="OpenIDM internal config installation starter"/>
+        <property name="service.vendor" value="ForgeRock AS"/>
+        <property name="service.pid" value="org.forgerock.openidm.config.enhanced.starter"/>
+        <reference name="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" cardinality="1..1" policy="static" bind="bindConfigAdmin" unbind="unbindConfigAdmin"/>
+        <reference name="crypto" interface="org.forgerock.openidm.crypto.CryptoService" cardinality="1..1" policy="static" bind="bindCrypto" unbind="unbindCrypto"/>
+        <reference name="repo" interface="org.forgerock.openidm.repo.RepoBootService" cardinality="1..1" policy="static" bind="bindRepo" unbind="unbindRepo"/>
+        <reference name="configPersisterMarker" interface="org.forgerock.openidm.config.persistence.ConfigPersisterMarker" cardinality="1..1" policy="static" bind="bindConfigPersisterMarker" unbind="unbindConfigPersisterMarker"/>
+    </scr:component>
+</components>

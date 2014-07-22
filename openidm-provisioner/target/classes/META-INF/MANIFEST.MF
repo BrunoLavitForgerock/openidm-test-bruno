@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-Description: The bundle provides the CRUD functionality for syste
+ m objects.
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Provisioner System Bundle
+Bundle-SymbolicName: org.forgerock.openidm.provisioner
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.provisioner;version="3.0.0";uses:=
+ "org.forgerock.json.fluent,org.forgerock.json.resource"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.provisioner;version="[3.0,3.1)",or
+ g.forgerock.openidm.quartz.impl;version="[3.0,3.1)",org.forgerock.openi
+ dm.router;version="[3.0,3.1)",org.forgerock.json.fluent;version="[2.3,2
+ .4)",org.forgerock.json.resource;version="[2.3,2.4)",org.apache.commons
+ .lang3;version="[3.1,4)",org.slf4j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.provisioner.impl.Syste
+ mObjectSetService.xml

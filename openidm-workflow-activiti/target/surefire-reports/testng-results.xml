@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="1" passed="1">
+  <reporter-output>
+  </reporter-output>
+  <suite name="org.forgerock.openidm.workflow.activiti.impl.JsonValueTypeTest" duration-ms="210" started-at="2014-07-22T15:19:02Z" finished-at="2014-07-22T15:19:03Z">
+    <groups>
+    </groups>
+    <test name="Command line test" duration-ms="210" started-at="2014-07-22T15:19:02Z" finished-at="2014-07-22T15:19:03Z">
+      <class name="org.forgerock.openidm.workflow.activiti.impl.JsonValueTypeTest">
+        <test-method status="PASS" signature="testValues()[pri:0, instance:org.forgerock.openidm.workflow.activiti.impl.JsonValueTypeTest@20ebd7c4]" name="testValues" duration-ms="200" started-at="2014-07-22T17:19:02Z" finished-at="2014-07-22T17:19:03Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testValues -->
+      </class> <!-- org.forgerock.openidm.workflow.activiti.impl.JsonValueTypeTest -->
+    </test> <!-- Command line test -->
+  </suite> <!-- org.forgerock.openidm.workflow.activiti.impl.JsonValueTypeTest -->
+</testng-results>

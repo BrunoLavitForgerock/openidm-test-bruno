@@ -1,0 +1,3 @@
+org/forgerock/openidm/quartz/impl/SimpleJob.class
+org/forgerock/openidm/quartz/impl/SimpleSignaler.class
+org/forgerock/openidm/quartz/impl/TestRepoJobstore.class

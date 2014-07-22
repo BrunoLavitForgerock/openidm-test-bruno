@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component enabled="true" immediate="true" name="org.forgerock.openidm.repo.jdbc" configuration-policy="require" activate="activate" deactivate="deactivate" modified="modified">
+        <implementation class="org.forgerock.openidm.repo.jdbc.impl.JDBCRepoService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.json.resource.RequestHandler"/>
+            <provide interface="org.forgerock.openidm.repo.RepoBootService"/>
+            <provide interface="org.forgerock.openidm.repo.RepositoryService"/>
+        </service>
+        <property name="service.description" value="Repository Service using JDBC"/>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="openidm.router.prefix" value="/repo/*"/>
+        <property name="db.type" value="JDBC"/>
+        <property name="service.pid" value="org.forgerock.openidm.repo.jdbc"/>
+        <reference name="cryptoService" interface="org.forgerock.openidm.crypto.CryptoService" cardinality="1..1" policy="static" bind="bindCryptoService" unbind="unbindCryptoService"/>
+    </scr:component>
+</components>

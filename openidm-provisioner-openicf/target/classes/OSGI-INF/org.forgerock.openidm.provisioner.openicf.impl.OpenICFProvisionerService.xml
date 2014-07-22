@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.provisioner.openicf" configuration-policy="require" activate="activate" deactivate="deactivate">
+        <implementation class="org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.openidm.provisioner.ProvisionerService"/>
+        </service>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="service.description" value="OpenIDM OpenICF Provisioner Service"/>
+        <property name="service.pid" value="org.forgerock.openidm.provisioner.openicf"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+        <reference name="routeService" interface="org.forgerock.openidm.router.RouteService" cardinality="1..1" policy="static" target="(openidm.router.prefix=/*)" bind="bindRouteService" unbind="unbindRouteService"/>
+        <reference name="connectorInfoProvider" interface="org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider" cardinality="1..1" policy="dynamic" bind="bindConnectorInfoProvider" unbind="unbindConnectorInfoProvider"/>
+        <reference name="routerRegistry" interface="org.forgerock.openidm.router.RouterRegistry" cardinality="1..1" policy="static" bind="bindRouterRegistry" unbind="unbindRouterRegistry"/>
+        <reference name="cryptoService" interface="org.forgerock.openidm.crypto.CryptoService" cardinality="1..1" policy="dynamic" bind="bindCryptoService" unbind="unbindCryptoService"/>
+        <reference name="syncFailureHandlerFactory" interface="org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandlerFactory" cardinality="1..1" policy="static" bind="bindSyncFailureHandlerFactory" unbind="unbindSyncFailureHandlerFactory"/>
+    </scr:component>
+</components>

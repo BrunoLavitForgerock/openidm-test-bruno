@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-Description: This bundle simplifies the JSON configuration for SC
+ R services
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Enhanced Configuration Bundle
+Bundle-SymbolicName: org.forgerock.openidm.enhanced-config
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.config.enhanced;uses:="org.forgero
+ ck.json.fluent,org.osgi.framework,org.osgi.service.component";version="
+ 3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.core;version="[3.0,3.1)",org.forge
+ rock.openidm.crypto;version="[3.0,3.1)",org.forgerock.openidm.crypto.fa
+ ctory;version="[3.0,3.1)",org.forgerock.openidm.util;version="[3.0,3.1)
+ ",org.forgerock.json.fluent;version="[2.3,2.4)",org.osgi.framework;vers
+ ion="[1.6,2)",org.osgi.service.component;version="[1.1,2)",org.osgi.uti
+ l.tracker;version="[1.4,2)",org.slf4j;version="[1.7,2)"
+SCM-Revision: 0

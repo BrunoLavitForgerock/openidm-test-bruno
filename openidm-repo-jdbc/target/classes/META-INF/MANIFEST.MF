@@ -1,0 +1,39 @@
+Manifest-Version: 1.0
+Bundle-Activator: org.forgerock.openidm.repo.jdbc.impl.Activator
+Bundle-ClassPath: .,bonecp-0.7.1.RELEASE.jar,guava-14.0.1.jar
+Bundle-Description: This bundle implement the RDBMS based repository wit
+ h plain JDBC
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM Repository Bundle - JDBC
+Bundle-SymbolicName: org.forgerock.openidm.repo-jdbc
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+DynamicImport-Package: *
+Embed-Dependency: bonecp;guava;scope=provided
+Embedded-Artifacts: bonecp-0.7.1.RELEASE.jar;g="com.jolbox";a="bonecp";v
+ ="0.7.1.RELEASE",guava-14.0.1.jar;g="com.google.guava";a="guava";v="14.
+ 0.1"
+Export-Package: org.forgerock.openidm.repo.jdbc;uses:="org.forgerock.jso
+ n.resource";version="3.0.0"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.config.enhanced;version="[3.0,3.1)
+ ",org.forgerock.openidm.config.persistence;version="[3.0,3.1)",org.forg
+ erock.openidm.crypto;version="[3.0,3.1)",org.forgerock.openidm.metadata
+ ;version="[3.0,3.1)",org.forgerock.openidm.osgi;version="[3.0,3.1)",org
+ .forgerock.openidm.repo;version="[3.0,3.1)",org.forgerock.openidm.repo.
+ jdbc,org.forgerock.openidm.repo.util;version="[3.0,3.1)",org.forgerock.
+ openidm.smartevent;version="[3.0,3.1)",org.forgerock.openidm.util;versi
+ on="[3.0,3.1)",org.forgerock.json.fluent;version="[2.3,2.4)",org.forger
+ ock.json.patch;version="[2.3,2.4)",org.forgerock.json.resource;version=
+ "[2.3,2.4)",javax.inject;resolution:=optional,javax.annotation,javax.ma
+ nagement,javax.naming,javax.naming.spi,javax.sql,javax.xml.parsers,org.
+ apache.commons.lang3;version="[3.1,4)",org.codehaus.jackson.map;version
+ ="[1.9,2)",org.codehaus.jackson.type;version="[1.9,2)",org.osgi.framewo
+ rk;version="[1.6,2)",org.osgi.service.component;version="[1.1,2)",org.s
+ lf4j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.repo.jdbc.impl.JDBCRep
+ oService.xml

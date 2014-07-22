@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.sync" configuration-policy="require" activate="activate" deactivate="deactivate" modified="modified">
+        <implementation class="org.forgerock.openidm.sync.impl.SynchronizationService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.json.resource.SingletonResourceProvider"/>
+            <provide interface="org.forgerock.openidm.sync.impl.Mappings"/>
+            <provide interface="org.forgerock.openidm.quartz.impl.ScheduledService"/>
+        </service>
+        <property name="service.description" value="OpenIDM object synchronization service"/>
+        <property name="service.vendor" value="ForgeRock AS"/>
+        <property name="openidm.router.prefix" value="/sync/*"/>
+        <property name="service.pid" value="org.forgerock.openidm.sync"/>
+        <reference name="connectionFactory" interface="org.forgerock.json.resource.ConnectionFactory" cardinality="1..1" policy="static" target="(service.pid=org.forgerock.openidm.internal)" bind="bindConnectionFactory" unbind="unbindConnectionFactory"/>
+        <reference name="reconService" interface="org.forgerock.openidm.sync.impl.Reconcile" cardinality="1..1" policy="static" bind="bindReconService" unbind="unbindReconService"/>
+        <reference name="scriptRegistry" interface="org.forgerock.script.ScriptRegistry" cardinality="1..1" policy="dynamic" bind="bindScriptRegistry" unbind="unbindScriptRegistry"/>
+    </scr:component>
+</components>

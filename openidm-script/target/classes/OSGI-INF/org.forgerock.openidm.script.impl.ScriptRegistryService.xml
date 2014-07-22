@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+    <scr:component immediate="true" name="org.forgerock.openidm.script" configuration-policy="require" activate="activate" deactivate="deactivate" modified="modified">
+        <implementation class="org.forgerock.openidm.script.impl.ScriptRegistryService"/>
+        <service servicefactory="false">
+            <provide interface="org.forgerock.json.resource.RequestHandler"/>
+            <provide interface="org.forgerock.openidm.quartz.impl.ScheduledService"/>
+            <provide interface="org.forgerock.script.ScriptRegistry"/>
+            <provide interface="org.forgerock.script.source.SourceUnitObserver"/>
+            <provide interface="org.forgerock.script.engine.ScriptEngineFactoryObserver"/>
+        </service>
+        <property name="service.vendor" value="ForgeRock AS."/>
+        <property name="service.description" value="OpenIDM Script Registry Service"/>
+        <property name="openidm.router.prefix" value="/script*"/>
+        <property name="service.pid" value="org.forgerock.openidm.script"/>
+        <reference name="CryptoServiceReference" interface="org.forgerock.openidm.crypto.CryptoService" cardinality="0..1" policy="dynamic" bind="bindCryptoService" unbind="unbindCryptoService"/>
+        <reference name="PersistenceConfigReference" interface="org.forgerock.json.resource.PersistenceConfig" cardinality="0..1" policy="dynamic" bind="setPersistenceConfig" unbind="unsetPersistenceConfig"/>
+        <reference name="ScriptEngineFactoryReference" interface="org.forgerock.script.engine.ScriptEngineFactory" cardinality="0..n" policy="dynamic" bind="addingEntries" unbind="removingEntries"/>
+        <reference name="FunctionReference" interface="org.forgerock.script.scope.Function" cardinality="0..n" policy="dynamic" target="(org.forgerock.openidm.script.name=*)" bind="bindFunction" unbind="unbindFunction"/>
+    </scr:component>
+</components>

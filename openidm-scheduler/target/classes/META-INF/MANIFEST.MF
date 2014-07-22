@@ -1,0 +1,40 @@
+Manifest-Version: 1.0
+Bundle-Activator: org.forgerock.openidm.scheduler.impl.Activator
+Bundle-Description: OpenIDM is an open standards based Identity Manageme
+ nt, Provisioning and Compliance solution.        Experience shows that 
+ the most important features of an identity management product are: high
+  flexibility in        Business Process handling and compliance with op
+ en standards and interfaces. A highly flexible user interface        co
+ mbined with a very robust workflow engine make OpenIDM ready for any Id
+ entity Management project.
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://cre
+ ativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM scheduler
+Bundle-SymbolicName: org.forgerock.openidm.scheduler
+Bundle-Vendor: ForgeRock AS
+Bundle-Version: 3.0.0
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.forgerock.openidm.scheduler;version="3.0.0";uses:="o
+ rg.forgerock.json.fluent,org.forgerock.json.resource,org.forgerock.open
+ idm.cluster,org.forgerock.openidm.router,org.osgi.service.component,org
+ .quartz"
+Implementation-Build: 0
+Import-Package: org.forgerock.openidm.cluster;version="[3.0,3.1)",org.fo
+ rgerock.openidm.config.enhanced;version="[3.0,3.1)",org.forgerock.openi
+ dm.core;version="[3.0,3.1)",org.forgerock.openidm.quartz.impl;version="
+ [3.0,3.1)",org.forgerock.openidm.router;version="[3.0,3.1)",org.forgero
+ ck.openidm.util;version="[3.0,3.1)",org.forgerock.json.fluent;version="
+ [2.3,2.4)",org.forgerock.json.resource;version="[2.3,2.4)",javax.script
+ ,javax.xml.bind,org.apache.commons.lang3;version="[3.1,4)",org.codehaus
+ .jackson;version="[1.9,2)",org.codehaus.jackson.map;version="[1.9,2)",o
+ rg.forgerock.script;version="[1.3,2)",org.joda.time;version="[2.1,3)",o
+ rg.osgi.framework;version="[1.6,2)",org.osgi.service.component;version=
+ "[1.1,2)",org.osgi.util.tracker;version="[1.5,2)",org.quartz;version="[
+ 1.8,2)",org.quartz.impl;version="[1.8,2)",org.quartz.simpl;version="[1.
+ 8,2)",org.slf4j;version="[1.7,2)"
+SCM-Revision: 0
+Service-Component: OSGI-INF/org.forgerock.openidm.scheduler.impl.TaskSca
+ nnerService.xml,OSGI-INF/org.forgerock.openidm.scheduler.ScheduleConfig
+ Service.xml,OSGI-INF/org.forgerock.openidm.scheduler.SchedulerService.x
+ ml

@@ -1,0 +1,5 @@
+org/forgerock/openidm/config/enhanced/InvalidException.class
+org/forgerock/openidm/config/enhanced/JSONEnhancedConfig.class
+org/forgerock/openidm/config/enhanced/EnhancedConfig.class
+org/forgerock/openidm/config/enhanced/JSONEnhancedConfig$PropertyTransformer.class
+org/forgerock/openidm/config/enhanced/InternalErrorException.class

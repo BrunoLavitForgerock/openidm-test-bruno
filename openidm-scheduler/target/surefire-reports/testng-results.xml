@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="1" passed="1">
+  <reporter-output>
+  </reporter-output>
+  <suite name="org.forgerock.openidm.scheduler.SchedulerServiceTest" duration-ms="40" started-at="2014-07-22T15:18:45Z" finished-at="2014-07-22T15:18:45Z">
+    <groups>
+    </groups>
+    <test name="Command line test" duration-ms="40" started-at="2014-07-22T15:18:45Z" finished-at="2014-07-22T15:18:45Z">
+      <class name="org.forgerock.openidm.scheduler.SchedulerServiceTest">
+        <test-method status="PASS" signature="beforeMethod()[pri:0, instance:org.forgerock.openidm.scheduler.SchedulerServiceTest@20863d22]" name="beforeMethod" is-config="true" duration-ms="6" started-at="2014-07-22T17:18:45Z" finished-at="2014-07-22T17:18:45Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- beforeMethod -->
+        <test-method status="PASS" signature="configParsingTest()[pri:0, instance:org.forgerock.openidm.scheduler.SchedulerServiceTest@20863d22]" name="configParsingTest" duration-ms="25" started-at="2014-07-22T17:18:45Z" finished-at="2014-07-22T17:18:45Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- configParsingTest -->
+      </class> <!-- org.forgerock.openidm.scheduler.SchedulerServiceTest -->
+    </test> <!-- Command line test -->
+  </suite> <!-- org.forgerock.openidm.scheduler.SchedulerServiceTest -->
+</testng-results>

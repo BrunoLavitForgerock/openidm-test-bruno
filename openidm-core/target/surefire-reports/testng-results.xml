@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="1" passed="1">
+  <reporter-output>
+  </reporter-output>
+  <suite name="org.forgerock.openidm.sync.impl.ObjectMappingTest" duration-ms="469" started-at="2014-07-22T15:17:24Z" finished-at="2014-07-22T15:17:25Z">
+    <groups>
+    </groups>
+    <test name="Command line test" duration-ms="469" started-at="2014-07-22T15:17:24Z" finished-at="2014-07-22T15:17:25Z">
+      <class name="org.forgerock.openidm.sync.impl.ObjectMappingTest">
+        <test-method status="PASS" signature="setUp()[pri:0, instance:org.forgerock.openidm.sync.impl.ObjectMappingTest@77b4f7c5]" name="setUp" is-config="true" duration-ms="456" started-at="2014-07-22T17:17:24Z" finished-at="2014-07-22T17:17:25Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setUp -->
+        <test-method status="PASS" signature="testSourceCondition()[pri:0, instance:org.forgerock.openidm.sync.impl.ObjectMappingTest@77b4f7c5]" name="testSourceCondition" duration-ms="5" started-at="2014-07-22T17:17:25Z" finished-at="2014-07-22T17:17:25Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testSourceCondition -->
+        <test-method status="PASS" signature="tearDown()[pri:0, instance:org.forgerock.openidm.sync.impl.ObjectMappingTest@77b4f7c5]" name="tearDown" is-config="true" duration-ms="0" started-at="2014-07-22T17:17:25Z" finished-at="2014-07-22T17:17:25Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- tearDown -->
+      </class> <!-- org.forgerock.openidm.sync.impl.ObjectMappingTest -->
+    </test> <!-- Command line test -->
+  </suite> <!-- org.forgerock.openidm.sync.impl.ObjectMappingTest -->
+</testng-results>

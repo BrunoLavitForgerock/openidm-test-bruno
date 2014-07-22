@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.<a name="line.2"></a>
+<span class="sourceLineNo">003</span> *<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * Copyright © 2011-2013 ForgeRock AS. All rights reserved.<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * The contents of this file are subject to the terms<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * of the Common Development and Distribution License<a name="line.7"></a>
+<span class="sourceLineNo">008</span> * (the License). You may not use this file except in<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * compliance with the License.<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * You can obtain a copy of the License at<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * http://forgerock.org/license/CDDLv1.0.html<a name="line.12"></a>
+<span class="sourceLineNo">013</span> * See the License for the specific language governing<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * permission and limitations under the License.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> *<a name="line.15"></a>
+<span class="sourceLineNo">016</span> * When distributing Covered Code, include this CDDL<a name="line.16"></a>
+<span class="sourceLineNo">017</span> * Header Notice in each file and include the License file<a name="line.17"></a>
+<span class="sourceLineNo">018</span> * at http://forgerock.org/license/CDDLv1.0.html<a name="line.18"></a>
+<span class="sourceLineNo">019</span> * If applicable, add the following below the CDDL Header,<a name="line.19"></a>
+<span class="sourceLineNo">020</span> * with the fields enclosed by brackets [] replaced by<a name="line.20"></a>
+<span class="sourceLineNo">021</span> * your own identifying information:<a name="line.21"></a>
+<span class="sourceLineNo">022</span> * "Portions Copyrighted [year] [name of copyright owner]"<a name="line.22"></a>
+<span class="sourceLineNo">023</span> */<a name="line.23"></a>
+<span class="sourceLineNo">024</span>package org.forgerock.openidm.audit.impl;<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.util.Map;<a name="line.26"></a>
+<span class="sourceLineNo">027</span><a name="line.27"></a>
+<span class="sourceLineNo">028</span>import org.forgerock.json.resource.ResourceException;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import org.forgerock.json.resource.ResourceName;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import org.forgerock.json.resource.ServerContext;<a name="line.30"></a>
+<span class="sourceLineNo">031</span><a name="line.31"></a>
+<span class="sourceLineNo">032</span>import org.osgi.framework.BundleContext;<a name="line.32"></a>
+<span class="sourceLineNo">033</span><a name="line.33"></a>
+<span class="sourceLineNo">034</span>/**<a name="line.34"></a>
+<span class="sourceLineNo">035</span> * OpenIDM audit logger<a name="line.35"></a>
+<span class="sourceLineNo">036</span> * @author aegloff<a name="line.36"></a>
+<span class="sourceLineNo">037</span> * @author brmiller<a name="line.37"></a>
+<span class="sourceLineNo">038</span> */<a name="line.38"></a>
+<span class="sourceLineNo">039</span>public interface AuditLogger {<a name="line.39"></a>
+<span class="sourceLineNo">040</span><a name="line.40"></a>
+<span class="sourceLineNo">041</span>    /**<a name="line.41"></a>
+<span class="sourceLineNo">042</span>     * Set the audit logger configuration which is a logger specific<a name="line.42"></a>
+<span class="sourceLineNo">043</span>     * map<a name="line.43"></a>
+<span class="sourceLineNo">044</span>     * @param config the configuration<a name="line.44"></a>
+<span class="sourceLineNo">045</span>     * @param ctx<a name="line.45"></a>
+<span class="sourceLineNo">046</span>     */<a name="line.46"></a>
+<span class="sourceLineNo">047</span>    void setConfig(Map config, BundleContext ctx);<a name="line.47"></a>
+<span class="sourceLineNo">048</span><a name="line.48"></a>
+<span class="sourceLineNo">049</span>    /**<a name="line.49"></a>
+<span class="sourceLineNo">050</span>     * Cleanup called when auditlogger no longer needed<a name="line.50"></a>
+<span class="sourceLineNo">051</span>     */<a name="line.51"></a>
+<span class="sourceLineNo">052</span>    void cleanup();<a name="line.52"></a>
+<span class="sourceLineNo">053</span><a name="line.53"></a>
+<span class="sourceLineNo">054</span>    /**<a name="line.54"></a>
+<span class="sourceLineNo">055</span>     * Whether this audit logger is used for reads/queries, when multiple<a name="line.55"></a>
+<span class="sourceLineNo">056</span>     * loggers are configured.<a name="line.56"></a>
+<span class="sourceLineNo">057</span>     *<a name="line.57"></a>
+<span class="sourceLineNo">058</span>     * @return whether to use this logger for reads/queries.<a name="line.58"></a>
+<span class="sourceLineNo">059</span>     */<a name="line.59"></a>
+<span class="sourceLineNo">060</span>    boolean isUsedForQueries();<a name="line.60"></a>
+<span class="sourceLineNo">061</span><a name="line.61"></a>
+<span class="sourceLineNo">062</span>    /**<a name="line.62"></a>
+<span class="sourceLineNo">063</span>     * Returns whether to ignore logging failures<a name="line.63"></a>
+<span class="sourceLineNo">064</span>     *<a name="line.64"></a>
+<span class="sourceLineNo">065</span>     * @return whether to ignore logging failures<a name="line.65"></a>
+<span class="sourceLineNo">066</span>     */<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    boolean isIgnoreLoggingFailures();<a name="line.67"></a>
+<span class="sourceLineNo">068</span><a name="line.68"></a>
+<span class="sourceLineNo">069</span>    /**<a name="line.69"></a>
+<span class="sourceLineNo">070</span>     * Creates a new object in the object set.<a name="line.70"></a>
+<span class="sourceLineNo">071</span>     * &lt;p&gt;<a name="line.71"></a>
+<span class="sourceLineNo">072</span>     * On completion, this method sets the {@code _id} property to the assigned identifier for<a name="line.72"></a>
+<span class="sourceLineNo">073</span>     * the object, and the {@code _rev} property to object version if optimistic concurrency<a name="line.73"></a>
+<span class="sourceLineNo">074</span>     * is supported.<a name="line.74"></a>
+<span class="sourceLineNo">075</span>     *<a name="line.75"></a>
+<span class="sourceLineNo">076</span>     * @param type the requested type of audit object to create.<a name="line.76"></a>
+<span class="sourceLineNo">077</span>     * @param object the contents of the object to create in the object set.<a name="line.77"></a>
+<span class="sourceLineNo">078</span>     * @throws ForbiddenException if access to the object or object set is forbidden.<a name="line.78"></a>
+<span class="sourceLineNo">079</span>     */<a name="line.79"></a>
+<span class="sourceLineNo">080</span>    void create(ServerContext context, String type, Map&lt;String, Object&gt; object) throws ResourceException;<a name="line.80"></a>
+<span class="sourceLineNo">081</span><a name="line.81"></a>
+<span class="sourceLineNo">082</span>    /**<a name="line.82"></a>
+<span class="sourceLineNo">083</span>     * Reads an object from the object set.<a name="line.83"></a>
+<span class="sourceLineNo">084</span>     * &lt;p&gt;<a name="line.84"></a>
+<span class="sourceLineNo">085</span>     * The returned object will contain metadata properties, including relative object<a name="line.85"></a>
+<span class="sourceLineNo">086</span>     * identifier {@code _id}. If optimistic concurrency is supported, the object version<a name="line.86"></a>
+<span class="sourceLineNo">087</span>     * {@code _rev} will be set in the returned object. If optimistic concurrency is not<a name="line.87"></a>
+<span class="sourceLineNo">088</span>     * supported, then {@code _rev} must be {@code null} or absent.<a name="line.88"></a>
+<span class="sourceLineNo">089</span>     *<a name="line.89"></a>
+<span class="sourceLineNo">090</span>     *<a name="line.90"></a>
+<span class="sourceLineNo">091</span>     *<a name="line.91"></a>
+<span class="sourceLineNo">092</span>     * @param type<a name="line.92"></a>
+<span class="sourceLineNo">093</span>     * @param localId<a name="line.93"></a>
+<span class="sourceLineNo">094</span>     * @throws NotFoundException if the specified object could not be found.<a name="line.94"></a>
+<span class="sourceLineNo">095</span>     * @throws ForbiddenException if access to the object is forbidden.<a name="line.95"></a>
+<span class="sourceLineNo">096</span>     * @return the requested object.<a name="line.96"></a>
+<span class="sourceLineNo">097</span>     */<a name="line.97"></a>
+<span class="sourceLineNo">098</span>    Map&lt;String, Object&gt; read(ServerContext context, String type, String localId) throws ResourceException;<a name="line.98"></a>
+<span class="sourceLineNo">099</span><a name="line.99"></a>
+<span class="sourceLineNo">100</span>    /**<a name="line.100"></a>
+<span class="sourceLineNo">101</span>     * Performs a query on the specified object and returns the associated result. The<a name="line.101"></a>
+<span class="sourceLineNo">102</span>     * execution of a query is not allowed to incur side effects.<a name="line.102"></a>
+<span class="sourceLineNo">103</span>     * &lt;p&gt;<a name="line.103"></a>
+<span class="sourceLineNo">104</span>     * Queries are parametric; a set of named parameters is provided as the query criteria.<a name="line.104"></a>
+<span class="sourceLineNo">105</span>     * The query result is a JSON object structure composed of basic Java types; its overall<a name="line.105"></a>
+<span class="sourceLineNo">106</span>     * structure is defined by the implementation.<a name="line.106"></a>
+<span class="sourceLineNo">107</span>     *<a name="line.107"></a>
+<span class="sourceLineNo">108</span>     *<a name="line.108"></a>
+<span class="sourceLineNo">109</span>     *<a name="line.109"></a>
+<span class="sourceLineNo">110</span>     * @param type<a name="line.110"></a>
+<span class="sourceLineNo">111</span>     * @param params the parameters of the query to perform.<a name="line.111"></a>
+<span class="sourceLineNo">112</span>     * @return the query result object.<a name="line.112"></a>
+<span class="sourceLineNo">113</span>     * @throws NotFoundException if the specified object could not be found.<a name="line.113"></a>
+<span class="sourceLineNo">114</span>     * @throws ForbiddenException if access to the object or the specified query is forbidden.<a name="line.114"></a>
+<span class="sourceLineNo">115</span>     */<a name="line.115"></a>
+<span class="sourceLineNo">116</span>    Map&lt;String, Object&gt; query(ServerContext context, String type, Map&lt;String, String&gt; params) throws ResourceException;<a name="line.116"></a>
+<span class="sourceLineNo">117</span><a name="line.117"></a>
+<span class="sourceLineNo">118</span>}<a name="line.118"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>

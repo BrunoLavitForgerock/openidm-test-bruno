@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * The contents of this file are subject to the terms of the Common Development and<a name="line.2"></a>
+<span class="sourceLineNo">003</span> * Distribution License (the License). You may not use this file except in compliance with the<a name="line.3"></a>
+<span class="sourceLineNo">004</span> * License.<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *<a name="line.5"></a>
+<span class="sourceLineNo">006</span> * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the<a name="line.6"></a>
+<span class="sourceLineNo">007</span> * specific language governing permission and limitations under the License.<a name="line.7"></a>
+<span class="sourceLineNo">008</span> *<a name="line.8"></a>
+<span class="sourceLineNo">009</span> * When distributing Covered Software, include this CDDL Header Notice in each file and include<a name="line.9"></a>
+<span class="sourceLineNo">010</span> * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL<a name="line.10"></a>
+<span class="sourceLineNo">011</span> * Header, with the fields enclosed by brackets [] replaced by your own identifying<a name="line.11"></a>
+<span class="sourceLineNo">012</span> * information: "Portions Copyrighted [year] [name of copyright owner]".<a name="line.12"></a>
+<span class="sourceLineNo">013</span> *<a name="line.13"></a>
+<span class="sourceLineNo">014</span> * Copyright © 2013-2014 ForgeRock AS. All rights reserved.<a name="line.14"></a>
+<span class="sourceLineNo">015</span> */<a name="line.15"></a>
+<span class="sourceLineNo">016</span>package org.forgerock.openidm.util;<a name="line.16"></a>
+<span class="sourceLineNo">017</span><a name="line.17"></a>
+<span class="sourceLineNo">018</span>import java.util.ArrayList;<a name="line.18"></a>
+<span class="sourceLineNo">019</span>import java.util.Collections;<a name="line.19"></a>
+<span class="sourceLineNo">020</span>import java.util.HashMap;<a name="line.20"></a>
+<span class="sourceLineNo">021</span>import java.util.List;<a name="line.21"></a>
+<span class="sourceLineNo">022</span>import java.util.Map;<a name="line.22"></a>
+<span class="sourceLineNo">023</span><a name="line.23"></a>
+<span class="sourceLineNo">024</span>import org.forgerock.json.fluent.JsonValue;<a name="line.24"></a>
+<span class="sourceLineNo">025</span>import org.forgerock.json.resource.ActionRequest;<a name="line.25"></a>
+<span class="sourceLineNo">026</span>import org.forgerock.json.resource.Context;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import org.forgerock.json.resource.CreateRequest;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import org.forgerock.json.resource.DeleteRequest;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import org.forgerock.json.resource.PatchOperation;<a name="line.29"></a>
+<span class="sourceLineNo">030</span>import org.forgerock.json.resource.PatchRequest;<a name="line.30"></a>
+<span class="sourceLineNo">031</span>import org.forgerock.json.resource.QueryRequest;<a name="line.31"></a>
+<span class="sourceLineNo">032</span>import org.forgerock.json.resource.ReadRequest;<a name="line.32"></a>
+<span class="sourceLineNo">033</span>import org.forgerock.json.resource.Request;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>import org.forgerock.json.resource.SecurityContext;<a name="line.34"></a>
+<span class="sourceLineNo">035</span>import org.forgerock.json.resource.ServerContext;<a name="line.35"></a>
+<span class="sourceLineNo">036</span>import org.forgerock.json.resource.UpdateRequest;<a name="line.36"></a>
+<span class="sourceLineNo">037</span>import org.forgerock.json.resource.servlet.HttpContext;<a name="line.37"></a>
+<span class="sourceLineNo">038</span>import org.forgerock.util.Factory;<a name="line.38"></a>
+<span class="sourceLineNo">039</span>import org.forgerock.util.LazyMap;<a name="line.39"></a>
+<span class="sourceLineNo">040</span><a name="line.40"></a>
+<span class="sourceLineNo">041</span>public class ScriptUtil {<a name="line.41"></a>
+<span class="sourceLineNo">042</span>    // a ScriptName will have this request-binding if it wishes OpenIDM 2.1.x request bindings<a name="line.42"></a>
+<span class="sourceLineNo">043</span>    public static final String REQUEST_BINDING_2_1 = "OEPNIDM-2.1";<a name="line.43"></a>
+<span class="sourceLineNo">044</span><a name="line.44"></a>
+<span class="sourceLineNo">045</span>    public static Map&lt;String, Object&gt; getRequestMap(Request request, ServerContext context) {<a name="line.45"></a>
+<span class="sourceLineNo">046</span>        Map&lt;String, Object&gt; requestMap = new HashMap&lt;String, Object&gt;();<a name="line.46"></a>
+<span class="sourceLineNo">047</span>        JsonValue value = new JsonValue(null);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>        String id = request.getResourceName();<a name="line.48"></a>
+<span class="sourceLineNo">049</span>        if (request instanceof ActionRequest) {<a name="line.49"></a>
+<span class="sourceLineNo">050</span>            value = ((ActionRequest)request).getContent();<a name="line.50"></a>
+<span class="sourceLineNo">051</span>            requestMap.put("params", ((ActionRequest)request).getAdditionalParameters());<a name="line.51"></a>
+<span class="sourceLineNo">052</span>            requestMap.put("method", "action");<a name="line.52"></a>
+<span class="sourceLineNo">053</span>            requestMap.put("action", ((ActionRequest)request).getAction());<a name="line.53"></a>
+<span class="sourceLineNo">054</span>        } else if (request instanceof CreateRequest) {<a name="line.54"></a>
+<span class="sourceLineNo">055</span>            CreateRequest createRequest = (CreateRequest)request;<a name="line.55"></a>
+<span class="sourceLineNo">056</span>            value = createRequest.getContent();<a name="line.56"></a>
+<span class="sourceLineNo">057</span>            requestMap.put("method", "create");<a name="line.57"></a>
+<span class="sourceLineNo">058</span>            if (createRequest.getNewResourceId() != null) {<a name="line.58"></a>
+<span class="sourceLineNo">059</span>                id = createRequest.getResourceName() + "/" + createRequest.getNewResourceId();<a name="line.59"></a>
+<span class="sourceLineNo">060</span>            }<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        } else if (request instanceof ReadRequest) {<a name="line.61"></a>
+<span class="sourceLineNo">062</span>            requestMap.put("method", "read");<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        } else if (request instanceof UpdateRequest) {<a name="line.63"></a>
+<span class="sourceLineNo">064</span>            value = ((UpdateRequest)request).getContent();<a name="line.64"></a>
+<span class="sourceLineNo">065</span>            requestMap.put("method", "update");<a name="line.65"></a>
+<span class="sourceLineNo">066</span>        } else if (request instanceof DeleteRequest) {<a name="line.66"></a>
+<span class="sourceLineNo">067</span>            requestMap.put("method", "delete");<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        } else if (request instanceof PatchRequest) {<a name="line.68"></a>
+<span class="sourceLineNo">069</span>            requestMap.put("method", "patch");<a name="line.69"></a>
+<span class="sourceLineNo">070</span>            List&lt;PatchOperation&gt; ops = ((PatchRequest)request).getPatchOperations();<a name="line.70"></a>
+<span class="sourceLineNo">071</span>            JsonValue opsValue = new JsonValue(new ArrayList&lt;Object&gt;());<a name="line.71"></a>
+<span class="sourceLineNo">072</span>            for (PatchOperation op : ops) {<a name="line.72"></a>
+<span class="sourceLineNo">073</span>                opsValue.add(op.toJsonValue().getObject());<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            }<a name="line.74"></a>
+<span class="sourceLineNo">075</span>            value = opsValue;<a name="line.75"></a>
+<span class="sourceLineNo">076</span>        } else if (request instanceof QueryRequest) {<a name="line.76"></a>
+<span class="sourceLineNo">077</span>            final QueryRequest queryRequest = (QueryRequest) request;<a name="line.77"></a>
+<span class="sourceLineNo">078</span>            final Map&lt;String, String&gt; params = queryRequest.getAdditionalParameters();<a name="line.78"></a>
+<span class="sourceLineNo">079</span>            params.put("_queryId", queryRequest.getQueryId());<a name="line.79"></a>
+<span class="sourceLineNo">080</span>            params.put("_queryExpression", queryRequest.getQueryExpression());<a name="line.80"></a>
+<span class="sourceLineNo">081</span>            params.put("_queryFilter", queryRequest.getQueryFilter() != null ? queryRequest.getQueryFilter().toString() : null);<a name="line.81"></a>
+<span class="sourceLineNo">082</span>            requestMap.put("params", params);<a name="line.82"></a>
+<span class="sourceLineNo">083</span>            requestMap.put("method", "query");<a name="line.83"></a>
+<span class="sourceLineNo">084</span>        } else {<a name="line.84"></a>
+<span class="sourceLineNo">085</span>            requestMap.put("method", null);<a name="line.85"></a>
+<span class="sourceLineNo">086</span>        }<a name="line.86"></a>
+<span class="sourceLineNo">087</span>        if (context.containsContext(SecurityContext.class)) {<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            SecurityContext securityContext = context.asContext(SecurityContext.class);<a name="line.88"></a>
+<span class="sourceLineNo">089</span>            Map&lt;String, Object&gt; security = new HashMap&lt;String, Object&gt;();<a name="line.89"></a>
+<span class="sourceLineNo">090</span>            security.putAll(securityContext.getAuthorizationId());<a name="line.90"></a>
+<span class="sourceLineNo">091</span>            security.put("username", securityContext.getAuthenticationId());<a name="line.91"></a>
+<span class="sourceLineNo">092</span>            requestMap.put("security", security);<a name="line.92"></a>
+<span class="sourceLineNo">093</span>        }<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        <a name="line.94"></a>
+<span class="sourceLineNo">095</span>        if (isFromHttp(context)) {<a name="line.95"></a>
+<span class="sourceLineNo">096</span>            HttpContext httpContext = context.asContext(HttpContext.class);<a name="line.96"></a>
+<span class="sourceLineNo">097</span>            requestMap.put("headers", httpContext.getHeaders());<a name="line.97"></a>
+<span class="sourceLineNo">098</span>            requestMap.put("fromHttp", "true");<a name="line.98"></a>
+<span class="sourceLineNo">099</span>            requestMap.put("params", httpContext.getParameters());<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        } else {<a name="line.100"></a>
+<span class="sourceLineNo">101</span>            requestMap.put("fromHttp", "false");<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        }<a name="line.102"></a>
+<span class="sourceLineNo">103</span>        requestMap.put("external", String.valueOf(ContextUtil.isExternal(context)));<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        requestMap.put("type", request.getRequestType().toString());<a name="line.104"></a>
+<span class="sourceLineNo">105</span>        requestMap.put("value", value.getObject());<a name="line.105"></a>
+<span class="sourceLineNo">106</span>        requestMap.put("id", id);<a name="line.106"></a>
+<span class="sourceLineNo">107</span>        <a name="line.107"></a>
+<span class="sourceLineNo">108</span>        return requestMap;<a name="line.108"></a>
+<span class="sourceLineNo">109</span>    }<a name="line.109"></a>
+<span class="sourceLineNo">110</span><a name="line.110"></a>
+<span class="sourceLineNo">111</span>    private static boolean isFromHttp(ServerContext context) {<a name="line.111"></a>
+<span class="sourceLineNo">112</span>        Context c = context.getParent();<a name="line.112"></a>
+<span class="sourceLineNo">113</span>        if (c != null &amp;&amp; c.getParent() != null &amp;&amp; HttpContext.class.isAssignableFrom(c.getParent().getClass())) {<a name="line.113"></a>
+<span class="sourceLineNo">114</span>            return true;<a name="line.114"></a>
+<span class="sourceLineNo">115</span>        }<a name="line.115"></a>
+<span class="sourceLineNo">116</span>        return false;<a name="line.116"></a>
+<span class="sourceLineNo">117</span>    }<a name="line.117"></a>
+<span class="sourceLineNo">118</span><a name="line.118"></a>
+<span class="sourceLineNo">119</span>    public static  LazyMap&lt;String, Object&gt; getLazyContext(final ServerContext context) {<a name="line.119"></a>
+<span class="sourceLineNo">120</span>        return new LazyMap&lt;String, Object&gt;(new Factory&lt;Map&lt;String, Object&gt;&gt;() {<a name="line.120"></a>
+<span class="sourceLineNo">121</span>            @Override<a name="line.121"></a>
+<span class="sourceLineNo">122</span>            public Map&lt;String, Object&gt; newInstance() {<a name="line.122"></a>
+<span class="sourceLineNo">123</span>                if (null != context) {<a name="line.123"></a>
+<span class="sourceLineNo">124</span>                    return context.toJsonValue().required().asMap();<a name="line.124"></a>
+<span class="sourceLineNo">125</span>                }<a name="line.125"></a>
+<span class="sourceLineNo">126</span>                else {<a name="line.126"></a>
+<span class="sourceLineNo">127</span>                    return Collections.emptyMap();<a name="line.127"></a>
+<span class="sourceLineNo">128</span>                }<a name="line.128"></a>
+<span class="sourceLineNo">129</span>            }<a name="line.129"></a>
+<span class="sourceLineNo">130</span>        });<a name="line.130"></a>
+<span class="sourceLineNo">131</span>    }<a name="line.131"></a>
+<span class="sourceLineNo">132</span><a name="line.132"></a>
+<span class="sourceLineNo">133</span>}<a name="line.133"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>
