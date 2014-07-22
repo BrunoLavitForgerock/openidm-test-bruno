@@ -62,9 +62,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:svn:https://svn.forgerock.org/openidm/trunk</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/openidm/trunk</developerConnection>
-        <url>http://sources.forgerock.org/browse/openidm/trunk</url>
+        <connection>scm:git:ssh://github.com/BrunoLavitForgerock/openidm-test-bruno.git</connection>
+        <developerConnection>scm:git:ssh://github.com/BrunoLavitForgerock/openidm-test-bruno.git</developerConnection>
+        <url>https://github.com/BrunoLavitForgerock/openidm-test-bruno</url>
     </scm>
     <distributionManagement>
         <site>
